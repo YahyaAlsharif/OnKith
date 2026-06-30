@@ -1,0 +1,9 @@
+# Home AI Python dependencies
+# Recommended Python version: 3.11
+# Install with:
+#   python -m pip install -r requirements.txt
+
+torch
+pandas
+numpy
+matplotlib
