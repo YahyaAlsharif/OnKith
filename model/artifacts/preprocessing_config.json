@@ -1,0 +1,22 @@
+{
+  "dataset_name": "ai4privacy/pii-masking-300k",
+  "source_column": "source_text",
+  "label_sources": [
+    "privacy_mask",
+    "span_labels"
+  ],
+  "target_text_usage": "reference_only_not_training_input",
+  "language_filter": "en",
+  "smoke_test_mode": true,
+  "max_examples": 2000,
+  "token_pattern": "[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}|\\d+[\\d.,:/+-]*|[A-Za-z]+(?:[-'][A-Za-z]+)*|\\w+|[^\\w\\s]",
+  "token_feature_rules": [
+    "EMAIL_PATTERN",
+    "NUMBER_PATTERN",
+    "ALNUM_PATTERN",
+    "lowercase fallback"
+  ],
+  "generic_pii_labels": true,
+  "use_type_specific_masks": false,
+  "model_architecture": "Embedding -> BiLSTM -> Linear token classifier"
+}

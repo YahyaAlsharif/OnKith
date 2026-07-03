@@ -1,0 +1,12 @@
+{
+  "label_to_id": {
+    "O": 0,
+    "B-PRIVATE": 1,
+    "I-PRIVATE": 2
+  },
+  "id_to_label": {
+    "0": "O",
+    "1": "B-PRIVATE",
+    "2": "I-PRIVATE"
+  }
+}
