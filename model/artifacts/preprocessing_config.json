@@ -7,8 +7,8 @@
   ],
   "target_text_usage": "reference_only_not_training_input",
   "language_filter": "en",
-  "smoke_test_mode": true,
-  "max_examples": 2000,
+  "text_truncation": "disabled",
+  "padding": "dynamic per batch in collate_batch",
   "token_pattern": "[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}|\\d+[\\d.,:/+-]*|[A-Za-z]+(?:[-'][A-Za-z]+)*|\\w+|[^\\w\\s]",
   "token_feature_rules": [
     "EMAIL_PATTERN",
@@ -16,7 +16,5 @@
     "ALNUM_PATTERN",
     "lowercase fallback"
   ],
-  "generic_pii_labels": true,
-  "use_type_specific_masks": false,
-  "model_architecture": "Embedding -> BiLSTM -> Linear token classifier"
+  "label_format": "type-specific BIO labels from privacy_mask/span_labels"
 }

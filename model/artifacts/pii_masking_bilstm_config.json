@@ -1,0 +1,14 @@
+{
+  "architecture": "Embedding -> BiLSTM -> Linear token classifier",
+  "vocab_size": 54181,
+  "num_labels": 57,
+  "embedding_dim": 64,
+  "hidden_dim": 64,
+  "dropout": 0.2,
+  "epochs": 20,
+  "batch_size": 32,
+  "optimizer": "AdamW",
+  "learning_rate": 0.001,
+  "weight_decay": 0.01,
+  "train_fraction": 0.8
+}
