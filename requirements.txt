@@ -8,3 +8,8 @@ pandas
 numpy
 matplotlib
 datasets
+transformers
+scikit-learn
+onnx
+onnxruntime
+onnxscript
