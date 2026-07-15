@@ -10,6 +10,7 @@ matplotlib
 datasets
 transformers
 scikit-learn
+seqeval
 onnx
 onnxruntime
 onnxscript
