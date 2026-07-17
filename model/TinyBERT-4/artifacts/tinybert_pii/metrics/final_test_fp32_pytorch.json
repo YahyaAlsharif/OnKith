@@ -1,0 +1,204 @@
+{
+  "framework": "PyTorch FP32",
+  "valid_label_weighted_loss": 0.06021837240925108,
+  "token_level": {
+    "all_valid_token_accuracy": 0.9894528726327342,
+    "pii_token_micro_precision": 0.9727174403013985,
+    "pii_token_micro_recall": 0.9734646815502357,
+    "pii_token_micro_f1": 0.9730909174732908
+  },
+  "entity_level": {
+    "pii_entity_precision": 0.9526932755709872,
+    "pii_entity_recall": 0.9603379239703177,
+    "pii_entity_f1": 0.9565003254120419,
+    "per_entity_type": {
+      "ACCOUNTNUM": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "AGE": {
+        "precision": 0.974286651361102,
+        "recall": 0.9807844690966719,
+        "f1": 0.9775247622494982,
+        "support": 15144
+      },
+      "AMOUNT": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "BANKNAME": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "BUILDINGNUM": {
+        "precision": 0.9879007450953585,
+        "recall": 0.9903378332077023,
+        "f1": 0.9891177879679693,
+        "support": 14593
+      },
+      "CITY": {
+        "precision": 0.973891784676415,
+        "recall": 0.9821827316710086,
+        "f1": 0.9780196873190504,
+        "support": 21496
+      },
+      "COUNTRY": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "CREDITCARDNUMBER": {
+        "precision": 0.99440739944074,
+        "recall": 0.9985959606868993,
+        "f1": 0.9964972786549551,
+        "support": 9259
+      },
+      "CURRENCY": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "DATE": {
+        "precision": 0.9981850695278511,
+        "recall": 0.9996525179086924,
+        "f1": 0.9989182547843853,
+        "support": 37412
+      },
+      "DRIVERLICENSENUM": {
+        "precision": 0.8771445020149683,
+        "recall": 0.8818150248871397,
+        "f1": 0.879473562687601,
+        "support": 8639
+      },
+      "EMAIL": {
+        "precision": 0.9981239092495637,
+        "recall": 0.9993884059237255,
+        "f1": 0.9987557573508546,
+        "support": 22891
+      },
+      "GENDER": {
+        "precision": 0.9721242060691602,
+        "recall": 0.9635113079972022,
+        "f1": 0.9677985948477752,
+        "support": 8578
+      },
+      "GIVENNAME": {
+        "precision": 0.8785638034733252,
+        "recall": 0.894992308100366,
+        "f1": 0.8867019669158707,
+        "support": 37702
+      },
+      "IDCARDNUM": {
+        "precision": 0.8837610111068556,
+        "recall": 0.8985591900311527,
+        "f1": 0.8910986676964664,
+        "support": 10272
+      },
+      "ORGANISATION": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      },
+      "PASSPORTNUM": {
+        "precision": 0.9385265133740028,
+        "recall": 0.9560229445506692,
+        "f1": 0.947193937958797,
+        "support": 6276
+      },
+      "SEX": {
+        "precision": 0.9396846041294099,
+        "recall": 0.9610907881609577,
+        "f1": 0.9502671598849157,
+        "support": 6014
+      },
+      "SOCIALNUM": {
+        "precision": 0.9200057861999132,
+        "recall": 0.9519533004041311,
+        "f1": 0.9357069295277328,
+        "support": 6681
+      },
+      "STREET": {
+        "precision": 0.9848327040749902,
+        "recall": 0.9890174544028241,
+        "f1": 0.9869206432042793,
+        "support": 15297
+      },
+      "SURNAME": {
+        "precision": 0.8702578268876612,
+        "recall": 0.8841524260945491,
+        "f1": 0.8771501051850019,
+        "support": 32068
+      },
+      "TAXNUM": {
+        "precision": 0.9623403700807923,
+        "recall": 0.9661172161172161,
+        "f1": 0.9642250946598773,
+        "support": 7644
+      },
+      "TELEPHONENUM": {
+        "precision": 0.9957858499525166,
+        "recall": 0.9972656482196992,
+        "f1": 0.9965251997267678,
+        "support": 16823
+      },
+      "TIME": {
+        "precision": 0.9221052631578948,
+        "recall": 0.9647577092511013,
+        "f1": 0.9429494079655544,
+        "support": 454
+      },
+      "TITLE": {
+        "precision": 0.9969214739035711,
+        "recall": 0.9986715376951179,
+        "f1": 0.9977957384276267,
+        "support": 21077
+      },
+      "URL": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 5
+      },
+      "USERNAME": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 9
+      },
+      "WEIGHT": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "ZIPCODE": {
+        "precision": 0.9900327170356844,
+        "recall": 0.9944970956893916,
+        "f1": 0.992259884851489,
+        "support": 13084
+      }
+    }
+  },
+  "privacy": {
+    "private_character_recall": 0.9972773649037285,
+    "private_character_leakage_rate": 0.002722635096271464,
+    "non_private_character_over_masking_rate": 0.0009567836500393957,
+    "exact_span_recall": 0.9686493705795292,
+    "private_characters": 3242447,
+    "masked_private_characters": 3233619,
+    "non_private_characters": 11304541,
+    "masked_non_private_characters": 10816,
+    "true_spans": 311477,
+    "exact_span_matches": 301712
+  },
+  "invalid_bio_transitions_repaired": 1811
+}

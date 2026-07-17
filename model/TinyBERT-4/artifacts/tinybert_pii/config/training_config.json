@@ -1,0 +1,87 @@
+{
+  "dataset_name": "ai4privacy/pii-masking-openpii-1.5m",
+  "dataset_revision": "a785eb528e28be2693c3718a27e066970de5dadb",
+  "dataset_fingerprints": {
+    "official_train": "6f5a2d717f5534c2",
+    "project_train": "d13425318343f3ea",
+    "project_validation": "6fc8b4c2e49944bf",
+    "untouched_official_final_test": "6df14acc1c402377",
+    "scored_final_test": "fc71de0a5e125a8f"
+  },
+  "model_name": "huawei-noah/TinyBERT_General_4L_312D",
+  "model_revision": "34707a33cd59a94ecde241ac209bf35103691b43",
+  "seed": 42,
+  "validation_size": 0.1,
+  "train_batch_size": 16,
+  "validation_batch_size": 64,
+  "final_test_batch_size": 16,
+  "dynamic_padding": "longest sequence in each batch",
+  "pad_to_multiple_of": 8,
+  "label_pad_token_id": -100,
+  "dataloader_num_workers": 0,
+  "pin_memory": false,
+  "non_blocking_transfers": true,
+  "use_mixed_precision": true,
+  "amp_dtype": "torch.float16",
+  "tf32_matmul_enabled": true,
+  "tf32_cudnn_enabled": true,
+  "supported_context_limit": 512,
+  "overflow_stride": 128,
+  "sequence_length_audit": {
+    "train": {
+      "row_count": 147366,
+      "oversized_example_count": 55,
+      "percentiles": {
+        "50": 75,
+        "90": 178,
+        "95": 221,
+        "99": 289,
+        "100": 741
+      }
+    },
+    "validation": {
+      "row_count": 16374,
+      "oversized_example_count": 7,
+      "percentiles": {
+        "50": 75,
+        "90": 180,
+        "95": 226,
+        "99": 286,
+        "100": 664
+      }
+    },
+    "final_test": {
+      "row_count": 40908,
+      "oversized_example_count": 12,
+      "percentiles": {
+        "50": 75,
+        "90": 178,
+        "95": 222,
+        "99": 289,
+        "100": 638
+      }
+    }
+  },
+  "epochs_configured": 25,
+  "epochs_completed": 22,
+  "best_epoch": 21,
+  "best_validation_metric_name": "pii_entity_f1",
+  "best_validation_metric": 0.9559104869856256,
+  "early_stopping_patience": 5,
+  "early_stopping_occurred": false,
+  "resume_training": true,
+  "learning_rate": 5e-05,
+  "weight_decay": 0.01,
+  "use_weighted_loss": false,
+  "o_label_weight": 1.0,
+  "pii_label_weight": 2.0,
+  "use_lr_scheduler": true,
+  "lr_scheduler": "ReduceLROnPlateau",
+  "unsupported_final_test_entity_types": [
+    "HEIGHT"
+  ],
+  "unsupported_final_test_rows": 1,
+  "unsupported_final_test_spans": {
+    "HEIGHT": 1
+  }
+}

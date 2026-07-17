@@ -1,0 +1,458 @@
+{
+  "models": {
+    "FP32 ONNX": {
+      "token_level": {
+        "all_valid_token_accuracy": 0.9894515305882798,
+        "pii_token_micro_precision": 0.9727145796113995,
+        "pii_token_micro_recall": 0.9734625196373752,
+        "pii_token_micro_f1": 0.9730884059030676
+      },
+      "entity_level": {
+        "pii_entity_precision": 0.9527025305165515,
+        "pii_entity_recall": 0.9603411349544522,
+        "pii_entity_f1": 0.9565065826189437,
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "AGE": {
+            "precision": 0.974286651361102,
+            "recall": 0.9807844690966719,
+            "f1": 0.9775247622494982,
+            "support": 15144
+          },
+          "AMOUNT": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "BANKNAME": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "BUILDINGNUM": {
+            "precision": 0.9879007450953585,
+            "recall": 0.9903378332077023,
+            "f1": 0.9891177879679693,
+            "support": 14593
+          },
+          "CITY": {
+            "precision": 0.973891784676415,
+            "recall": 0.9821827316710086,
+            "f1": 0.9780196873190504,
+            "support": 21496
+          },
+          "COUNTRY": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "CREDITCARDNUMBER": {
+            "precision": 0.9943004624153134,
+            "recall": 0.9985959606868993,
+            "f1": 0.9964435822825736,
+            "support": 9259
+          },
+          "CURRENCY": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "DATE": {
+            "precision": 0.998158379373849,
+            "recall": 0.9996257885170533,
+            "f1": 0.9988915450259752,
+            "support": 37412
+          },
+          "DRIVERLICENSENUM": {
+            "precision": 0.8775486695081212,
+            "recall": 0.8818150248871397,
+            "f1": 0.879676674364896,
+            "support": 8639
+          },
+          "EMAIL": {
+            "precision": 0.9981239092495637,
+            "recall": 0.9993884059237255,
+            "f1": 0.9987557573508546,
+            "support": 22891
+          },
+          "GENDER": {
+            "precision": 0.9722385601693918,
+            "recall": 0.9635113079972022,
+            "f1": 0.9678552608466537,
+            "support": 8578
+          },
+          "GIVENNAME": {
+            "precision": 0.8785606415664219,
+            "recall": 0.8949657843085247,
+            "f1": 0.8866873390445157,
+            "support": 37702
+          },
+          "IDCARDNUM": {
+            "precision": 0.8838567598621218,
+            "recall": 0.8986565420560748,
+            "f1": 0.8911952114307783,
+            "support": 10272
+          },
+          "ORGANISATION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "PASSPORTNUM": {
+            "precision": 0.9386829344595652,
+            "recall": 0.9561822817080943,
+            "f1": 0.9473518036151235,
+            "support": 6276
+          },
+          "SEX": {
+            "precision": 0.9396944083224967,
+            "recall": 0.9612570668440306,
+            "f1": 0.9503534440243301,
+            "support": 6014
+          },
+          "SOCIALNUM": {
+            "precision": 0.9197396963123644,
+            "recall": 0.9519533004041311,
+            "f1": 0.9355692850838482,
+            "support": 6681
+          },
+          "STREET": {
+            "precision": 0.9848327040749902,
+            "recall": 0.9890174544028241,
+            "f1": 0.9869206432042793,
+            "support": 15297
+          },
+          "SURNAME": {
+            "precision": 0.8703419485542391,
+            "recall": 0.8841836098291131,
+            "f1": 0.8772081799337933,
+            "support": 32068
+          },
+          "TAXNUM": {
+            "precision": 0.9620846905537459,
+            "recall": 0.9659863945578231,
+            "f1": 0.9640315947516156,
+            "support": 7644
+          },
+          "TELEPHONENUM": {
+            "precision": 0.9957858499525166,
+            "recall": 0.9972656482196992,
+            "f1": 0.9965251997267678,
+            "support": 16823
+          },
+          "TIME": {
+            "precision": 0.9221052631578948,
+            "recall": 0.9647577092511013,
+            "f1": 0.9429494079655544,
+            "support": 454
+          },
+          "TITLE": {
+            "precision": 0.996874260004736,
+            "recall": 0.9986715376951179,
+            "f1": 0.9977720894956389,
+            "support": 21077
+          },
+          "URL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 5
+          },
+          "USERNAME": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 9
+          },
+          "WEIGHT": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "ZIPCODE": {
+            "precision": 0.9900327170356844,
+            "recall": 0.9944970956893916,
+            "f1": 0.992259884851489,
+            "support": 13084
+          }
+        }
+      },
+      "privacy": {
+        "private_character_recall": 0.9972761312675272,
+        "private_character_leakage_rate": 0.0027238687324727673,
+        "non_private_character_over_masking_rate": 0.0009573144102002903,
+        "exact_span_recall": 0.9686557915993798,
+        "private_characters": 3242447,
+        "masked_private_characters": 3233615,
+        "non_private_characters": 11304541,
+        "masked_non_private_characters": 10822,
+        "true_spans": 311477,
+        "exact_span_matches": 301714
+      },
+      "invalid_bio_transitions_repaired": 1809,
+      "model_size_mb": 54.49426746368408,
+      "host_machine_benchmark": {
+        "mean_batch_latency_ms": 912.5830576001899,
+        "median_batch_latency_ms": 925.0265000009676,
+        "batch_size_one_mean_latency_ms": 144.21056399936788,
+        "batch_size_one_median_latency_ms": 130.49060000048485,
+        "throughput_examples_per_second": 17.532650717924824,
+        "timed_examples_including_repetitions": 2000,
+        "repetitions": 5,
+        "warmup_runs": 3,
+        "benchmark_batches": 25,
+        "execution_provider": "CPUExecutionProvider",
+        "thread_settings": {
+          "fp32_intra_op_num_threads": 0,
+          "fp32_inter_op_num_threads": 0,
+          "int8_intra_op_num_threads": 0,
+          "int8_inter_op_num_threads": 0,
+          "note": "0 means ONNX Runtime default thread selection"
+        },
+        "measurement_scope": "host machine; not Raspberry Pi"
+      }
+    },
+    "INT8 ONNX": {
+      "token_level": {
+        "all_valid_token_accuracy": 0.9880286950577065,
+        "pii_token_micro_precision": 0.9690430311009314,
+        "pii_token_micro_recall": 0.9701540723231915,
+        "pii_token_micro_f1": 0.9695982334327603
+      },
+      "entity_level": {
+        "pii_entity_precision": 0.9435751285481508,
+        "pii_entity_recall": 0.9557397946896744,
+        "pii_entity_f1": 0.9496185057036707,
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "AGE": {
+            "precision": 0.9576243980738363,
+            "recall": 0.9848784997358689,
+            "f1": 0.9710602558677041,
+            "support": 15144
+          },
+          "AMOUNT": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "BANKNAME": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "BUILDINGNUM": {
+            "precision": 0.9832730251928723,
+            "recall": 0.9869115329267457,
+            "f1": 0.9850889192886457,
+            "support": 14593
+          },
+          "CITY": {
+            "precision": 0.9670314511679234,
+            "recall": 0.9783680684778564,
+            "f1": 0.9726667283322542,
+            "support": 21496
+          },
+          "COUNTRY": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "CREDITCARDNUMBER": {
+            "precision": 0.9925798472954082,
+            "recall": 0.9968679123015445,
+            "f1": 0.994719258540791,
+            "support": 9259
+          },
+          "CURRENCY": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "DATE": {
+            "precision": 0.9964009597440683,
+            "recall": 0.9990110125093553,
+            "f1": 0.9977042791169484,
+            "support": 37412
+          },
+          "DRIVERLICENSENUM": {
+            "precision": 0.8830093592512599,
+            "recall": 0.8518347030906355,
+            "f1": 0.8671419313026572,
+            "support": 8639
+          },
+          "EMAIL": {
+            "precision": 0.9972963544392116,
+            "recall": 0.9990826088855882,
+            "f1": 0.998188682539336,
+            "support": 22891
+          },
+          "GENDER": {
+            "precision": 0.9737155090390105,
+            "recall": 0.9544182793191887,
+            "f1": 0.9639703285058284,
+            "support": 8578
+          },
+          "GIVENNAME": {
+            "precision": 0.8616187989556136,
+            "recall": 0.8840379820699167,
+            "f1": 0.8726844275708581,
+            "support": 37702
+          },
+          "IDCARDNUM": {
+            "precision": 0.8575503818901261,
+            "recall": 0.9072235202492211,
+            "f1": 0.8816878754907991,
+            "support": 10272
+          },
+          "ORGANISATION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "PASSPORTNUM": {
+            "precision": 0.9340085456559583,
+            "recall": 0.9404079031230083,
+            "f1": 0.9371973005160777,
+            "support": 6276
+          },
+          "SEX": {
+            "precision": 0.9201640896181761,
+            "recall": 0.969737279680745,
+            "f1": 0.944300518134715,
+            "support": 6014
+          },
+          "SOCIALNUM": {
+            "precision": 0.88391994478951,
+            "recall": 0.9585391408471786,
+            "f1": 0.9197185121355738,
+            "support": 6681
+          },
+          "STREET": {
+            "precision": 0.9769525417126533,
+            "recall": 0.9837222984899,
+            "f1": 0.9803257328990227,
+            "support": 15297
+          },
+          "SURNAME": {
+            "precision": 0.8497525729378548,
+            "recall": 0.8728327304477984,
+            "f1": 0.8611380312889381,
+            "support": 32068
+          },
+          "TAXNUM": {
+            "precision": 0.9664223850766156,
+            "recall": 0.9488487702773417,
+            "f1": 0.9575549541223843,
+            "support": 7644
+          },
+          "TELEPHONENUM": {
+            "precision": 0.9921157152172624,
+            "recall": 0.9948285085894312,
+            "f1": 0.9934702600023745,
+            "support": 16823
+          },
+          "TIME": {
+            "precision": 0.902542372881356,
+            "recall": 0.9383259911894273,
+            "f1": 0.9200863930885529,
+            "support": 454
+          },
+          "TITLE": {
+            "precision": 0.9961177918757693,
+            "recall": 0.998244531954263,
+            "f1": 0.997180027962748,
+            "support": 21077
+          },
+          "URL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 5
+          },
+          "USERNAME": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 9
+          },
+          "WEIGHT": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "ZIPCODE": {
+            "precision": 0.983356029656529,
+            "recall": 0.9934270865178845,
+            "f1": 0.9883659037335565,
+            "support": 13084
+          }
+        }
+      },
+      "privacy": {
+        "private_character_recall": 0.9968866106369665,
+        "private_character_leakage_rate": 0.003113389363033514,
+        "non_private_character_over_masking_rate": 0.0011531649095704107,
+        "exact_span_recall": 0.9653714399458065,
+        "private_characters": 3242447,
+        "masked_private_characters": 3232352,
+        "non_private_characters": 11304541,
+        "masked_non_private_characters": 13036,
+        "true_spans": 311477,
+        "exact_span_matches": 300691
+      },
+      "invalid_bio_transitions_repaired": 2435,
+      "model_size_mb": 13.72033405303955,
+      "host_machine_benchmark": {
+        "mean_batch_latency_ms": 844.1934087994741,
+        "median_batch_latency_ms": 925.8297999913339,
+        "batch_size_one_mean_latency_ms": 129.92105599900242,
+        "batch_size_one_median_latency_ms": 120.03429999458604,
+        "throughput_examples_per_second": 18.953002751767002,
+        "timed_examples_including_repetitions": 2000,
+        "repetitions": 5,
+        "warmup_runs": 3,
+        "benchmark_batches": 25,
+        "execution_provider": "CPUExecutionProvider",
+        "thread_settings": {
+          "fp32_intra_op_num_threads": 0,
+          "fp32_inter_op_num_threads": 0,
+          "int8_intra_op_num_threads": 0,
+          "int8_inter_op_num_threads": 0,
+          "note": "0 means ONNX Runtime default thread selection"
+        },
+        "measurement_scope": "host machine; not Raspberry Pi"
+      }
+    }
+  },
+  "comparison": {
+    "difference_definition": "INT8 minus FP32",
+    "pii_token_micro_f1_difference": -0.003490172470307251,
+    "pii_entity_f1_difference": -0.006888076915273045,
+    "private_character_leakage_rate_difference": 0.0003895206305607468,
+    "model_size_difference_mb": -40.77393341064453,
+    "batch_size_one_mean_latency_difference_ms": -14.289508000365458
+  }
+}
