@@ -1,1 +1,4 @@
 .venv/
+model/TinyBERT-4/artifacts/tinybert_pii/checkpoints/
+model/TinyBERT-4/artifacts/tinybert_pii/huggingface_model/
+model/TinyBERT-4/artifacts/tinybert_pii/onnx_model/model_fp32.onnx

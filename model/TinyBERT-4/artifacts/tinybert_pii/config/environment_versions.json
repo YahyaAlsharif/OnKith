@@ -1,0 +1,13 @@
+{
+  "python": "3.11.9",
+  "pytorch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "transformers": "5.13.1",
+  "datasets": "5.0.0",
+  "numpy": "2.4.6",
+  "scikit_learn": "1.9.0",
+  "seqeval": "1.2.2",
+  "onnx": "1.22.0",
+  "onnxruntime": "1.27.0",
+  "onnxscript": "0.7.1"
+}

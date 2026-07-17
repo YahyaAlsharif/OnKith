@@ -1,0 +1,11 @@
+{
+  "method": "ONNX Runtime dynamic post-training quantization",
+  "weight_type": "QInt8",
+  "per_channel": false,
+  "reduce_range": false,
+  "source_model": "onnx_model\\model_fp32.onnx",
+  "int8_model": "onnx_model\\model_int8.onnx",
+  "onnx_exporter": "torch.onnx.export Dynamo",
+  "opset": 17,
+  "onnxruntime_version": "1.27.0"
+}
