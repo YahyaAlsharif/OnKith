@@ -1,0 +1,4 @@
+moonshine-voice
+sounddevice
+numpy
+pyrnnoise
