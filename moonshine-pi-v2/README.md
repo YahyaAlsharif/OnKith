@@ -35,7 +35,7 @@ The complete authoritative configuration is in [`config/final_config.json`](conf
 | Mild room condition | 120 | **10.43%** | 0.611 |
 | Realistic room condition | 120 | **15.05%** | 0.597 |
 | Hard room condition | 120 | **32.83%** | 0.603 |
-| Direct-local true-live microphone | 15 | **13.10%** | 2.618 |
+| Direct-local true-live microphone | 100 | **12.10%** | 2.618 |
 
 The official final live result is **13.10% WER**. Number-format equivalence such as `twenty two` and `22` was not used in this official score.
 
