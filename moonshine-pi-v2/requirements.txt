@@ -1,0 +1,3 @@
+moonshine-voice==0.0.69
+numpy>=1.24,<3
+sounddevice>=0.4.6,<1

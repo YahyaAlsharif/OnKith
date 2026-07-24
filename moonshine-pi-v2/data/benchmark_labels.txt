@@ -1,0 +1,16 @@
+# One command per line. Lines beginning with # are ignored.
+Turn on the kitchen lights and set their brightness to sixty percent before I start cooking.
+Turn off every kitchen light but leave the small counter lamp switched on.
+Remind me to call Ahmed tomorrow at nine in the morning.
+Set a timer for fifteen minutes and tell me when it finishes.
+Lock the front door and confirm that the back door is already locked.
+Turn the bedroom air conditioner to twenty two degrees.
+Send a message to Ahmed saying I will arrive in ten minutes.
+Add milk eggs bread and coffee to my shopping list.
+What appointments do I have tomorrow afternoon?
+Do not send this private message until I confirm the recipient.
+Play quiet music in the living room and lower the volume to twenty percent.
+Turn off the television after the current episode finishes.
+Remind me to take my medicine at eight o'clock tonight.
+Call my brother and use the speaker only after he answers.
+Read my latest calendar event without sharing any private details.
