@@ -1,0 +1,326 @@
+"""Whole-word consolidation and deterministic PII span overlap resolution."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from typing import Any, Iterable, Sequence
+
+
+@dataclass(frozen=True)
+class SpanCandidate:
+    entity_type: str
+    start_char: int
+    end_char: int
+    text: str
+    source: str
+    confidence: float
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SpanDecision:
+    span: SpanCandidate
+    chosen: bool
+    reason: str
+    final_placeholder: str | None = None
+
+
+@dataclass
+class SpanMergeResult:
+    masked_text: str
+    entities: list[dict[str, Any]]
+    chosen_spans: list[SpanCandidate]
+    decisions: list[SpanDecision]
+    latency_seconds: float
+
+
+@dataclass
+class WordConsolidationResult:
+    labels: list[str]
+    spans: list[SpanCandidate]
+    warnings: list[str]
+    partial_word_boundary_count: int
+
+
+def _alphanumeric_word_bounds(text: str, start: int, end: int) -> tuple[int, int]:
+    """Expand an aligned token only across the containing alphanumeric word."""
+
+    start = max(0, min(int(start), len(text)))
+    end = max(start, min(int(end), len(text)))
+    while start > 0 and text[start - 1].isalnum():
+        start -= 1
+    while end < len(text) and text[end].isalnum():
+        end += 1
+    return start, end
+
+
+def derive_word_ids(text: str, offsets: Sequence[tuple[int, int]]) -> list[int | None]:
+    """Derive stable word groups from exact offsets when tokenizer IDs are absent."""
+
+    key_to_id: dict[tuple[int, int], int] = {}
+    result: list[int | None] = []
+    for start, end in offsets:
+        if start == end:
+            result.append(None)
+            continue
+        bounds = _alphanumeric_word_bounds(text, start, end)
+        if bounds[0] == bounds[1]:
+            # Punctuation remains its own non-expandable group.
+            bounds = (int(start), int(end))
+        if bounds not in key_to_id:
+            key_to_id[bounds] = len(key_to_id)
+        result.append(key_to_id[bounds])
+    return result
+
+
+def consolidate_predictions_to_words(
+    text: str,
+    offsets: Sequence[tuple[int, int]],
+    labels: Sequence[str],
+    confidences: Sequence[float],
+    *,
+    word_ids: Sequence[int | None] | None = None,
+) -> WordConsolidationResult:
+    """Promote subtoken evidence to complete words using a deterministic rule.
+
+    For every original word, each non-O entity type receives a
+    character-length-weighted mean of its chosen-label confidences. The highest
+    score wins; ties are resolved alphabetically by entity type. A sensitive
+    word is expanded only to its complete alphanumeric boundaries. Adjacent
+    same-type words separated only by whitespace become one entity span.
+    """
+
+    if not (len(offsets) == len(labels) == len(confidences)):
+        raise ValueError("offsets, labels, and confidences must have equal lengths.")
+    if word_ids is None or len(word_ids) != len(offsets):
+        word_ids = derive_word_ids(text, offsets)
+
+    groups: dict[Any, list[int]] = {}
+    for index, (offset, word_id) in enumerate(zip(offsets, word_ids)):
+        if offset[0] == offset[1]:
+            continue
+        group_key: Any = ("tokenizer", word_id) if word_id is not None else (
+            "derived",
+            *_alphanumeric_word_bounds(text, *offset),
+        )
+        groups.setdefault(group_key, []).append(index)
+
+    word_rows: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for indices in groups.values():
+        starts = [int(offsets[index][0]) for index in indices]
+        ends = [int(offsets[index][1]) for index in indices]
+        group_start, group_end = min(starts), max(ends)
+        word_start, word_end = _alphanumeric_word_bounds(text, group_start, group_end)
+        if word_start == word_end:
+            word_start, word_end = group_start, group_end
+        evidence: dict[str, list[tuple[float, int]]] = {}
+        for index in indices:
+            label = str(labels[index])
+            if label == "O" or "-" not in label:
+                continue
+            entity_type = label.split("-", maxsplit=1)[1]
+            token_length = max(1, int(offsets[index][1]) - int(offsets[index][0]))
+            evidence.setdefault(entity_type, []).append(
+                (float(confidences[index]), token_length)
+            )
+        if evidence:
+            scored = []
+            for entity_type, values in evidence.items():
+                total_weight = sum(weight for _, weight in values)
+                score = sum(confidence * weight for confidence, weight in values)
+                score /= total_weight
+                scored.append((score, entity_type))
+            scored.sort(key=lambda item: (-item[0], item[1]))
+            winning_score, winning_type = scored[0]
+            if len(scored) > 1:
+                warnings.append(
+                    "Conflicting subword entity types for "
+                    f"{text[word_start:word_end]!r}: "
+                    + ", ".join(f"{kind}={score:.6f}" for score, kind in scored)
+                    + f"; chose {winning_type}."
+                )
+        else:
+            winning_type = None
+            winning_score = 0.0
+        word_rows.append(
+            {
+                "indices": indices,
+                "start": word_start,
+                "end": word_end,
+                "entity_type": winning_type,
+                "confidence": float(winning_score),
+            }
+        )
+
+    word_rows.sort(key=lambda row: (row["start"], row["end"]))
+    consolidated_labels = ["O"] * len(offsets)
+    spans: list[SpanCandidate] = []
+    active: dict[str, Any] | None = None
+    previous_sensitive_word: dict[str, Any] | None = None
+    for row in word_rows:
+        entity_type = row["entity_type"]
+        if entity_type is None:
+            active = None
+            previous_sensitive_word = None
+            continue
+        compatible_previous = (
+            previous_sensitive_word is not None
+            and previous_sensitive_word["entity_type"] == entity_type
+            and text[previous_sensitive_word["end"] : row["start"]].isspace()
+        )
+        for position, token_index in enumerate(row["indices"]):
+            prefix = "I" if compatible_previous or position > 0 else "B"
+            consolidated_labels[token_index] = f"{prefix}-{entity_type}"
+        if compatible_previous and active is not None:
+            active["end"] = row["end"]
+            active["confidence_values"].append(row["confidence"])
+        else:
+            active = {
+                "start": row["start"],
+                "end": row["end"],
+                "entity_type": entity_type,
+                "confidence_values": [row["confidence"]],
+            }
+            spans.append(
+                SpanCandidate(
+                    entity_type=entity_type,
+                    start_char=row["start"],
+                    end_char=row["end"],
+                    text=text[row["start"] : row["end"]],
+                    source="tinybert_whole_word",
+                    confidence=row["confidence"],
+                    metadata={"word_level": True},
+                )
+            )
+        if compatible_previous and spans:
+            values = active["confidence_values"]
+            spans[-1] = SpanCandidate(
+                entity_type=entity_type,
+                start_char=active["start"],
+                end_char=active["end"],
+                text=text[active["start"] : active["end"]],
+                source="tinybert_whole_word",
+                confidence=sum(values) / len(values),
+                metadata={"word_level": True, "word_count": len(values)},
+            )
+        previous_sensitive_word = row
+
+    return WordConsolidationResult(
+        labels=consolidated_labels,
+        spans=spans,
+        warnings=warnings,
+        partial_word_boundary_count=count_partial_word_boundaries(text, spans),
+    )
+
+
+def count_partial_word_boundaries(
+    text: str, spans: Iterable[SpanCandidate | dict[str, Any]]
+) -> int:
+    count = 0
+    for span in spans:
+        start = (
+            span.start_char if isinstance(span, SpanCandidate) else int(span["start"])
+        )
+        end = span.end_char if isinstance(span, SpanCandidate) else int(span["end"])
+        if start > 0 and start < len(text) and text[start - 1].isalnum() and text[start].isalnum():
+            count += 1
+        if end > 0 and end < len(text) and text[end - 1].isalnum() and text[end].isalnum():
+            count += 1
+    return count
+
+
+def _overlap(first: SpanCandidate, second: SpanCandidate) -> bool:
+    return first.start_char < second.end_char and second.start_char < first.end_char
+
+
+def merge_pii_spans(
+    text: str,
+    tinybert_spans: Sequence[SpanCandidate],
+    structured_spans: Sequence[SpanCandidate],
+) -> SpanMergeResult:
+    """Prefer exact structured spans, then deterministically keep non-overlaps."""
+
+    import time
+
+    started = time.perf_counter()
+    candidates = [*structured_spans, *tinybert_spans]
+    for span in candidates:
+        if (
+            span.start_char < 0
+            or span.end_char <= span.start_char
+            or span.end_char > len(text)
+            or text[span.start_char : span.end_char] != span.text
+        ):
+            raise ValueError(f"Invalid source-aligned span: {span!r}")
+    ordered = sorted(
+        candidates,
+        key=lambda span: (
+            0 if span.source.startswith("structured") else 1,
+            -(span.end_char - span.start_char),
+            -float(span.confidence),
+            span.start_char,
+            span.end_char,
+            span.entity_type,
+            span.source,
+        ),
+    )
+    chosen: list[SpanCandidate] = []
+    decisions: list[SpanDecision] = []
+    for candidate in ordered:
+        conflict = next((existing for existing in chosen if _overlap(candidate, existing)), None)
+        if conflict is None:
+            chosen.append(candidate)
+            decisions.append(SpanDecision(candidate, True, "selected_non_overlapping"))
+        else:
+            decisions.append(
+                SpanDecision(
+                    candidate,
+                    False,
+                    "discarded_overlap_with_"
+                    f"{conflict.source}:{conflict.start_char}-{conflict.end_char}",
+                )
+            )
+    chosen.sort(key=lambda span: (span.start_char, span.end_char, span.entity_type))
+    parts: list[str] = []
+    entities: list[dict[str, Any]] = []
+    counts: dict[str, int] = {}
+    cursor = 0
+    decision_by_span = {id(decision.span): decision for decision in decisions}
+    for span in chosen:
+        if span.start_char < cursor:
+            raise RuntimeError("Overlap resolution produced overlapping chosen spans.")
+        parts.append(text[cursor : span.start_char])
+        counts[span.entity_type] = counts.get(span.entity_type, 0) + 1
+        placeholder = f"[{span.entity_type}_{counts[span.entity_type]}]"
+        parts.append(placeholder)
+        entity = {
+            "start": span.start_char,
+            "end": span.end_char,
+            "entity_type": span.entity_type,
+            "text": span.text,
+            "placeholder": placeholder,
+            "source": span.source,
+            "confidence": span.confidence,
+            "metadata": span.metadata,
+        }
+        entities.append(entity)
+        decision_by_span[id(span)].final_placeholder = placeholder
+        cursor = span.end_char
+    parts.append(text[cursor:])
+    return SpanMergeResult(
+        masked_text="".join(parts),
+        entities=entities,
+        chosen_spans=chosen,
+        decisions=decisions,
+        latency_seconds=time.perf_counter() - started,
+    )
+
+
+def decision_to_dict(decision: SpanDecision) -> dict[str, Any]:
+    return {
+        "span": asdict(decision.span),
+        "chosen": decision.chosen,
+        "reason": decision.reason,
+        "final_placeholder": decision.final_placeholder,
+    }
