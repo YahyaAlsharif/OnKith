@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import importlib.metadata
 import json
 import platform
+import re
 import sys
 from pathlib import Path
 
@@ -25,38 +27,75 @@ from integrated_pipeline.pipeline import FailClosedMasker
 def verify_deployment_boundary() -> None:
     """Verify this reduced package contains no research runtime or extra model."""
 
-    blocked = [
-        "data" + "sets",
-        "load_" + "dataset",
-        "libri" + "speech",
-        "kag" + "gle",
-        "pan" + "das",
-        "mat" + "plotlib",
-        "sk" + "learn",
-        "seq" + "eval",
-        "to" + "rch",
-        "wer " + "benchmark",
-    ]
+    # Research-only packages that must never enter the Pi runtime. Matching is
+    # done against real import statements and real requirement lines, not raw
+    # substrings, so that prose mentioning a package (for example, explaining
+    # why PyTorch is avoided) does not trip the check.
+    blocked = {
+        "datasets",
+        "kaggle",
+        "matplotlib",
+        "pandas",
+        "seqeval",
+        "sklearn",
+        "scikit-learn",
+        "torch",
+        "torchaudio",
+        "torchvision",
+        "transformers",
+    }
+    # Directories that hold installed third-party code or build output rather
+    # than this deployment's own source.
+    ignored_parts = {".venv", "venv", "__pycache__", ".git"}
     findings = []
-    runtime_targets = [
+    python_targets = [
         ROOT / "app",
         ROOT / "integrated_pipeline",
         ROOT / "moonshine_runtime",
         ROOT / "scripts" / "check_pi.py",
-        ROOT / "requirements-rpi.txt",
     ]
-    for target in runtime_targets:
+    for target in python_targets:
         files = [target] if target.is_file() else list(target.rglob("*.py"))
         for path in files:
-            text = path.read_text(encoding="utf-8").lower()
-            for term in blocked:
-                if term in text:
-                    findings.append(f"{path.relative_to(ROOT)}: {term}")
+            if ignored_parts.intersection(path.parts):
+                continue
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    names = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    names = [node.module or ""]
+                else:
+                    continue
+                for name in names:
+                    root_package = name.split(".", maxsplit=1)[0].lower()
+                    if root_package in blocked:
+                        findings.append(
+                            f"{path.relative_to(ROOT)}: imports {root_package}"
+                        )
+
+    requirements = ROOT / "requirements-rpi.txt"
+    for line in requirements.read_text(encoding="utf-8").splitlines():
+        line = line.split("#", maxsplit=1)[0].strip()
+        if not line:
+            continue
+        name = re.split(r"[<>=!~\[; ]", line, maxsplit=1)[0].strip().lower()
+        if name in blocked:
+            findings.append(f"{requirements.name}: requires {name}")
+
     if findings:
         raise RuntimeError(
             "Deployment dependency-boundary failure: " + "; ".join(findings)
         )
-    onnx_files = list(ROOT.rglob("*.onnx"))
+    # Only this deployment's own tree is in scope. The virtual environment is
+    # excluded because onnxruntime ships sample .onnx files under
+    # `onnxruntime/datasets/`, which would otherwise fail this check on every
+    # successful install.
+    onnx_files = [
+        path
+        for path in ROOT.rglob("*.onnx")
+        if not ignored_parts.intersection(path.parts)
+    ]
     expected = ROOT / "models" / "tinybert_pii" / "model_int8.onnx"
     if onnx_files != [expected]:
         raise RuntimeError(f"Expected only {expected}; found {onnx_files}")
@@ -73,8 +112,11 @@ def main() -> int:
     args = parser().parse_args()
     print(f"[CHECK] Python {platform.python_version()}")
     print(f"[CHECK] Architecture {platform.machine()}")
-    if sys.version_info[:2] != (3, 11):
-        raise RuntimeError("Target runtime requires Python 3.11")
+    if sys.version_info[:2] < (3, 11):
+        raise RuntimeError(
+            "Target runtime requires Python 3.11 or newer; "
+            f"found {platform.python_version()}"
+        )
 
     config = PipelineConfig()
     static_self_test(config)

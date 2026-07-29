@@ -1,5 +1,0 @@
-moonshine-voice==0.0.69
-numpy>=1.24,<3
-sounddevice>=0.4.6,<1
-onnxruntime>=1.17,<2
-tokenizers>=0.15,<1

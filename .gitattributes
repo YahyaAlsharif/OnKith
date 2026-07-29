@@ -1,0 +1,25 @@
+# Normalize text files in the repository.
+* text=auto
+
+# Shell scripts must keep LF endings. This repository is developed on Windows
+# (where core.autocrlf=true is common) and deployed to Raspberry Pi OS. A CRLF
+# shell script fails on Linux with an opaque "\r: command not found".
+*.sh text eol=lf
+
+# PowerShell is Windows-side; CRLF is the native convention there.
+*.ps1 text eol=crlf
+
+# Binary assets must never be line-ending converted.
+*.onnx binary
+*.ort binary
+*.bin binary
+*.safetensors binary
+*.wav binary
+*.flac binary
+*.png binary
+*.jpg binary
+*.pyc binary
+
+# Large vendored model artifacts are not useful in diffs.
+*.onnx -diff
+*.safetensors -diff

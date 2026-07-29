@@ -13,6 +13,9 @@ from typing import Any, Callable
 from integrated_pipeline.config import PipelineConfig
 from integrated_pipeline.schemas import STTResult
 
+# Upper bound on how long shutdown waits for the audio worker to drain.
+WORKER_JOIN_TIMEOUT_SECONDS = 10.0
+
 
 @dataclass(frozen=True)
 class AudioChunk:
@@ -276,9 +279,28 @@ class LiveAudioRuntime:
             raise RuntimeError(
                 f"Cannot select microphone device {selected}: {exc}"
             ) from exc
+        if int(info["max_input_channels"]) <= 0:
+            raise RuntimeError(
+                f"Device {selected} ({info['name']}) has no input channels. "
+                "Use --list-devices and pick a microphone."
+            )
         self.device_id = int(selected)
         self.sample_rate = int(round(float(info["default_samplerate"])))
         self.device_name = str(info["name"])
+        # Fail here, with an actionable message, rather than deep inside the
+        # PortAudio callback once the stream is already running.
+        try:
+            sd.check_input_settings(
+                device=self.device_id,
+                channels=1,
+                dtype="float32",
+                samplerate=self.sample_rate,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                f"Microphone {self.device_id} ({self.device_name}) cannot supply "
+                f"1-channel float32 audio at {self.sample_rate} Hz: {exc}"
+            ) from exc
 
     def _audio_callback(
         self, indata: Any, frames: int, time_info: Any, status: Any
@@ -400,7 +422,15 @@ class LiveAudioRuntime:
         finally:
             self.stop_event.set()
             if self.worker is not None:
-                self.worker.join()
+                # Bounded join: a wedged Moonshine `add_audio` must not stop the
+                # process from exiting. The worker is a daemon thread, so an
+                # abandoned one cannot keep the interpreter alive.
+                self.worker.join(timeout=WORKER_JOIN_TIMEOUT_SECONDS)
+                if self.worker.is_alive():
+                    self.on_event(
+                        "worker_join_timeout",
+                        {"seconds": WORKER_JOIN_TIMEOUT_SECONDS},
+                    )
             if self.state_machine is not None:
                 self.state_machine.shutdown()
 

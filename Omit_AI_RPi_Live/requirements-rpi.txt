@@ -2,4 +2,7 @@ moonshine-voice==0.0.69
 numpy==2.0.2
 sounddevice==0.5.5
 onnxruntime==1.27.0
-transformers==5.0.0
+# Low-level Rust tokenizer only. Deliberately NOT `transformers`, which imports
+# PyTorch when present and costs several hundred MB of RAM the Pi needs for
+# the Moonshine speech model.
+tokenizers==0.22.2

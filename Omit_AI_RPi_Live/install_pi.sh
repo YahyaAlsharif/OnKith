@@ -22,8 +22,8 @@ command -v python3 >/dev/null || {
 }
 PYTHON_VERSION="$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
 echo "[SYSTEM] Python: ${PYTHON_VERSION}"
-python3 -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) else 1)' || {
-  echo "Python 3.11 is required on the target Raspberry Pi." >&2
+python3 -c 'import sys; raise SystemExit(0 if sys.version_info[:2] >= (3, 11) else 1)' || {
+  echo "Python 3.11 or newer is required on the target Raspberry Pi." >&2
   exit 1
 }
 
@@ -79,10 +79,12 @@ source "${ROOT_DIR}/.venv/bin/activate"
 python -m pip install --upgrade pip wheel setuptools
 python -m pip install --requirement "${ROOT_DIR}/requirements-rpi.txt"
 
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python - <<'PY'
+python - <<'PY'
+import sys
 from pathlib import Path
+
 import onnxruntime as ort
-from transformers import AutoTokenizer
+from tokenizers import Tokenizer
 
 root = Path.cwd()
 model = root / "models" / "tinybert_pii" / "model_int8.onnx"
@@ -91,15 +93,15 @@ if header.startswith(b"version https://git-lfs.github.com/spec/"):
     raise SystemExit("TinyBERT is a Git LFS pointer")
 if model.stat().st_size < 1_000_000:
     raise SystemExit("TinyBERT model is unexpectedly small")
-AutoTokenizer.from_pretrained(
-    root / "models" / "tinybert_pii" / "tokenizer",
-    local_files_only=True,
-    use_fast=True,
+Tokenizer.from_file(
+    str(root / "models" / "tinybert_pii" / "tokenizer" / "tokenizer.json")
 )
 if "CPUExecutionProvider" not in ort.get_available_providers():
     raise SystemExit("CPUExecutionProvider is unavailable")
 ort.InferenceSession(str(model), providers=["CPUExecutionProvider"])
-print("[OK] TinyBERT tokenizer and INT8 model work fully offline.")
+if "torch" in sys.modules:
+    raise SystemExit("PyTorch was imported; the Pi runtime must stay lightweight")
+print("[OK] TinyBERT tokenizer and INT8 model load locally without PyTorch.")
 PY
 
 python - <<'PY'

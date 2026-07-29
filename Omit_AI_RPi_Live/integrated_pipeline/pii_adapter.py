@@ -1,4 +1,12 @@
-"""Local TinyBERT INT8 token classification plus structured PII recognition."""
+"""Local TinyBERT INT8 token classification plus structured PII recognition.
+
+Tokenization uses the low-level ``tokenizers`` library rather than
+``transformers``. The Hugging Face auto-tokenizer pulls in the full
+``transformers`` stack, which imports PyTorch whenever it is installed and costs
+several hundred megabytes of resident memory. On a 4 GB Raspberry Pi that memory
+is needed by the Moonshine speech model, so this module talks to the same
+underlying Rust tokenizer directly.
+"""
 
 from __future__ import annotations
 
@@ -50,6 +58,8 @@ class PIIMaskerAdapter:
         self._session: Any | None = None
         self._id2label: dict[int, str] = {}
         self._structured = StructuredPIIRecognizer()
+        self._pad_id = 0
+        self._input_names: set[str] = set()
         self.load_count = 0
 
     @property
@@ -81,9 +91,9 @@ class PIIMaskerAdapter:
         except ModuleNotFoundError as exc:
             raise RuntimeError("Install the pinned onnxruntime package") from exc
         try:
-            from transformers import AutoTokenizer
+            from tokenizers import Tokenizer
         except ModuleNotFoundError as exc:
-            raise RuntimeError("Install the pinned transformers package") from exc
+            raise RuntimeError("Install the pinned tokenizers package") from exc
 
         if "CPUExecutionProvider" not in ort.get_available_providers():
             raise RuntimeError("CPUExecutionProvider is unavailable")
@@ -98,24 +108,15 @@ class PIIMaskerAdapter:
         ):
             raise RuntimeError("TinyBERT label map must contain IDs 0 through 66")
 
-        previous_offline = None
-        try:
-            import os
-
-            previous_offline = os.environ.get("HF_HUB_OFFLINE")
-            os.environ["HF_HUB_OFFLINE"] = "1"
-            tokenizer = AutoTokenizer.from_pretrained(
-                tokenizer_path,
-                local_files_only=True,
-                use_fast=True,
-            )
-        finally:
-            if previous_offline is None:
-                os.environ.pop("HF_HUB_OFFLINE", None)
-            else:
-                os.environ["HF_HUB_OFFLINE"] = previous_offline
-        if not getattr(tokenizer, "is_fast", False):
-            raise RuntimeError("A fast local tokenizer is required for exact offsets")
+        # ``tokenizers`` only ever reads the packaged file; there is no hub
+        # client involved, so no offline environment flags are required.
+        tokenizer_file = tokenizer_path / "tokenizer.json"
+        if not tokenizer_file.is_file():
+            raise FileNotFoundError(f"Packaged tokenizer is missing: {tokenizer_file}")
+        tokenizer = Tokenizer.from_file(str(tokenizer_file))
+        tokenizer.no_truncation()
+        tokenizer.no_padding()
+        pad_id = self._resolve_pad_id(tokenizer, tokenizer_path)
 
         session = ort.InferenceSession(
             str(model_path),
@@ -124,67 +125,93 @@ class PIIMaskerAdapter:
         if "logits" not in {output.name for output in session.get_outputs()}:
             raise RuntimeError("TinyBERT ONNX output named 'logits' is missing")
         self._tokenizer = tokenizer
+        self._pad_id = pad_id
         self._session = session
         self._id2label = labels
+        self._input_names = {inp.name for inp in session.get_inputs()}
         self.load_count += 1
 
+    @staticmethod
+    def _resolve_pad_id(tokenizer: Any, tokenizer_path: Path) -> int:
+        """Find the padding token id from the tokenizer or its config sidecar."""
+
+        pad_token = "[PAD]"
+        config_file = tokenizer_path / "tokenizer_config.json"
+        if config_file.is_file():
+            config = json.loads(config_file.read_text(encoding="utf-8"))
+            pad_token = str(config.get("pad_token") or pad_token)
+        pad_id = tokenizer.token_to_id(pad_token)
+        if pad_id is None:
+            raise RuntimeError(f"Tokenizer has no padding token {pad_token!r}")
+        return int(pad_id)
+
     def _window_encodings(self, text: str) -> tuple[Any, list[dict[str, Any]]]:
+        """Encode once in full, then again as overlapping context windows.
+
+        The full encoding fixes the authoritative offsets and word grouping for
+        the whole utterance. When it exceeds the model context, the text is
+        re-encoded with truncation plus ``OVERFLOW_STRIDE`` overlap; the primary
+        encoding and its ``overflowing`` siblings together cover every token.
+        """
+
         assert self._tokenizer is not None
-        full = self._tokenizer(
-            text,
-            truncation=False,
-            padding=False,
-            return_attention_mask=True,
-            return_offsets_mapping=True,
-            return_token_type_ids=False,
+        full = self._tokenizer.encode(text)
+        if len(full.ids) <= CONTEXT_LIMIT:
+            return full, [self._as_window(full)]
+
+        self._tokenizer.enable_truncation(
+            max_length=CONTEXT_LIMIT, stride=OVERFLOW_STRIDE
         )
-        if len(full["input_ids"]) <= CONTEXT_LIMIT:
-            return full, [
-                {
-                    "input_ids": full["input_ids"],
-                    "attention_mask": full["attention_mask"],
-                    "offset_mapping": full["offset_mapping"],
-                }
-            ]
-        overflow = self._tokenizer(
-            text,
-            truncation=True,
-            max_length=CONTEXT_LIMIT,
-            stride=OVERFLOW_STRIDE,
-            padding=False,
-            return_attention_mask=True,
-            return_offsets_mapping=True,
-            return_overflowing_tokens=True,
-            return_token_type_ids=False,
-        )
-        windows = [
-            {
-                "input_ids": input_ids,
-                "attention_mask": attention_mask,
-                "offset_mapping": offsets,
-            }
-            for input_ids, attention_mask, offsets in zip(
-                overflow["input_ids"],
-                overflow["attention_mask"],
-                overflow["offset_mapping"],
-            )
-        ]
+        try:
+            primary = self._tokenizer.encode(text)
+        finally:
+            # Always restore the unrestricted state so the next call sees a
+            # tokenizer in a known configuration.
+            self._tokenizer.no_truncation()
+        windows = [self._as_window(primary)]
+        windows.extend(self._as_window(item) for item in primary.overflowing)
         return full, windows
+
+    @staticmethod
+    def _as_window(encoding: Any) -> dict[str, Any]:
+        return {
+            "input_ids": list(encoding.ids),
+            "attention_mask": list(encoding.attention_mask),
+            "offset_mapping": list(encoding.offsets),
+        }
 
     @staticmethod
     def _word_ids(
         encoding: Any, text: str, offsets: list[tuple[int, int]]
     ) -> list[int | None]:
-        try:
-            ids = list(encoding.word_ids())
-        except (AttributeError, TypeError, ValueError):
-            ids = derive_word_ids(text, offsets)
+        ids = getattr(encoding, "word_ids", None)
+        if callable(ids):
+            ids = ids()
+        ids = list(ids) if ids is not None else []
         if len(ids) != len(offsets):
             ids = derive_word_ids(text, offsets)
         return [
             word_id if start != end else None
             for word_id, (start, end) in zip(ids, offsets)
         ]
+
+    def _pad_batch(self, batch: list[dict[str, Any]]) -> dict[str, Any]:
+        """Right-pad a batch of windows to the longest member."""
+
+        import numpy as np
+
+        width = max(len(window["input_ids"]) for window in batch)
+        input_ids = np.full((len(batch), width), self._pad_id, dtype=np.int64)
+        attention_mask = np.zeros((len(batch), width), dtype=np.int64)
+        for row, window in enumerate(batch):
+            ids = window["input_ids"]
+            mask = window["attention_mask"]
+            input_ids[row, : len(ids)] = ids
+            attention_mask[row, : len(mask)] = mask
+        inputs = {"input_ids": input_ids, "attention_mask": attention_mask}
+        if "token_type_ids" in self._input_names:
+            inputs["token_type_ids"] = np.zeros((len(batch), width), dtype=np.int64)
+        return inputs
 
     @staticmethod
     def _argmax_with_confidence(logits: Any) -> tuple[Any, Any]:
@@ -219,7 +246,7 @@ class PIIMaskerAdapter:
         started = time.perf_counter()
         tinybert_started = time.perf_counter()
         full, windows = self._window_encodings(text)
-        all_offsets = [tuple(map(int, item)) for item in full["offset_mapping"]]
+        all_offsets = [tuple(map(int, item)) for item in full.offsets]
         all_word_ids = self._word_ids(full, text, all_offsets)
         offsets = [item for item in all_offsets if item[0] != item[1]]
         word_ids = [
@@ -233,21 +260,7 @@ class PIIMaskerAdapter:
         prediction_by_offset: dict[tuple[int, int], tuple[int, float]] = {}
         for batch_start in range(0, len(windows), BATCH_SIZE):
             batch = windows[batch_start : batch_start + BATCH_SIZE]
-            padded = self._tokenizer.pad(
-                [
-                    {
-                        "input_ids": window["input_ids"],
-                        "attention_mask": window["attention_mask"],
-                    }
-                    for window in batch
-                ],
-                padding="longest",
-                return_tensors="np",
-            )
-            inputs = {
-                "input_ids": padded["input_ids"],
-                "attention_mask": padded["attention_mask"],
-            }
+            inputs = self._pad_batch(batch)
             logits = self._session.run(["logits"], inputs)[0]
             expected = (
                 inputs["input_ids"].shape[0],

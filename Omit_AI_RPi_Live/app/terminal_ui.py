@@ -80,6 +80,13 @@ class TerminalUI:
                 "the affected utterance is unreliable",
                 force=True,
             )
+        elif name == "worker_join_timeout":
+            self.line(
+                "WARNING",
+                f"Audio worker did not finish within {data['seconds']:.0f}s; "
+                "shutting down anyway",
+                force=True,
+            )
         elif name in {"utterance_error", "microphone_status"}:
             self.line("WARNING", str(data), force=True)
         elif name == "empty_final_ignored":
