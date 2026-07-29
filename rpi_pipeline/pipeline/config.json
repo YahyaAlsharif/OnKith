@@ -1,0 +1,9 @@
+{
+  "moonshine_script": "moonshine-pi-v2/src/moonshine_pi_live.py",
+  "moonshine_config": "moonshine-pi-v2/config/final_config.json",
+  "tinybert_model": "tinybert_pii_rpi/model_int8.onnx",
+  "tinybert_tokenizer": "tinybert_pii_rpi/tokenizer/tokenizer.json",
+  "tinybert_id2label": "tinybert_pii_rpi/config/id2label.json",
+  "max_length": 256,
+  "confidence_threshold": 0.0
+}
