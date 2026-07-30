@@ -1,0 +1,58 @@
+{
+  "moonshine": {
+    "language": "en",
+    "model_arch": "medium_streaming",
+    "package_version": "0.0.69",
+    "session_policy": "isolated_cached_resources",
+    "rnnoise_enabled": false,
+    "chunk_seconds": 0.1,
+    "update_interval_seconds": 0.25,
+    "vad_threshold": 0.5,
+    "vad_window_duration_seconds": 0.3,
+    "vad_max_segment_duration_seconds": 10.0,
+    "max_tokens_per_second": 6.5
+  },
+  "audio": {
+    "calibration_seconds": 2.0,
+    "pre_roll_seconds": 0.4,
+    "start_confirm_seconds": 0.2,
+    "endpoint_silence_seconds": 2.5,
+    "minimum_speech_seconds": 0.6,
+    "maximum_utterance_seconds": 8.5,
+    "minimum_start_rms": 0.006,
+    "noise_multiplier": 4.0,
+    "continue_ratio": 0.6,
+    "queue_max_chunks": 100,
+    "completed_recording_queue_max": 4,
+    "forced_split_overlap_seconds": 0.35,
+    "trailing_silence_context_seconds": 0.35,
+    "save_debug_audio": false
+  },
+  "buffer": {
+    "inactivity_seconds": 3.0,
+    "maximum_tokens": 256,
+    "maximum_duration_seconds": 15.0
+  },
+  "stage5": {
+    "mode": "immediate"
+  },
+  "storage": {
+    "filename": "session_transcript.db",
+    "journal_mode": "WAL",
+    "synchronous": "NORMAL",
+    "foreign_keys": true,
+    "busy_timeout_ms": 5000
+  },
+  "pii": {
+    "model": "TinyBERT-4 token classifier",
+    "artifact": "models/tinybert_pii/model_int8.onnx",
+    "tokenizer": "models/tinybert_pii/tokenizer",
+    "id2label": "models/tinybert_pii/config/id2label.json",
+    "provider": "CPUExecutionProvider",
+    "context_limit": 512,
+    "overflow_stride": 128,
+    "label_count": 67,
+    "word_policy": "whole_word_union",
+    "structured_enabled": true
+  }
+}
