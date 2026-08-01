@@ -1,0 +1,5 @@
+moonshine-voice==0.0.69
+numpy==2.0.2
+sounddevice==0.5.5
+onnxruntime==1.27.0
+transformers==5.0.0
