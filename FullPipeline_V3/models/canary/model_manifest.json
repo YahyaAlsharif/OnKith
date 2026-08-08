@@ -1,0 +1,34 @@
+{
+  "model_id": "nvidia/canary-180m-flash",
+  "revision": "c770bfa0f70f66ad89dbf9827985f999675943a3",
+  "artifact_file": "canary-180m-flash.nemo",
+  "sha256": "7b97de18b718ef01bf3398715ce8d18486c4d83961e230230b26f5712e112675",
+  "backend": "nemo_cpu_fp32",
+  "precision": "fp32",
+  "device": "cpu",
+  "nemo_version": "2.5.3",
+  "torch_version": "2.7.1",
+  "decoder": {
+    "strategy": "beam",
+    "beam_size": 2,
+    "return_best_hypothesis": true,
+    "temperature": 1.0,
+    "max_generation_delta": 50
+  },
+  "transcription": {
+    "batch_size": 1,
+    "source_lang": "en",
+    "target_lang": "en",
+    "task": "asr",
+    "pnc": "no",
+    "timestamps": false,
+    "timestamp_prompt": "no",
+    "num_workers": 0,
+    "return_hypotheses": true,
+    "enable_chunking": false
+  },
+  "conversion": null,
+  "converted_artifact": null,
+  "physical_pi5_validation": "pending_not_run",
+  "parity_validation": "native_nemo_reference_backend_no_conversion"
+}
