@@ -1,0 +1,103 @@
+{
+  "purpose": "deployment compatibility only; classifier head is random and untrained",
+  "seed": 42,
+  "model": {
+    "id": "microsoft/deberta-v3-xsmall",
+    "resolved_revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+    "architecture": "DebertaV2ForTokenClassification",
+    "total_parameters": 70707907,
+    "backbone_parameters": 70682112,
+    "classification_head_parameters": 25795,
+    "parameter_bytes_fp32": 282831628,
+    "parameter_dtype": "torch.float32",
+    "num_labels": 67,
+    "classifier_is_random_untrained": true
+  },
+  "tokenizer": {
+    "development_class": "DebertaV2Tokenizer",
+    "production_class": "DebertaV2TokenizerFast",
+    "is_fast": true,
+    "vocab_size": 128000,
+    "context_limit_used": 512,
+    "overflow_stride": 128,
+    "tokenizer_json": {
+      "size_bytes": 8339876,
+      "sha256": "e9ddd853a4a31023721c993458663f2019e3154a05dacf0d2b3c217e53d9bdc8"
+    },
+    "tokenizer_config_json": {
+      "size_bytes": 378,
+      "sha256": "ee4e715fb79289f6668f87e67d1af632d498cf69089facfd1781ea8b4577cb3e"
+    },
+    "unusual_probe_count": 7,
+    "original_saved_hf_exact_matches": 7,
+    "saved_hf_raw_tokenizers_exact_matches": 7,
+    "all_offsets_valid": true,
+    "long_probe_window_count": 9,
+    "long_probe_window_lengths": [512, 512, 512, 512, 512, 512, 512, 512, 146],
+    "production_config_normalization": "removed Transformers 5.x runtime-only fields before Transformers 4.53.3 reload"
+  },
+  "fp32_onnx": {
+    "success": true,
+    "exporter": "torch.onnx.export Dynamo",
+    "opset": 17,
+    "size_bytes": 282977091,
+    "sha256": "72dc5d01433686db883037109b2cbe16c0a41dc3c9cddf49b34c76cac2c48e4c",
+    "inputs": ["input_ids", "attention_mask"],
+    "output": "logits",
+    "dynamic_shape": ["batch_size", "sequence_length", 67],
+    "output_dtype": "tensor(float)",
+    "checker_passed": true,
+    "cpu_execution_provider_loaded": true,
+    "initializer_bytes_by_dtype": {
+      "FLOAT": 282831660,
+      "INT64": 216
+    }
+  },
+  "int8_onnx": {
+    "success": true,
+    "method": "ONNX Runtime dynamic quantization",
+    "weight_type": "QInt8",
+    "per_channel": false,
+    "reduce_range": false,
+    "successful_attempt": "standard_dynamic_qint8",
+    "size_bytes": 82276586,
+    "sha256": "0c54ae7eeb4f9615473a38dc8c75623e624213e31b080ee659560cb2b7ae4f09",
+    "checker_passed": true,
+    "cpu_execution_provider_loaded": true,
+    "operator_counts": {
+      "DynamicQuantizeLinear": 49,
+      "MatMulInteger": 49,
+      "MatMul": 96,
+      "Gather": 1,
+      "DequantizeLinear": 1
+    },
+    "initializer_bytes_by_dtype": {
+      "FLOAT": 15188468,
+      "INT8": 17720497,
+      "UINT8": 49190401,
+      "INT64": 216
+    }
+  },
+  "resolved_diagnostics": {
+    "windows_console_encoding": "modern exporter progress marker raised UnicodeEncodeError under the legacy code page",
+    "legacy_quantization": "legacy If subgraphs failed ONNX topological validation under standard, EnableSubgraph and ORT-preprocessed dynamic QInt8",
+    "resolution": "run with PYTHONUTF8=1; modern opset-17 export then standard dynamic QInt8 succeeds",
+    "optimum_retry_needed": false
+  },
+  "production_runtime": {
+    "report": "production_runtime_compat.json",
+    "transformers": "4.53.3",
+    "tokenizers": "0.21.4",
+    "onnxruntime": "1.22.1",
+    "sentencepiece": "0.2.1",
+    "tokenizer_exact_match": true,
+    "fp32_lengths_passed": [75, 221, 289, 512],
+    "int8_lengths_passed": [75, 221, 289, 512]
+  },
+  "benchmark": {
+    "report": "final_benchmark.json",
+    "measurement_scope": "development machine; not Raspberry Pi",
+    "controlled_policy": "one intra-op and one inter-op thread; each model measured in isolation",
+    "default_thread_policy": "separate DeBERTa INT8 run matching FullPipeline_V3 session defaults"
+  }
+}

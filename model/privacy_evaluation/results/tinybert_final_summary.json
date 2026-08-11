@@ -1,0 +1,4051 @@
+{
+  "case_count": 360,
+  "fixture_sha256": "2acdd4022adc0b74659d5823e93bf2b5a9e97e96eeb8ca772a6f7f1ab4f4e438",
+  "note": "Development-host measurements; never interpret latency as Raspberry Pi latency.",
+  "partition": "final",
+  "stages": {
+    "fp32_model": {
+      "by_category": {
+        "contextual_multi_entity": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.6891385767790262,
+            "fn": 68,
+            "fp": 15,
+            "precision": 0.8598130841121495,
+            "recall": 0.575,
+            "tp": 92
+          },
+          "bio_repairs": 5,
+          "case_count": 48,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.041666666666666664,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.9166666666666666,
+            "positive_cases": 48,
+            "predicted_positive_cases": 44
+          },
+          "error_count": 46,
+          "latency_seconds": {
+            "count": 48,
+            "median": 0.03703259999747388,
+            "p95": 0.057587499999499414
+          },
+          "per_entity_type": {
+            "BUILDINGNUM": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 24,
+              "tp": 24
+            },
+            "CITY": {
+              "f1": 0.8311688311688312,
+              "fn": 8,
+              "fp": 5,
+              "precision": 0.8648648648648649,
+              "recall": 0.8,
+              "support": 40,
+              "tp": 32
+            },
+            "DATE": {
+              "f1": 0.10810810810810811,
+              "fn": 30,
+              "fp": 3,
+              "precision": 0.4,
+              "recall": 0.0625,
+              "support": 32,
+              "tp": 2
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 8,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.9032258064516129,
+              "fn": 4,
+              "fp": 2,
+              "precision": 0.9333333333333333,
+              "recall": 0.875,
+              "support": 32,
+              "tp": 28
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 781,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 1232,
+            "private_character_leakage_rate": 0.555745164960182,
+            "private_character_recall": 0.444254835039818,
+            "private_characters": 1758
+          },
+          "typed_entity": {
+            "f1": 0.6441947565543071,
+            "fn": 74,
+            "fp": 21,
+            "precision": 0.8037383177570093,
+            "recall": 0.5375,
+            "tp": 86
+          }
+        },
+        "email": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 60,
+            "fp": 41,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 2,
+          "case_count": 60,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.5166666666666667,
+            "positive_cases": 60,
+            "predicted_positive_cases": 31
+          },
+          "error_count": 60,
+          "latency_seconds": {
+            "count": 60,
+            "median": 0.035301399999298155,
+            "p95": 0.050401799999235664
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 4,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 23,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "EMAIL": {
+              "f1": 0.0,
+              "fn": 60,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 60,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 263,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 990,
+            "private_character_leakage_rate": 0.8884648006785412,
+            "private_character_recall": 0.11153519932145886,
+            "private_characters": 2358
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 60,
+            "fp": 41,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "hard_negatives": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 50,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 7,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.3055555555555556,
+            "hard_negative_cases": 72,
+            "hard_negative_false_positive_case_rate": 0.6944444444444444,
+            "hard_negative_false_positive_cases": 50,
+            "hard_negative_false_positive_spans": 50,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 0,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 50,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.038060900002165,
+            "p95": 0.052290899999206886
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 9,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 10,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 4,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TIME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ZIPCODE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 178,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.04731525784157363,
+            "non_private_characters": 3762,
+            "private_character_leakage_rate": 0.0,
+            "private_character_recall": 0.0,
+            "private_characters": 0
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 50,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "long_window": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 2,
+          "case_count": 24,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.25,
+            "positive_cases": 24,
+            "predicted_positive_cases": 6
+          },
+          "error_count": 24,
+          "latency_seconds": {
+            "count": 24,
+            "median": 1.1348349999971106,
+            "p95": 1.3497637000000395
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 83,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 138240,
+            "private_character_leakage_rate": 0.8462962962962963,
+            "private_character_recall": 0.1537037037037037,
+            "private_characters": 540
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "names": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.8014981273408239,
+            "fn": 37,
+            "fp": 16,
+            "precision": 0.8699186991869918,
+            "recall": 0.7430555555555556,
+            "tp": 107
+          },
+          "bio_repairs": 3,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.625,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.9861111111111112,
+            "positive_cases": 72,
+            "predicted_positive_cases": 71
+          },
+          "error_count": 27,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.03634379999857629,
+            "p95": 0.05309569999735686
+          },
+          "per_entity_type": {
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.6956521739130435,
+              "fn": 24,
+              "fp": 18,
+              "precision": 0.7272727272727273,
+              "recall": 0.6666666666666666,
+              "support": 72,
+              "tp": 48
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.8320000000000001,
+              "fn": 20,
+              "fp": 1,
+              "precision": 0.9811320754716981,
+              "recall": 0.7222222222222222,
+              "support": 72,
+              "tp": 52
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 12,
+            "masked_private_characters": 809,
+            "non_private_character_overmasking_rate": 0.003436426116838488,
+            "non_private_characters": 3492,
+            "private_character_leakage_rate": 0.03113772455089825,
+            "private_character_recall": 0.9688622754491018,
+            "private_characters": 835
+          },
+          "typed_entity": {
+            "f1": 0.7490636704119851,
+            "fn": 44,
+            "fp": 23,
+            "precision": 0.8130081300813008,
+            "recall": 0.6944444444444444,
+            "tp": 100
+          }
+        },
+        "numeric_structured": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.30656934306569344,
+            "fn": 63,
+            "fp": 32,
+            "precision": 0.39622641509433965,
+            "recall": 0.25,
+            "tp": 21
+          },
+          "bio_repairs": 16,
+          "case_count": 84,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.15476190476190477,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.4880952380952381,
+            "positive_cases": 84,
+            "predicted_positive_cases": 41
+          },
+          "error_count": 71,
+          "latency_seconds": {
+            "count": 84,
+            "median": 0.03841489999831538,
+            "p95": 0.0515694000023359
+          },
+          "per_entity_type": {
+            "ACCOUNTNUM": {
+              "f1": 0.0,
+              "fn": 18,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 18,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CREDITCARDNUMBER": {
+              "f1": 0.2857142857142857,
+              "fn": 10,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.16666666666666666,
+              "support": 12,
+              "tp": 2
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.13333333333333333,
+              "fn": 5,
+              "fp": 8,
+              "precision": 0.1111111111111111,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "IDCARDNUM": {
+              "f1": 0.125,
+              "fn": 11,
+              "fp": 3,
+              "precision": 0.25,
+              "recall": 0.08333333333333333,
+              "support": 12,
+              "tp": 1
+            },
+            "PASSPORTNUM": {
+              "f1": 0.6,
+              "fn": 3,
+              "fp": 1,
+              "precision": 0.75,
+              "recall": 0.5,
+              "support": 6,
+              "tp": 3
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 8,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TAXNUM": {
+              "f1": 0.15384615384615383,
+              "fn": 5,
+              "fp": 6,
+              "precision": 0.14285714285714285,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "TELEPHONENUM": {
+              "f1": 0.1935483870967742,
+              "fn": 15,
+              "fp": 10,
+              "precision": 0.23076923076923078,
+              "recall": 0.16666666666666666,
+              "support": 18,
+              "tp": 3
+            },
+            "ZIPCODE": {
+              "f1": 0.4444444444444444,
+              "fn": 4,
+              "fp": 1,
+              "precision": 0.6666666666666666,
+              "recall": 0.3333333333333333,
+              "support": 6,
+              "tp": 2
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 515,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 2376,
+            "private_character_leakage_rate": 0.7905652704351362,
+            "private_character_recall": 0.20943472956486375,
+            "private_characters": 2459
+          },
+          "typed_entity": {
+            "f1": 0.18978102189781024,
+            "fn": 71,
+            "fp": 40,
+            "precision": 0.24528301886792453,
+            "recall": 0.15476190476190477,
+            "tp": 13
+          }
+        }
+      },
+      "overall": {
+        "binary_entity_exact_boundary": {
+          "f1": 0.5158264947245017,
+          "fn": 252,
+          "fp": 161,
+          "precision": 0.5774278215223098,
+          "recall": 0.4661016949152542,
+          "tp": 220
+        },
+        "bio_repairs": 35,
+        "case_count": 360,
+        "case_level": {
+          "blocked_cases": 0,
+          "exact_typed_case_rate": 0.22777777777777777,
+          "hard_negative_cases": 72,
+          "hard_negative_false_positive_case_rate": 0.6944444444444444,
+          "hard_negative_false_positive_cases": 50,
+          "hard_negative_false_positive_spans": 50,
+          "positive_case_detection_recall": 0.6701388888888888,
+          "positive_cases": 288,
+          "predicted_positive_cases": 193
+        },
+        "error_count": 278,
+        "latency_seconds": {
+          "count": 360,
+          "median": 0.037706499999330845,
+          "p95": 1.0844887000021117
+        },
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "f1": 0.0,
+            "fn": 18,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 18,
+            "tp": 0
+          },
+          "AGE": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 11,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "BUILDINGNUM": {
+            "f1": 0.7499999999999999,
+            "fn": 0,
+            "fp": 16,
+            "precision": 0.6,
+            "recall": 1.0,
+            "support": 24,
+            "tp": 24
+          },
+          "CITY": {
+            "f1": 0.5981308411214953,
+            "fn": 8,
+            "fp": 35,
+            "precision": 0.47761194029850745,
+            "recall": 0.8,
+            "support": 40,
+            "tp": 32
+          },
+          "CREDITCARDNUMBER": {
+            "f1": 0.2857142857142857,
+            "fn": 10,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "support": 12,
+            "tp": 2
+          },
+          "DATE": {
+            "f1": 0.10810810810810811,
+            "fn": 30,
+            "fp": 3,
+            "precision": 0.4,
+            "recall": 0.0625,
+            "support": 32,
+            "tp": 2
+          },
+          "DRIVERLICENSENUM": {
+            "f1": 0.09523809523809522,
+            "fn": 5,
+            "fp": 14,
+            "precision": 0.06666666666666667,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "EMAIL": {
+            "f1": 0.0,
+            "fn": 66,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 66,
+            "tp": 0
+          },
+          "GIVENNAME": {
+            "f1": 0.6075949367088608,
+            "fn": 30,
+            "fp": 32,
+            "precision": 0.6,
+            "recall": 0.6153846153846154,
+            "support": 78,
+            "tp": 48
+          },
+          "IDCARDNUM": {
+            "f1": 0.125,
+            "fn": 11,
+            "fp": 3,
+            "precision": 0.25,
+            "recall": 0.08333333333333333,
+            "support": 12,
+            "tp": 1
+          },
+          "ORGANISATION": {
+            "f1": 0.0,
+            "fn": 38,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 38,
+            "tp": 0
+          },
+          "PASSPORTNUM": {
+            "f1": 0.37499999999999994,
+            "fn": 3,
+            "fp": 7,
+            "precision": 0.3,
+            "recall": 0.5,
+            "support": 6,
+            "tp": 3
+          },
+          "SEX": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 8,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "SOCIALNUM": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 14,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "STREET": {
+            "f1": 0.8888888888888888,
+            "fn": 4,
+            "fp": 3,
+            "precision": 0.9032258064516129,
+            "recall": 0.875,
+            "support": 32,
+            "tp": 28
+          },
+          "SURNAME": {
+            "f1": 0.7761194029850746,
+            "fn": 20,
+            "fp": 10,
+            "precision": 0.8387096774193549,
+            "recall": 0.7222222222222222,
+            "support": 72,
+            "tp": 52
+          },
+          "TAXNUM": {
+            "f1": 0.15384615384615383,
+            "fn": 5,
+            "fp": 6,
+            "precision": 0.14285714285714285,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "TELEPHONENUM": {
+            "f1": 0.13953488372093023,
+            "fn": 21,
+            "fp": 16,
+            "precision": 0.15789473684210525,
+            "recall": 0.125,
+            "support": 24,
+            "tp": 3
+          },
+          "TIME": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "ZIPCODE": {
+            "f1": 0.4,
+            "fn": 4,
+            "fp": 2,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "support": 6,
+            "tp": 2
+          }
+        },
+        "privacy_character": {
+          "masked_non_private_characters": 190,
+          "masked_private_characters": 2451,
+          "non_private_character_overmasking_rate": 0.0012658902539775605,
+          "non_private_characters": 150092,
+          "private_character_leakage_rate": 0.6916981132075471,
+          "private_character_recall": 0.30830188679245285,
+          "private_characters": 7950
+        },
+        "typed_entity": {
+          "f1": 0.46658851113716293,
+          "fn": 273,
+          "fp": 182,
+          "precision": 0.5223097112860893,
+          "recall": 0.4216101694915254,
+          "tp": 199
+        }
+      },
+      "result_file": "tinybert_final_fp32_model.json"
+    },
+    "int8_model": {
+      "by_category": {
+        "contextual_multi_entity": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.6571428571428571,
+            "fn": 68,
+            "fp": 28,
+            "precision": 0.7666666666666667,
+            "recall": 0.575,
+            "tp": 92
+          },
+          "bio_repairs": 17,
+          "case_count": 48,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.10416666666666667,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 1.0,
+            "positive_cases": 48,
+            "predicted_positive_cases": 48
+          },
+          "error_count": 43,
+          "latency_seconds": {
+            "count": 48,
+            "median": 0.027893200000107754,
+            "p95": 0.03810639999937848
+          },
+          "per_entity_type": {
+            "BUILDINGNUM": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 24,
+              "tp": 24
+            },
+            "CITY": {
+              "f1": 0.8571428571428571,
+              "fn": 7,
+              "fp": 4,
+              "precision": 0.8918918918918919,
+              "recall": 0.825,
+              "support": 40,
+              "tp": 33
+            },
+            "DATE": {
+              "f1": 0.2745098039215686,
+              "fn": 25,
+              "fp": 12,
+              "precision": 0.3684210526315789,
+              "recall": 0.21875,
+              "support": 32,
+              "tp": 7
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.8064516129032259,
+              "fn": 7,
+              "fp": 5,
+              "precision": 0.8333333333333334,
+              "recall": 0.78125,
+              "support": 32,
+              "tp": 25
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 886,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 1232,
+            "private_character_leakage_rate": 0.4960182025028441,
+            "private_character_recall": 0.5039817974971559,
+            "private_characters": 1758
+          },
+          "typed_entity": {
+            "f1": 0.6357142857142858,
+            "fn": 71,
+            "fp": 31,
+            "precision": 0.7416666666666667,
+            "recall": 0.55625,
+            "tp": 89
+          }
+        },
+        "email": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 60,
+            "fp": 42,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 4,
+          "case_count": 60,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.5,
+            "positive_cases": 60,
+            "predicted_positive_cases": 30
+          },
+          "error_count": 60,
+          "latency_seconds": {
+            "count": 60,
+            "median": 0.026531399998930283,
+            "p95": 0.03517219999775989
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 21,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "EMAIL": {
+              "f1": 0.0,
+              "fn": 60,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 60,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 9,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 269,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 990,
+            "private_character_leakage_rate": 0.8859202714164546,
+            "private_character_recall": 0.11407972858354538,
+            "private_characters": 2358
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 60,
+            "fp": 42,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "hard_negatives": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 47,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 8,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.3472222222222222,
+            "hard_negative_cases": 72,
+            "hard_negative_false_positive_case_rate": 0.6527777777777778,
+            "hard_negative_false_positive_cases": 47,
+            "hard_negative_false_positive_spans": 47,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 0,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 47,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.02456499999971129,
+            "p95": 0.03699929999856977
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 11,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 11,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TIME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ZIPCODE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 9,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 168,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.044657097288676235,
+            "non_private_characters": 3762,
+            "private_character_leakage_rate": 0.0,
+            "private_character_recall": 0.0,
+            "private_characters": 0
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 47,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "long_window": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 1,
+          "case_count": 24,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.20833333333333334,
+            "positive_cases": 24,
+            "predicted_positive_cases": 5
+          },
+          "error_count": 24,
+          "latency_seconds": {
+            "count": 24,
+            "median": 1.0372893999992812,
+            "p95": 1.066962799999601
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 59,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 138240,
+            "private_character_leakage_rate": 0.8907407407407407,
+            "private_character_recall": 0.10925925925925926,
+            "private_characters": 540
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "names": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.8,
+            "fn": 34,
+            "fp": 21,
+            "precision": 0.8396946564885496,
+            "recall": 0.7638888888888888,
+            "tp": 110
+          },
+          "bio_repairs": 11,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.5694444444444444,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.9861111111111112,
+            "positive_cases": 72,
+            "predicted_positive_cases": 71
+          },
+          "error_count": 31,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.025775499998417217,
+            "p95": 0.03627730000152951
+          },
+          "per_entity_type": {
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.7375886524822696,
+              "fn": 20,
+              "fp": 17,
+              "precision": 0.7536231884057971,
+              "recall": 0.7222222222222222,
+              "support": 72,
+              "tp": 52
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.7777777777777779,
+              "fn": 23,
+              "fp": 5,
+              "precision": 0.9074074074074074,
+              "recall": 0.6805555555555556,
+              "support": 72,
+              "tp": 49
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 8,
+            "masked_private_characters": 805,
+            "non_private_character_overmasking_rate": 0.002290950744558992,
+            "non_private_characters": 3492,
+            "private_character_leakage_rate": 0.0359281437125748,
+            "private_character_recall": 0.9640718562874252,
+            "private_characters": 835
+          },
+          "typed_entity": {
+            "f1": 0.7345454545454546,
+            "fn": 43,
+            "fp": 30,
+            "precision": 0.7709923664122137,
+            "recall": 0.7013888888888888,
+            "tp": 101
+          }
+        },
+        "numeric_structured": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.3382352941176471,
+            "fn": 61,
+            "fp": 29,
+            "precision": 0.4423076923076923,
+            "recall": 0.27380952380952384,
+            "tp": 23
+          },
+          "bio_repairs": 16,
+          "case_count": 84,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.14285714285714285,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.5,
+            "positive_cases": 84,
+            "predicted_positive_cases": 42
+          },
+          "error_count": 72,
+          "latency_seconds": {
+            "count": 84,
+            "median": 0.02777810000043246,
+            "p95": 0.03901899999982561
+          },
+          "per_entity_type": {
+            "ACCOUNTNUM": {
+              "f1": 0.0,
+              "fn": 18,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 18,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CREDITCARDNUMBER": {
+              "f1": 0.2857142857142857,
+              "fn": 10,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.16666666666666666,
+              "support": 12,
+              "tp": 2
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.15384615384615383,
+              "fn": 5,
+              "fp": 6,
+              "precision": 0.14285714285714285,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "IDCARDNUM": {
+              "f1": 0.1111111111111111,
+              "fn": 11,
+              "fp": 5,
+              "precision": 0.16666666666666666,
+              "recall": 0.08333333333333333,
+              "support": 12,
+              "tp": 1
+            },
+            "PASSPORTNUM": {
+              "f1": 0.6,
+              "fn": 3,
+              "fp": 1,
+              "precision": 0.75,
+              "recall": 0.5,
+              "support": 6,
+              "tp": 3
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TAXNUM": {
+              "f1": 0.13333333333333333,
+              "fn": 5,
+              "fp": 8,
+              "precision": 0.1111111111111111,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "TELEPHONENUM": {
+              "f1": 0.2,
+              "fn": 15,
+              "fp": 9,
+              "precision": 0.25,
+              "recall": 0.16666666666666666,
+              "support": 18,
+              "tp": 3
+            },
+            "ZIPCODE": {
+              "f1": 0.2222222222222222,
+              "fn": 5,
+              "fp": 2,
+              "precision": 0.3333333333333333,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 532,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 2376,
+            "private_character_leakage_rate": 0.7836518910126067,
+            "private_character_recall": 0.21634810898739326,
+            "private_characters": 2459
+          },
+          "typed_entity": {
+            "f1": 0.17647058823529413,
+            "fn": 72,
+            "fp": 40,
+            "precision": 0.23076923076923078,
+            "recall": 0.14285714285714285,
+            "tp": 12
+          }
+        }
+      },
+      "overall": {
+        "binary_entity_exact_boundary": {
+          "f1": 0.5178365937859609,
+          "fn": 247,
+          "fp": 172,
+          "precision": 0.5667506297229219,
+          "recall": 0.4766949152542373,
+          "tp": 225
+        },
+        "bio_repairs": 57,
+        "case_count": 360,
+        "case_level": {
+          "blocked_cases": 0,
+          "exact_typed_case_rate": 0.23055555555555557,
+          "hard_negative_cases": 72,
+          "hard_negative_false_positive_case_rate": 0.6527777777777778,
+          "hard_negative_false_positive_cases": 47,
+          "hard_negative_false_positive_spans": 47,
+          "positive_case_detection_recall": 0.6805555555555556,
+          "positive_cases": 288,
+          "predicted_positive_cases": 196
+        },
+        "error_count": 277,
+        "latency_seconds": {
+          "count": 360,
+          "median": 0.02703259999907459,
+          "p95": 0.990668900001765
+        },
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "f1": 0.0,
+            "fn": 18,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 18,
+            "tp": 0
+          },
+          "AGE": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 14,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "BUILDINGNUM": {
+            "f1": 0.761904761904762,
+            "fn": 0,
+            "fp": 15,
+            "precision": 0.6153846153846154,
+            "recall": 1.0,
+            "support": 24,
+            "tp": 24
+          },
+          "CITY": {
+            "f1": 0.6226415094339622,
+            "fn": 7,
+            "fp": 33,
+            "precision": 0.5,
+            "recall": 0.825,
+            "support": 40,
+            "tp": 33
+          },
+          "CREDITCARDNUMBER": {
+            "f1": 0.2857142857142857,
+            "fn": 10,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "support": 12,
+            "tp": 2
+          },
+          "DATE": {
+            "f1": 0.2745098039215686,
+            "fn": 25,
+            "fp": 12,
+            "precision": 0.3684210526315789,
+            "recall": 0.21875,
+            "support": 32,
+            "tp": 7
+          },
+          "DRIVERLICENSENUM": {
+            "f1": 0.14285714285714288,
+            "fn": 5,
+            "fp": 7,
+            "precision": 0.125,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "EMAIL": {
+            "f1": 0.0,
+            "fn": 66,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 66,
+            "tp": 0
+          },
+          "GIVENNAME": {
+            "f1": 0.638036809815951,
+            "fn": 26,
+            "fp": 33,
+            "precision": 0.611764705882353,
+            "recall": 0.6666666666666666,
+            "support": 78,
+            "tp": 52
+          },
+          "IDCARDNUM": {
+            "f1": 0.1111111111111111,
+            "fn": 11,
+            "fp": 5,
+            "precision": 0.16666666666666666,
+            "recall": 0.08333333333333333,
+            "support": 12,
+            "tp": 1
+          },
+          "ORGANISATION": {
+            "f1": 0.0,
+            "fn": 38,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 38,
+            "tp": 0
+          },
+          "PASSPORTNUM": {
+            "f1": 0.4,
+            "fn": 3,
+            "fp": 6,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "support": 6,
+            "tp": 3
+          },
+          "SEX": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 6,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "SOCIALNUM": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 10,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "STREET": {
+            "f1": 0.8064516129032259,
+            "fn": 7,
+            "fp": 5,
+            "precision": 0.8333333333333334,
+            "recall": 0.78125,
+            "support": 32,
+            "tp": 25
+          },
+          "SURNAME": {
+            "f1": 0.7368421052631579,
+            "fn": 23,
+            "fp": 12,
+            "precision": 0.8032786885245902,
+            "recall": 0.6805555555555556,
+            "support": 72,
+            "tp": 49
+          },
+          "TAXNUM": {
+            "f1": 0.13333333333333333,
+            "fn": 5,
+            "fp": 8,
+            "precision": 0.1111111111111111,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "TELEPHONENUM": {
+            "f1": 0.13953488372093023,
+            "fn": 21,
+            "fp": 16,
+            "precision": 0.15789473684210525,
+            "recall": 0.125,
+            "support": 24,
+            "tp": 3
+          },
+          "TIME": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "ZIPCODE": {
+            "f1": 0.1111111111111111,
+            "fn": 5,
+            "fp": 11,
+            "precision": 0.08333333333333333,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          }
+        },
+        "privacy_character": {
+          "masked_non_private_characters": 176,
+          "masked_private_characters": 2551,
+          "non_private_character_overmasking_rate": 0.0011726141300002664,
+          "non_private_characters": 150092,
+          "private_character_leakage_rate": 0.6791194968553459,
+          "private_character_recall": 0.3208805031446541,
+          "private_characters": 7950
+        },
+        "typed_entity": {
+          "f1": 0.46490218642117376,
+          "fn": 270,
+          "fp": 195,
+          "precision": 0.5088161209068011,
+          "recall": 0.4279661016949153,
+          "tp": 202
+        }
+      },
+      "result_file": "tinybert_final_int8_model.json"
+    },
+    "production": {
+      "by_category": {
+        "contextual_multi_entity": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.6571428571428571,
+            "fn": 68,
+            "fp": 28,
+            "precision": 0.7666666666666667,
+            "recall": 0.575,
+            "tp": 92
+          },
+          "bio_repairs": 17,
+          "case_count": 48,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.10416666666666667,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 1.0,
+            "positive_cases": 48,
+            "predicted_positive_cases": 48
+          },
+          "error_count": 43,
+          "latency_seconds": {
+            "count": 48,
+            "median": 0.027638600000500446,
+            "p95": 0.04056479999781004
+          },
+          "per_entity_type": {
+            "BUILDINGNUM": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 24,
+              "tp": 24
+            },
+            "CITY": {
+              "f1": 0.8571428571428571,
+              "fn": 7,
+              "fp": 4,
+              "precision": 0.8918918918918919,
+              "recall": 0.825,
+              "support": 40,
+              "tp": 33
+            },
+            "DATE": {
+              "f1": 0.2745098039215686,
+              "fn": 25,
+              "fp": 12,
+              "precision": 0.3684210526315789,
+              "recall": 0.21875,
+              "support": 32,
+              "tp": 7
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.8064516129032259,
+              "fn": 7,
+              "fp": 5,
+              "precision": 0.8333333333333334,
+              "recall": 0.78125,
+              "support": 32,
+              "tp": 25
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 886,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 1232,
+            "private_character_leakage_rate": 0.4960182025028441,
+            "private_character_recall": 0.5039817974971559,
+            "private_characters": 1758
+          },
+          "typed_entity": {
+            "f1": 0.6357142857142858,
+            "fn": 71,
+            "fp": 31,
+            "precision": 0.7416666666666667,
+            "recall": 0.55625,
+            "tp": 89
+          }
+        },
+        "email": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.6504065040650407,
+            "fn": 20,
+            "fp": 23,
+            "precision": 0.6349206349206349,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          },
+          "bio_repairs": 4,
+          "case_count": 60,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.6666666666666666,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.9,
+            "positive_cases": 60,
+            "predicted_positive_cases": 54
+          },
+          "error_count": 20,
+          "latency_seconds": {
+            "count": 60,
+            "median": 0.027254199998424156,
+            "p95": 0.043031500001234235
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 11,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "EMAIL": {
+              "f1": 0.8,
+              "fn": 20,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 60,
+              "tp": 40
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 8,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 1554,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 990,
+            "private_character_leakage_rate": 0.3409669211195929,
+            "private_character_recall": 0.6590330788804071,
+            "private_characters": 2358
+          },
+          "typed_entity": {
+            "f1": 0.6504065040650407,
+            "fn": 20,
+            "fp": 23,
+            "precision": 0.6349206349206349,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          }
+        },
+        "hard_negatives": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 47,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 8,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.3472222222222222,
+            "hard_negative_cases": 72,
+            "hard_negative_false_positive_case_rate": 0.6527777777777778,
+            "hard_negative_false_positive_cases": 47,
+            "hard_negative_false_positive_spans": 47,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 0,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 47,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.02500560000044061,
+            "p95": 0.03640369999993709
+          },
+          "per_entity_type": {
+            "AGE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 11,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 11,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TIME": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ZIPCODE": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 9,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 168,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.044657097288676235,
+            "non_private_characters": 3762,
+            "private_character_leakage_rate": 0.0,
+            "private_character_recall": 0.0,
+            "private_characters": 0
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 47,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "long_window": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.3333333333333333,
+            "fn": 18,
+            "fp": 6,
+            "precision": 0.5,
+            "recall": 0.25,
+            "tp": 6
+          },
+          "bio_repairs": 1,
+          "case_count": 24,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.25,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.5,
+            "positive_cases": 24,
+            "predicted_positive_cases": 12
+          },
+          "error_count": 18,
+          "latency_seconds": {
+            "count": 24,
+            "median": 1.0661209999998391,
+            "p95": 1.20826279999892
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6,
+              "tp": 6
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "NUMERICID": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 5,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 283,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 138240,
+            "private_character_leakage_rate": 0.475925925925926,
+            "private_character_recall": 0.524074074074074,
+            "private_characters": 540
+          },
+          "typed_entity": {
+            "f1": 0.3333333333333333,
+            "fn": 18,
+            "fp": 6,
+            "precision": 0.5,
+            "recall": 0.25,
+            "tp": 6
+          }
+        },
+        "names": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.8,
+            "fn": 34,
+            "fp": 21,
+            "precision": 0.8396946564885496,
+            "recall": 0.7638888888888888,
+            "tp": 110
+          },
+          "bio_repairs": 11,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.5694444444444444,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.9861111111111112,
+            "positive_cases": 72,
+            "predicted_positive_cases": 71
+          },
+          "error_count": 31,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.027413600000727456,
+            "p95": 0.03981250000288128
+          },
+          "per_entity_type": {
+            "CITY": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "GIVENNAME": {
+              "f1": 0.7375886524822696,
+              "fn": 20,
+              "fp": 17,
+              "precision": 0.7536231884057971,
+              "recall": 0.7222222222222222,
+              "support": 72,
+              "tp": 52
+            },
+            "SEX": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.7777777777777779,
+              "fn": 23,
+              "fp": 5,
+              "precision": 0.9074074074074074,
+              "recall": 0.6805555555555556,
+              "support": 72,
+              "tp": 49
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 8,
+            "masked_private_characters": 805,
+            "non_private_character_overmasking_rate": 0.002290950744558992,
+            "non_private_characters": 3492,
+            "private_character_leakage_rate": 0.0359281437125748,
+            "private_character_recall": 0.9640718562874252,
+            "private_characters": 835
+          },
+          "typed_entity": {
+            "f1": 0.7345454545454546,
+            "fn": 43,
+            "fp": 30,
+            "precision": 0.7709923664122137,
+            "recall": 0.7013888888888888,
+            "tp": 101
+          }
+        },
+        "numeric_structured": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.5487804878048781,
+            "fn": 39,
+            "fp": 35,
+            "precision": 0.5625,
+            "recall": 0.5357142857142857,
+            "tp": 45
+          },
+          "bio_repairs": 16,
+          "case_count": 84,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.30952380952380953,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.8333333333333334,
+            "positive_cases": 84,
+            "predicted_positive_cases": 70
+          },
+          "error_count": 58,
+          "latency_seconds": {
+            "count": 84,
+            "median": 0.02832769999804441,
+            "p95": 0.04212790000019595
+          },
+          "per_entity_type": {
+            "ACCOUNTNUM": {
+              "f1": 0.5,
+              "fn": 12,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "support": 18,
+              "tp": 6
+            },
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "CREDITCARDNUMBER": {
+              "f1": 0.2857142857142857,
+              "fn": 10,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.16666666666666666,
+              "support": 12,
+              "tp": 2
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.15384615384615383,
+              "fn": 5,
+              "fp": 6,
+              "precision": 0.14285714285714285,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "IDCARDNUM": {
+              "f1": 0.1111111111111111,
+              "fn": 11,
+              "fp": 5,
+              "precision": 0.16666666666666666,
+              "recall": 0.08333333333333333,
+              "support": 12,
+              "tp": 1
+            },
+            "NUMERICID": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 18,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.6,
+              "fn": 3,
+              "fp": 1,
+              "precision": 0.75,
+              "recall": 0.5,
+              "support": 6,
+              "tp": 3
+            },
+            "SOCIALNUM": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "TAXNUM": {
+              "f1": 0.14285714285714288,
+              "fn": 5,
+              "fp": 7,
+              "precision": 0.125,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            },
+            "TELEPHONENUM": {
+              "f1": 0.6111111111111112,
+              "fn": 7,
+              "fp": 7,
+              "precision": 0.6111111111111112,
+              "recall": 0.6111111111111112,
+              "support": 18,
+              "tp": 11
+            },
+            "ZIPCODE": {
+              "f1": 0.25,
+              "fn": 5,
+              "fp": 1,
+              "precision": 0.5,
+              "recall": 0.16666666666666666,
+              "support": 6,
+              "tp": 1
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 1893,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 2376,
+            "private_character_leakage_rate": 0.23017486783245222,
+            "private_character_recall": 0.7698251321675478,
+            "private_characters": 2459
+          },
+          "typed_entity": {
+            "f1": 0.3170731707317073,
+            "fn": 58,
+            "fp": 54,
+            "precision": 0.325,
+            "recall": 0.30952380952380953,
+            "tp": 26
+          }
+        }
+      },
+      "overall": {
+        "binary_entity_exact_boundary": {
+          "f1": 0.6335135135135135,
+          "fn": 179,
+          "fp": 160,
+          "precision": 0.6467991169977925,
+          "recall": 0.6207627118644068,
+          "tp": 293
+        },
+        "bio_repairs": 57,
+        "case_count": 360,
+        "case_level": {
+          "blocked_cases": 0,
+          "exact_typed_case_rate": 0.3972222222222222,
+          "hard_negative_cases": 72,
+          "hard_negative_false_positive_case_rate": 0.6527777777777778,
+          "hard_negative_false_positive_cases": 47,
+          "hard_negative_false_positive_spans": 47,
+          "positive_case_detection_recall": 0.8854166666666666,
+          "positive_cases": 288,
+          "predicted_positive_cases": 255
+        },
+        "error_count": 217,
+        "latency_seconds": {
+          "count": 360,
+          "median": 0.027395099998102523,
+          "p95": 1.025807400001213
+        },
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "f1": 0.5,
+            "fn": 12,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "support": 18,
+            "tp": 6
+          },
+          "AGE": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 13,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "BUILDINGNUM": {
+            "f1": 0.761904761904762,
+            "fn": 0,
+            "fp": 15,
+            "precision": 0.6153846153846154,
+            "recall": 1.0,
+            "support": 24,
+            "tp": 24
+          },
+          "CITY": {
+            "f1": 0.6875000000000001,
+            "fn": 7,
+            "fp": 23,
+            "precision": 0.5892857142857143,
+            "recall": 0.825,
+            "support": 40,
+            "tp": 33
+          },
+          "CREDITCARDNUMBER": {
+            "f1": 0.2857142857142857,
+            "fn": 10,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "support": 12,
+            "tp": 2
+          },
+          "DATE": {
+            "f1": 0.2745098039215686,
+            "fn": 25,
+            "fp": 12,
+            "precision": 0.3684210526315789,
+            "recall": 0.21875,
+            "support": 32,
+            "tp": 7
+          },
+          "DRIVERLICENSENUM": {
+            "f1": 0.14285714285714288,
+            "fn": 5,
+            "fp": 7,
+            "precision": 0.125,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "EMAIL": {
+            "f1": 0.8214285714285715,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.696969696969697,
+            "support": 66,
+            "tp": 46
+          },
+          "GIVENNAME": {
+            "f1": 0.6419753086419754,
+            "fn": 26,
+            "fp": 32,
+            "precision": 0.6190476190476191,
+            "recall": 0.6666666666666666,
+            "support": 78,
+            "tp": 52
+          },
+          "IDCARDNUM": {
+            "f1": 0.1111111111111111,
+            "fn": 11,
+            "fp": 5,
+            "precision": 0.16666666666666666,
+            "recall": 0.08333333333333333,
+            "support": 12,
+            "tp": 1
+          },
+          "NUMERICID": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 19,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "ORGANISATION": {
+            "f1": 0.0,
+            "fn": 38,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 38,
+            "tp": 0
+          },
+          "PASSPORTNUM": {
+            "f1": 0.4,
+            "fn": 3,
+            "fp": 6,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "support": 6,
+            "tp": 3
+          },
+          "SEX": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 6,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "SOCIALNUM": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 10,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "STREET": {
+            "f1": 0.8064516129032259,
+            "fn": 7,
+            "fp": 5,
+            "precision": 0.8333333333333334,
+            "recall": 0.78125,
+            "support": 32,
+            "tp": 25
+          },
+          "SURNAME": {
+            "f1": 0.765625,
+            "fn": 23,
+            "fp": 7,
+            "precision": 0.875,
+            "recall": 0.6805555555555556,
+            "support": 72,
+            "tp": 49
+          },
+          "TAXNUM": {
+            "f1": 0.14285714285714288,
+            "fn": 5,
+            "fp": 7,
+            "precision": 0.125,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          },
+          "TELEPHONENUM": {
+            "f1": 0.4680851063829787,
+            "fn": 13,
+            "fp": 12,
+            "precision": 0.4782608695652174,
+            "recall": 0.4583333333333333,
+            "support": 24,
+            "tp": 11
+          },
+          "TIME": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "ZIPCODE": {
+            "f1": 0.11764705882352942,
+            "fn": 5,
+            "fp": 10,
+            "precision": 0.09090909090909091,
+            "recall": 0.16666666666666666,
+            "support": 6,
+            "tp": 1
+          }
+        },
+        "privacy_character": {
+          "masked_non_private_characters": 176,
+          "masked_private_characters": 5421,
+          "non_private_character_overmasking_rate": 0.0011726141300002664,
+          "non_private_characters": 150092,
+          "private_character_leakage_rate": 0.31811320754716976,
+          "private_character_recall": 0.6818867924528302,
+          "private_characters": 7950
+        },
+        "typed_entity": {
+          "f1": 0.5664864864864864,
+          "fn": 210,
+          "fp": 191,
+          "precision": 0.5783664459161147,
+          "recall": 0.5550847457627118,
+          "tp": 262
+        }
+      },
+      "result_file": "tinybert_final_production.json"
+    },
+    "structured": {
+      "by_category": {
+        "contextual_multi_entity": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 160,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 48,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 48,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 48,
+          "latency_seconds": {
+            "count": 48,
+            "median": 6.38999990769662e-05,
+            "p95": 9.869999848888256e-05
+          },
+          "per_entity_type": {
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 24,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 24,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 40,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 40,
+              "tp": 0
+            },
+            "DATE": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 1232,
+            "private_character_leakage_rate": 1.0,
+            "private_character_recall": 0.0,
+            "private_characters": 1758
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 160,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "email": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.8,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          },
+          "bio_repairs": 0,
+          "case_count": 60,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.6666666666666666,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.6666666666666666,
+            "positive_cases": 60,
+            "predicted_positive_cases": 40
+          },
+          "error_count": 20,
+          "latency_seconds": {
+            "count": 60,
+            "median": 9.180000051856041e-05,
+            "p95": 0.00013559999933931977
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 0.8,
+              "fn": 20,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 60,
+              "tp": 40
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 1420,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 990,
+            "private_character_leakage_rate": 0.39779474130619163,
+            "private_character_recall": 0.6022052586938084,
+            "private_characters": 2358
+          },
+          "typed_entity": {
+            "f1": 0.8,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          }
+        },
+        "hard_negatives": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 1.0,
+            "hard_negative_cases": 72,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 0,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 0,
+          "latency_seconds": {
+            "count": 72,
+            "median": 5.650000093737617e-05,
+            "p95": 7.689999983995222e-05
+          },
+          "per_entity_type": {},
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 3762,
+            "private_character_leakage_rate": 0.0,
+            "private_character_recall": 0.0,
+            "private_characters": 0
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "long_window": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.4,
+            "fn": 18,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.25,
+            "tp": 6
+          },
+          "bio_repairs": 0,
+          "case_count": 24,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.25,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.25,
+            "positive_cases": 24,
+            "predicted_positive_cases": 6
+          },
+          "error_count": 18,
+          "latency_seconds": {
+            "count": 24,
+            "median": 0.0029408999980660155,
+            "p95": 0.003615700003138045
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6,
+              "tp": 6
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 210,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 138240,
+            "private_character_leakage_rate": 0.6111111111111112,
+            "private_character_recall": 0.3888888888888889,
+            "private_characters": 540
+          },
+          "typed_entity": {
+            "f1": 0.4,
+            "fn": 18,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.25,
+            "tp": 6
+          }
+        },
+        "names": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 144,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 72,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 72,
+          "latency_seconds": {
+            "count": 72,
+            "median": 6.219999704626389e-05,
+            "p95": 8.969999908003956e-05
+          },
+          "per_entity_type": {
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 72,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 72,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 72,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 72,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 3492,
+            "private_character_leakage_rate": 1.0,
+            "private_character_recall": 0.0,
+            "private_characters": 835
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 144,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "numeric_structured": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.13333333333333333,
+            "fn": 78,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.07142857142857142,
+            "tp": 6
+          },
+          "bio_repairs": 0,
+          "case_count": 84,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.07142857142857142,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.07142857142857142,
+            "positive_cases": 84,
+            "predicted_positive_cases": 6
+          },
+          "error_count": 78,
+          "latency_seconds": {
+            "count": 84,
+            "median": 6.260000009206124e-05,
+            "p95": 0.0001449999981559813
+          },
+          "per_entity_type": {
+            "ACCOUNTNUM": {
+              "f1": 0.19999999999999998,
+              "fn": 16,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.1111111111111111,
+              "support": 18,
+              "tp": 2
+            },
+            "CREDITCARDNUMBER": {
+              "f1": 0.0,
+              "fn": 12,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 12,
+              "tp": 0
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "IDCARDNUM": {
+              "f1": 0.0,
+              "fn": 12,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 12,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TAXNUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.3636363636363636,
+              "fn": 14,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "support": 18,
+              "tp": 4
+            },
+            "ZIPCODE": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 228,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 2376,
+            "private_character_leakage_rate": 0.9072793818625458,
+            "private_character_recall": 0.09272061813745425,
+            "private_characters": 2459
+          },
+          "typed_entity": {
+            "f1": 0.13333333333333333,
+            "fn": 78,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.07142857142857142,
+            "tp": 6
+          }
+        }
+      },
+      "overall": {
+        "binary_entity_exact_boundary": {
+          "f1": 0.1984732824427481,
+          "fn": 420,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 0.11016949152542373,
+          "tp": 52
+        },
+        "bio_repairs": 0,
+        "case_count": 360,
+        "case_level": {
+          "blocked_cases": 0,
+          "exact_typed_case_rate": 0.34444444444444444,
+          "hard_negative_cases": 72,
+          "hard_negative_false_positive_case_rate": 0.0,
+          "hard_negative_false_positive_cases": 0,
+          "hard_negative_false_positive_spans": 0,
+          "positive_case_detection_recall": 0.18055555555555555,
+          "positive_cases": 288,
+          "predicted_positive_cases": 52
+        },
+        "error_count": 236,
+        "latency_seconds": {
+          "count": 360,
+          "median": 6.439999924623407e-05,
+          "p95": 0.0028100000017730054
+        },
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "f1": 0.19999999999999998,
+            "fn": 16,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.1111111111111111,
+            "support": 18,
+            "tp": 2
+          },
+          "BUILDINGNUM": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 24,
+            "tp": 0
+          },
+          "CITY": {
+            "f1": 0.0,
+            "fn": 40,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 40,
+            "tp": 0
+          },
+          "CREDITCARDNUMBER": {
+            "f1": 0.0,
+            "fn": 12,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 12,
+            "tp": 0
+          },
+          "DATE": {
+            "f1": 0.0,
+            "fn": 32,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 32,
+            "tp": 0
+          },
+          "DRIVERLICENSENUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "EMAIL": {
+            "f1": 0.8214285714285715,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.696969696969697,
+            "support": 66,
+            "tp": 46
+          },
+          "GIVENNAME": {
+            "f1": 0.0,
+            "fn": 78,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 78,
+            "tp": 0
+          },
+          "IDCARDNUM": {
+            "f1": 0.0,
+            "fn": 12,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 12,
+            "tp": 0
+          },
+          "ORGANISATION": {
+            "f1": 0.0,
+            "fn": 38,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 38,
+            "tp": 0
+          },
+          "PASSPORTNUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "STREET": {
+            "f1": 0.0,
+            "fn": 32,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 32,
+            "tp": 0
+          },
+          "SURNAME": {
+            "f1": 0.0,
+            "fn": 72,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 72,
+            "tp": 0
+          },
+          "TAXNUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "TELEPHONENUM": {
+            "f1": 0.2857142857142857,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "support": 24,
+            "tp": 4
+          },
+          "ZIPCODE": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          }
+        },
+        "privacy_character": {
+          "masked_non_private_characters": 0,
+          "masked_private_characters": 1858,
+          "non_private_character_overmasking_rate": 0.0,
+          "non_private_characters": 150092,
+          "private_character_leakage_rate": 0.7662893081761006,
+          "private_character_recall": 0.23371069182389936,
+          "private_characters": 7950
+        },
+        "typed_entity": {
+          "f1": 0.1984732824427481,
+          "fn": 420,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 0.11016949152542373,
+          "tp": 52
+        }
+      },
+      "result_file": "tinybert_final_structured.json"
+    },
+    "structured_supplemental": {
+      "by_category": {
+        "contextual_multi_entity": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 160,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 48,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 48,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 48,
+          "latency_seconds": {
+            "count": 48,
+            "median": 0.00019780000002356246,
+            "p95": 0.0003781000013987068
+          },
+          "per_entity_type": {
+            "BUILDINGNUM": {
+              "f1": 0.0,
+              "fn": 24,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 24,
+              "tp": 0
+            },
+            "CITY": {
+              "f1": 0.0,
+              "fn": 40,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 40,
+              "tp": 0
+            },
+            "DATE": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            },
+            "STREET": {
+              "f1": 0.0,
+              "fn": 32,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 32,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 1232,
+            "private_character_leakage_rate": 1.0,
+            "private_character_recall": 0.0,
+            "private_characters": 1758
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 160,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "email": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.8,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          },
+          "bio_repairs": 0,
+          "case_count": 60,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.6666666666666666,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.6666666666666666,
+            "positive_cases": 60,
+            "predicted_positive_cases": 40
+          },
+          "error_count": 20,
+          "latency_seconds": {
+            "count": 60,
+            "median": 0.00021430000197142363,
+            "p95": 0.0005208999973547179
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 0.8,
+              "fn": 20,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 60,
+              "tp": 40
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 1420,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 990,
+            "private_character_leakage_rate": 0.39779474130619163,
+            "private_character_recall": 0.6022052586938084,
+            "private_characters": 2358
+          },
+          "typed_entity": {
+            "f1": 0.8,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "tp": 40
+          }
+        },
+        "hard_negatives": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 1.0,
+            "hard_negative_cases": 72,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 0,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 0,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.00016980000145849772,
+            "p95": 0.0003414999991946388
+          },
+          "per_entity_type": {},
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 3762,
+            "private_character_leakage_rate": 0.0,
+            "private_character_recall": 0.0,
+            "private_characters": 0
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "long_window": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.3333333333333333,
+            "fn": 18,
+            "fp": 6,
+            "precision": 0.5,
+            "recall": 0.25,
+            "tp": 6
+          },
+          "bio_repairs": 0,
+          "case_count": 24,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.25,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.5,
+            "positive_cases": 24,
+            "predicted_positive_cases": 12
+          },
+          "error_count": 18,
+          "latency_seconds": {
+            "count": 24,
+            "median": 0.009252800002286676,
+            "p95": 0.01010590000078082
+          },
+          "per_entity_type": {
+            "EMAIL": {
+              "f1": 1.0,
+              "fn": 0,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6,
+              "tp": 6
+            },
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "NUMERICID": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "ORGANISATION": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 294,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 138240,
+            "private_character_leakage_rate": 0.4555555555555556,
+            "private_character_recall": 0.5444444444444444,
+            "private_characters": 540
+          },
+          "typed_entity": {
+            "f1": 0.3333333333333333,
+            "fn": 18,
+            "fp": 6,
+            "precision": 0.5,
+            "recall": 0.25,
+            "tp": 6
+          }
+        },
+        "names": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.0,
+            "fn": 144,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "bio_repairs": 0,
+          "case_count": 72,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.0,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.0,
+            "positive_cases": 72,
+            "predicted_positive_cases": 0
+          },
+          "error_count": 72,
+          "latency_seconds": {
+            "count": 72,
+            "median": 0.000180200000613695,
+            "p95": 0.0003125000002910383
+          },
+          "per_entity_type": {
+            "GIVENNAME": {
+              "f1": 0.0,
+              "fn": 72,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 72,
+              "tp": 0
+            },
+            "SURNAME": {
+              "f1": 0.0,
+              "fn": 72,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 72,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 0,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 3492,
+            "private_character_leakage_rate": 1.0,
+            "private_character_recall": 0.0,
+            "private_characters": 835
+          },
+          "typed_entity": {
+            "f1": 0.0,
+            "fn": 144,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "tp": 0
+          }
+        },
+        "numeric_structured": {
+          "binary_entity_exact_boundary": {
+            "f1": 0.4647887323943662,
+            "fn": 51,
+            "fp": 25,
+            "precision": 0.5689655172413793,
+            "recall": 0.39285714285714285,
+            "tp": 33
+          },
+          "bio_repairs": 0,
+          "case_count": 84,
+          "case_level": {
+            "blocked_cases": 0,
+            "exact_typed_case_rate": 0.16666666666666666,
+            "hard_negative_cases": 0,
+            "hard_negative_false_positive_case_rate": 0.0,
+            "hard_negative_false_positive_cases": 0,
+            "hard_negative_false_positive_spans": 0,
+            "positive_case_detection_recall": 0.6904761904761905,
+            "positive_cases": 84,
+            "predicted_positive_cases": 58
+          },
+          "error_count": 70,
+          "latency_seconds": {
+            "count": 84,
+            "median": 0.0002443000012135599,
+            "p95": 0.0004519000030995812
+          },
+          "per_entity_type": {
+            "ACCOUNTNUM": {
+              "f1": 0.5,
+              "fn": 12,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "support": 18,
+              "tp": 6
+            },
+            "CREDITCARDNUMBER": {
+              "f1": 0.0,
+              "fn": 12,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 12,
+              "tp": 0
+            },
+            "DRIVERLICENSENUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "IDCARDNUM": {
+              "f1": 0.0,
+              "fn": 12,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 12,
+              "tp": 0
+            },
+            "NUMERICID": {
+              "f1": 0.0,
+              "fn": 0,
+              "fp": 44,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 0,
+              "tp": 0
+            },
+            "PASSPORTNUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TAXNUM": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            },
+            "TELEPHONENUM": {
+              "f1": 0.6153846153846153,
+              "fn": 10,
+              "fp": 0,
+              "precision": 1.0,
+              "recall": 0.4444444444444444,
+              "support": 18,
+              "tp": 8
+            },
+            "ZIPCODE": {
+              "f1": 0.0,
+              "fn": 6,
+              "fp": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 6,
+              "tp": 0
+            }
+          },
+          "privacy_character": {
+            "masked_non_private_characters": 0,
+            "masked_private_characters": 1783,
+            "non_private_character_overmasking_rate": 0.0,
+            "non_private_characters": 2376,
+            "private_character_leakage_rate": 0.27490849938999595,
+            "private_character_recall": 0.725091500610004,
+            "private_characters": 2459
+          },
+          "typed_entity": {
+            "f1": 0.19718309859154928,
+            "fn": 70,
+            "fp": 44,
+            "precision": 0.2413793103448276,
+            "recall": 0.16666666666666666,
+            "tp": 14
+          }
+        }
+      },
+      "overall": {
+        "binary_entity_exact_boundary": {
+          "f1": 0.27147766323024053,
+          "fn": 393,
+          "fp": 31,
+          "precision": 0.7181818181818181,
+          "recall": 0.1673728813559322,
+          "tp": 79
+        },
+        "bio_repairs": 0,
+        "case_count": 360,
+        "case_level": {
+          "blocked_cases": 0,
+          "exact_typed_case_rate": 0.36666666666666664,
+          "hard_negative_cases": 72,
+          "hard_negative_false_positive_case_rate": 0.0,
+          "hard_negative_false_positive_cases": 0,
+          "hard_negative_false_positive_spans": 0,
+          "positive_case_detection_recall": 0.3819444444444444,
+          "positive_cases": 288,
+          "predicted_positive_cases": 110
+        },
+        "error_count": 228,
+        "latency_seconds": {
+          "count": 360,
+          "median": 0.0002009999989240896,
+          "p95": 0.008660999999847263
+        },
+        "per_entity_type": {
+          "ACCOUNTNUM": {
+            "f1": 0.5,
+            "fn": 12,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "support": 18,
+            "tp": 6
+          },
+          "BUILDINGNUM": {
+            "f1": 0.0,
+            "fn": 24,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 24,
+            "tp": 0
+          },
+          "CITY": {
+            "f1": 0.0,
+            "fn": 40,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 40,
+            "tp": 0
+          },
+          "CREDITCARDNUMBER": {
+            "f1": 0.0,
+            "fn": 12,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 12,
+            "tp": 0
+          },
+          "DATE": {
+            "f1": 0.0,
+            "fn": 32,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 32,
+            "tp": 0
+          },
+          "DRIVERLICENSENUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "EMAIL": {
+            "f1": 0.8214285714285715,
+            "fn": 20,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.696969696969697,
+            "support": 66,
+            "tp": 46
+          },
+          "GIVENNAME": {
+            "f1": 0.0,
+            "fn": 78,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 78,
+            "tp": 0
+          },
+          "IDCARDNUM": {
+            "f1": 0.0,
+            "fn": 12,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 12,
+            "tp": 0
+          },
+          "NUMERICID": {
+            "f1": 0.0,
+            "fn": 0,
+            "fp": 50,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 0,
+            "tp": 0
+          },
+          "ORGANISATION": {
+            "f1": 0.0,
+            "fn": 38,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 38,
+            "tp": 0
+          },
+          "PASSPORTNUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "STREET": {
+            "f1": 0.0,
+            "fn": 32,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 32,
+            "tp": 0
+          },
+          "SURNAME": {
+            "f1": 0.0,
+            "fn": 72,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 72,
+            "tp": 0
+          },
+          "TAXNUM": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          },
+          "TELEPHONENUM": {
+            "f1": 0.5,
+            "fn": 16,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "support": 24,
+            "tp": 8
+          },
+          "ZIPCODE": {
+            "f1": 0.0,
+            "fn": 6,
+            "fp": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 6,
+            "tp": 0
+          }
+        },
+        "privacy_character": {
+          "masked_non_private_characters": 0,
+          "masked_private_characters": 3497,
+          "non_private_character_overmasking_rate": 0.0,
+          "non_private_characters": 150092,
+          "private_character_leakage_rate": 0.560125786163522,
+          "private_character_recall": 0.439874213836478,
+          "private_characters": 7950
+        },
+        "typed_entity": {
+          "f1": 0.20618556701030927,
+          "fn": 412,
+          "fp": 50,
+          "precision": 0.5454545454545454,
+          "recall": 0.1271186440677966,
+          "tp": 60
+        }
+      },
+      "result_file": "tinybert_final_structured_supplemental.json"
+    }
+  }
+}

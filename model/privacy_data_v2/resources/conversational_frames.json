@@ -1,0 +1,10 @@
+[
+  {"prefix": "um could you note that ", "suffix": " thanks", "family": "filler_request"},
+  {"prefix": "okay so ", "suffix": " is what I meant", "family": "self_correction"},
+  {"prefix": "please remember ", "suffix": " for later", "family": "assistant_request"},
+  {"prefix": "I think the detail was ", "suffix": " but let me check", "family": "uncertain_recall"},
+  {"prefix": "hey Onkith ", "suffix": "", "family": "wake_word"},
+  {"prefix": "right right ", "suffix": " okay", "family": "repetition"},
+  {"prefix": "the transcript should say ", "suffix": " exactly", "family": "dictation"},
+  {"prefix": "without punctuation ", "suffix": " please", "family": "asr_style"}
+]

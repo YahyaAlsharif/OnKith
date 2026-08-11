@@ -1,0 +1,19 @@
+{
+  "TELEPHONENUM": [
+    {"region": "GB", "value": "0117 496 0182", "family": "spaced_local"},
+    {"region": "SA", "value": "+966 55 123 4567", "family": "international_spaced"},
+    {"region": "JP", "value": "+81-3-1234-5678", "family": "international_hyphenated"}
+  ],
+  "IDCARDNUM": [
+    {"region": "synthetic", "value": "QX-77device-2291", "family": "mixed_alphanumeric"},
+    {"region": "synthetic", "value": "ID KSA 2049 7712", "family": "spaced_prefixed"}
+  ],
+  "PASSPORTNUM": [
+    {"region": "synthetic", "value": "L898902C3", "family": "compact_alphanumeric"},
+    {"region": "synthetic", "value": "N42-771-AX", "family": "hyphenated_alphanumeric"}
+  ],
+  "ACCOUNTNUM": [
+    {"region": "GB", "value": "GB82 WEST 1234 5698 7654 32", "family": "iban_spaced"},
+    {"region": "SA", "value": "SA0380000000608010167519", "family": "iban_compact"}
+  ]
+}

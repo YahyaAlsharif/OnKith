@@ -1,0 +1,154 @@
+{
+  "report_version": 1,
+  "dataset": {
+    "name": "ai4privacy/pii-masking-openpii-1.5m",
+    "revision": "a785eb528e28be2693c3718a27e066970de5dadb",
+    "language": "en"
+  },
+  "provenance": {
+    "counts": "Executed outputs in model/TinyBERT-4/pii_masking_TinyBERT-4.ipynb at the pinned dataset revision",
+    "surface_audit": "Read-only cached Arrow audit at the same pinned revision",
+    "full_rerun_status": "Not claimed; offline full-source reruns exceeded the bounded development-machine audit window",
+    "cache_indices_verified": {
+      "official_english_train": 163740,
+      "official_english_validation": 40909,
+      "project_train": 147366,
+      "project_validation": 16374
+    }
+  },
+  "historical_split": {
+    "seed": 42,
+    "validation_fraction": 0.1,
+    "official_english_train_rows": 163740,
+    "official_english_validation_rows": 40909,
+    "project_train_rows": 147366,
+    "project_validation_rows": 16374,
+    "scored_final_rows": 40908,
+    "unsupported_final_types": ["HEIGHT"],
+    "excluded_final_rows": 1,
+    "empty_mask_rows": {
+      "official_english_train": 44,
+      "project_train": 39,
+      "project_validation": 5,
+      "scored_final": 9
+    }
+  },
+  "project_train_span_counts": {
+    "ACCOUNTNUM": 1,
+    "AGE": 54531,
+    "ALLERGIES": 3,
+    "AMOUNT": 14,
+    "BANKNAME": 4,
+    "BUILDINGNUM": 52686,
+    "CITY": 77306,
+    "COUNTRY": 9,
+    "CREDITCARDNUMBER": 34092,
+    "CURRENCY": 15,
+    "DATE": 134599,
+    "DRIVERLICENSENUM": 31200,
+    "EMAIL": 82477,
+    "GENDER": 30361,
+    "GIVENNAME": 135626,
+    "IDCARDNUM": 36657,
+    "IPV4": 2,
+    "ORGANISATION": 18,
+    "PASSPORTNUM": 22723,
+    "SALARY": 2,
+    "SEX": 21483,
+    "SOCIALNUM": 24539,
+    "STREET": 55219,
+    "SURNAME": 115723,
+    "TAXNUM": 27777,
+    "TELEPHONENUM": 60254,
+    "TIME": 1848,
+    "TIMEZONE": 2,
+    "TITLE": 76206,
+    "URL": 4,
+    "USERNAME": 16,
+    "WEIGHT": 1,
+    "ZIPCODE": 47289
+  },
+  "rare_labels": {
+    "singleton": ["ACCOUNTNUM", "WEIGHT"],
+    "fewer_than_10": [
+      "ACCOUNTNUM",
+      "ALLERGIES",
+      "BANKNAME",
+      "COUNTRY",
+      "IPV4",
+      "SALARY",
+      "TIMEZONE",
+      "URL",
+      "WEIGHT"
+    ],
+    "fewer_than_100": [
+      "ACCOUNTNUM",
+      "ALLERGIES",
+      "AMOUNT",
+      "BANKNAME",
+      "COUNTRY",
+      "CURRENCY",
+      "IPV4",
+      "ORGANISATION",
+      "SALARY",
+      "TIMEZONE",
+      "URL",
+      "USERNAME",
+      "WEIGHT"
+    ]
+  },
+  "official_english_training_surface_audit": {
+    "email": {
+      "span_count": 91656,
+      "unique_domains": 7,
+      "domains": {
+        "outlook.com": 13170,
+        "yahoo.com": 13168,
+        "hotmail.com": 13153,
+        "aol.com": 13151,
+        "gmail.com": 13150,
+        "tutanota.com": 12955,
+        "protonmail.com": 12909
+      }
+    },
+    "name_case": {
+      "GIVENNAME": {
+        "title": 150636,
+        "mixed": 85,
+        "lower": 0,
+        "total": 150721
+      },
+      "SURNAME": {
+        "title": 125382,
+        "mixed": 3124,
+        "lower": 4,
+        "upper": 1,
+        "total": 128511
+      }
+    },
+    "source_dataset_rows": {
+      "base": 143515,
+      "asia-pacific": 20225
+    },
+    "region_rows": {
+      "US": 35787,
+      "CA": 36077,
+      "GB": 35830,
+      "IN": 35821,
+      "SG": 20225
+    }
+  },
+  "findings": [
+    "The historical split balances entity presence but not values, domains, formatting families, templates, regions, or generators.",
+    "Only 44 of 163,740 official English training rows contain no PII, so hard-negative coverage is effectively absent.",
+    "The official English training distribution contains only seven email domains.",
+    "Lowercase names are virtually absent even though the deployed tokenizer is uncased; controlled minimal pairs are required to separate tokenizer invariance from context and surface-family effects.",
+    "Thirteen project-training labels have fewer than 100 spans and must not receive unsupported performance claims."
+  ],
+  "policy": {
+    "rare_labels": "Do not treat duplication or oversampling of one or two source examples as genuine coverage.",
+    "iid": "Preserve the official validation split for historical continuity.",
+    "ood_final": "Never load frozen OOD-final fixtures through this data-preparation package.",
+    "grouped_holdouts": "Declare and audit one held-out factor at a time."
+  }
+}

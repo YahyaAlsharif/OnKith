@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "status": "frozen_from_existing_artifacts_not_recomputed",
+  "dataset": {
+    "name": "ai4privacy/pii-masking-openpii-1.5m",
+    "revision": "a785eb528e28be2693c3718a27e066970de5dadb",
+    "scored_final_test_rows": 40908,
+    "true_spans": 311477,
+    "note": "Official English validation after excluding the single HEIGHT row unsupported by the 67-label training ontology."
+  },
+  "sources": [
+    {
+      "path": "../../TinyBERT-4/artifacts/tinybert_pii/metrics/all_final_metrics.json",
+      "sha256": "87607903c89076ff770e143f0502d5420e7bc47c5f873b66f3b7bb4d74da4ba1"
+    },
+    {
+      "path": "../../TinyBERT-4/artifacts/tinybert_pii/metrics/final_test_fp32_pytorch.json",
+      "sha256": "e89910efb0aeaf4635c3d18f07355bcb3fef4db692eebb79f0c9c1fc9a7c2006"
+    },
+    {
+      "path": "../../TinyBERT-4/artifacts/tinybert_pii/metrics/onnx_quality_and_benchmark.json",
+      "sha256": "7b2a2d7170f2dfcf8a2d648c0a1371de5dcd236b2520094ca7e2155d888bd2de"
+    }
+  ],
+  "pytorch_fp32": {
+    "pii_token_micro_precision": 0.9727174403013985,
+    "pii_token_micro_recall": 0.9734646815502357,
+    "pii_token_micro_f1": 0.9730909174732908,
+    "typed_entity_precision": 0.9526932755709872,
+    "typed_entity_recall": 0.9603379239703177,
+    "typed_entity_f1": 0.9565003254120419,
+    "private_character_recall": 0.9972773649037285,
+    "private_character_leakage_rate": 0.002722635096271464,
+    "non_private_character_overmasking_rate": 0.0009567836500393957,
+    "exact_span_recall": 0.9686493705795292,
+    "invalid_bio_transitions_repaired": 1811
+  },
+  "onnx_fp32": {
+    "model_size_mib": 54.49426746368408,
+    "pii_token_micro_precision": 0.9727145796013995,
+    "pii_token_micro_recall": 0.9734625196373752,
+    "pii_token_micro_f1": 0.9730884059030676,
+    "typed_entity_precision": 0.9527025305165515,
+    "typed_entity_recall": 0.9603411349544522,
+    "typed_entity_f1": 0.9565065826189437,
+    "private_character_recall": 0.9972761312675272,
+    "private_character_leakage_rate": 0.0027238687324727673,
+    "non_private_character_overmasking_rate": 0.0009573144102002903,
+    "exact_span_recall": 0.9686557915993798,
+    "invalid_bio_transitions_repaired": 1809,
+    "batch_size_one_median_latency_ms": 130.49060000048485
+  },
+  "onnx_int8": {
+    "model_size_mib": 13.72033405303955,
+    "pii_token_micro_precision": 0.9690430311009314,
+    "pii_token_micro_recall": 0.9701540723231915,
+    "pii_token_micro_f1": 0.9695982334327603,
+    "typed_entity_precision": 0.9435751285481508,
+    "typed_entity_recall": 0.9557397946896744,
+    "typed_entity_f1": 0.9496185057036707,
+    "private_character_recall": 0.9968866106369665,
+    "private_character_leakage_rate": 0.003113389363033514,
+    "non_private_character_overmasking_rate": 0.0011531649095704107,
+    "exact_span_recall": 0.9653714399458065,
+    "invalid_bio_transitions_repaired": 2435,
+    "batch_size_one_median_latency_ms": 120.03429999458604,
+    "selected_per_entity_f1": {
+      "DRIVERLICENSENUM": 0.8671419313026572,
+      "EMAIL": 0.998188682539336,
+      "GIVENNAME": 0.8726844275708581,
+      "IDCARDNUM": 0.8816878754907991,
+      "PASSPORTNUM": 0.9371973005160777,
+      "SURNAME": 0.8611380312889381,
+      "TELEPHONENUM": 0.9934702600023745,
+      "TIME": 0.9200863930885529
+    },
+    "unsupported_or_too_rare_zero_f1": {
+      "ACCOUNTNUM": 1,
+      "AMOUNT": 2,
+      "BANKNAME": 1,
+      "COUNTRY": 2,
+      "ORGANISATION": 4,
+      "URL": 5,
+      "USERNAME": 9,
+      "WEIGHT": 1
+    }
+  },
+  "int8_minus_fp32": {
+    "pii_token_micro_f1": -0.003490172470307251,
+    "typed_entity_f1": -0.006888076915273045,
+    "private_character_leakage_rate": 0.0003895206305607468,
+    "model_size_mib": -40.77393341064453,
+    "batch_size_one_mean_latency_ms": -14.289508000365458
+  },
+  "continuity_rule": "These numbers are historical IID continuity metrics. Do not overwrite them with OOD results or compare them as if both sets came from one distribution."
+}

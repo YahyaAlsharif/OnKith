@@ -1,0 +1,12 @@
+{
+  "local_parts": [
+    "first.last", "first-last", "first_last", "first+receipts", "x9.y_test",
+    "ops+pi", "contact", "billing.eu", "a.b.c", "team-42"
+  ],
+  "domains": [
+    "example.com", "example.org", "example.travel", "example.museum",
+    "northwind-consulting.co.uk", "alerts.lab.example", "subunit.example.cloud",
+    "alumni.example.edu", "service.example.photography", "xn--bcher-kva.example"
+  ],
+  "note": "Reserved example domains and synthetic subdomains prevent accidental use of real addresses."
+}

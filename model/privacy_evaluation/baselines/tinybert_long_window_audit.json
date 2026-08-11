@@ -1,0 +1,774 @@
+{
+  "all_entities_covered": true,
+  "case_count": 48,
+  "cases": [
+    {
+      "case_id": "dev-long_window-018",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 707,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-012",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 708,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-003",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 383,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-021",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 385,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-016",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 508,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-011",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 629,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-015",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 388,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-020",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 125,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-006",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 702,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-024",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 704,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-022",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 505,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-007",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 9,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-009",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 389,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-019",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 5,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-010",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 509,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-001",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 3,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-002",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 123,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-013",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 8,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-014",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 128,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-008",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 129,
+      "full_token_count": 731,
+      "partition": "dev",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-017",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 628,
+      "full_token_count": 730,
+      "partition": "dev",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-004",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 503,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-023",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 625,
+      "full_token_count": 727,
+      "partition": "dev",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "dev-long_window-005",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 623,
+      "full_token_count": 725,
+      "partition": "dev",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-005",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 623,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-007",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 10,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-003",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 383,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-015",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 386,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-021",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 385,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-002",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 123,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-011",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 630,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-001",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 3,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-014",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 126,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-018",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 705,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-019",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 5,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-022",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 505,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-013",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 1,
+      "entity_last_token_index": 6,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_0",
+        "near_beginning"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-016",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 506,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-024",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 704,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-004",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 503,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-017",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 626,
+      "full_token_count": 728,
+      "partition": "final",
+      "subcategory": "telephonenum",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-010",
+      "entity_covering_window_count": 2,
+      "entity_first_token_index": 501,
+      "entity_last_token_index": 510,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_500",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-023",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 621,
+      "entity_last_token_index": 625,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_620",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-008",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 130,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-020",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 121,
+      "entity_last_token_index": 125,
+      "full_token_count": 727,
+      "partition": "final",
+      "subcategory": "organisation",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_120"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-009",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 381,
+      "entity_last_token_index": 390,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_380",
+        "window_overlap_probe"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-006",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 702,
+      "full_token_count": 725,
+      "partition": "final",
+      "subcategory": "givenname",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    },
+    {
+      "case_id": "final-long_window-012",
+      "entity_covering_window_count": 1,
+      "entity_first_token_index": 700,
+      "entity_last_token_index": 709,
+      "full_token_count": 732,
+      "partition": "final",
+      "subcategory": "email",
+      "tags": [
+        "long_input",
+        "multi_window",
+        "word_position_699",
+        "near_end"
+      ],
+      "window_count": 2
+    }
+  ],
+  "context_limit": 512,
+  "maximum_full_token_count": 732,
+  "maximum_window_count": 2,
+  "minimum_full_token_count": 725,
+  "minimum_window_count": 2,
+  "overflow_stride": 128,
+  "schema_version": 1,
+  "tokenizer": "packaged TinyBERT-4 fast tokenizer"
+}

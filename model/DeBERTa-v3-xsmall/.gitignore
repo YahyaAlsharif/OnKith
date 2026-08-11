@@ -1,0 +1,14 @@
+# Downloaded pretrained weights and local Hugging Face snapshots.
+artifacts/preflight/huggingface_model/
+artifacts/preflight/cache/
+
+# Generated ONNX graphs are large and reproducible from the preflight script.
+artifacts/preflight/onnx_model/
+
+# Disposable production-pin compatibility environment.
+.venv-production/
+
+# Local notebook/runtime scratch files.
+artifacts/preflight/tmp/
+__pycache__/
+*.pyc

@@ -1,0 +1,46 @@
+{
+  "GIVENNAME": [
+    "Aarav", "Aiko", "Amara", "Ana-María", "Chiamaka", "Dae-Hyun",
+    "Fatou", "İrem", "João", "Kwame", "Léa", "Mariam", "Noura",
+    "Oluwaseun", "Priyanka", "Rami", "Saoirse", "Thiago", "Xiomara", "Yuna"
+  ],
+  "SURNAME": [
+    "Al-Hassan", "Björkman", "D'Souza", "El-Sayed", "Fernández-Ruiz",
+    "Haddad", "Ibrahim", "Kovačević", "López", "Mensah", "Nguyễn",
+    "O'Connell", "Okafor", "Papadopoulos", "Qureshi", "Rossi",
+    "Singh", "Tanaka", "Winterbourne", "Zieliński"
+  ],
+  "EMAIL": [
+    "ana.maria+receipts@example.travel",
+    "aiko_77@alerts.lab.example",
+    "contact@northwind-consulting.co.uk",
+    "d.souza@alumni.example.edu",
+    "first-last@privacy.example.org",
+    "ops+pi@subunit.example.cloud",
+    "x9.y_test@xn--bcher-kva.example"
+  ],
+  "TELEPHONENUM": [
+    "+966 55 123 4567", "+81-3-1234-5678", "+234 (0) 803 123 4567",
+    "0117 496 0182", "06 12 34 56 78", "03-1234-5678"
+  ],
+  "ACCOUNTNUM": [
+    "GB82 WEST 1234 5698 7654 32", "SA03 8000 0000 6080 1016 7519",
+    "DE89 3704 0044 0532 0130 00", "001-442-90871"
+  ],
+  "IDCARDNUM": ["QX-77device-2291", "ID-KSA-2049-7712", "A9 44 2X 701"],
+  "PASSPORTNUM": ["L898902C3", "N42-771-AX", "P 0048 219"],
+  "DRIVERLICENSENUM": ["D-SOUZA-77-041", "DL 0429 8816", "KSA-19-773301"],
+  "TAXNUM": ["VAT-GB-771-2049-18", "TIN 48-220-7719", "TXA901177"],
+  "CREDITCARDNUMBER": [
+    "4485-9012-3344-7761", "4111 1111 1111 1111", "5555555555554444"
+  ],
+  "ORGANISATION": [
+    "Meridian Trust", "Northwind Research Cooperative", "Sakura Health Lab",
+    "Al Noor Community Foundation", "Ndlovu & Partners"
+  ],
+  "CITY": ["Abidjan", "AlUla", "Chișinău", "Kraków", "Mombasa", "Recife", "Şanlıurfa"],
+  "STREET": [
+    "47 Harrowgate Lane", "12B Rue des Lilas", "8 Kingfisher Close",
+    "٢١ شارع النخيل", "5-12 Sakura-dori"
+  ]
+}
