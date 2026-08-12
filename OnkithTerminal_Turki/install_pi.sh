@@ -123,6 +123,26 @@ else
   ${SUDO} apt-get install -y espeak-ng || true
 fi
 
+# The one case that must not pass quietly. `|| true` above is right for
+# piper, whose wheels are genuinely not always published for aarch64, and
+# it was on the espeak fallback too, so a Pi that ended up with no voice
+# at all finished the install reporting success. The first device this
+# ran on did exactly that: piper, piper-tts and espeak-ng all absent, the
+# report otherwise green, and a device that hears and answers and never
+# says a word.
+if command -v piper >/dev/null || command -v piper-tts >/dev/null \
+   || command -v espeak-ng >/dev/null; then
+  echo "[OK] A speech backend is installed."
+else
+  echo "[WARNING] ==============================================="
+  echo "[WARNING] No speech backend. This device cannot speak."
+  echo "[WARNING] It will hear, mask, answer and show the answer,"
+  echo "[WARNING] silently. Fix with:"
+  echo "[WARNING]     sudo apt-get install -y espeak-ng"
+  echo "[WARNING] and read the error if that fails."
+  echo "[WARNING] ==============================================="
+fi
+
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python - <<'PY'
 from pathlib import Path
 import onnxruntime as ort

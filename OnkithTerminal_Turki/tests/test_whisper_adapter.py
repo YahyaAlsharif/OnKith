@@ -124,9 +124,57 @@ class EngineChoiceTest(unittest.TestCase):
         self.assertEqual(config.stt_engine, "moonshine")
         self.assertEqual(config.stt, {})
 
-    def test_the_shipped_config_still_runs_moonshine(self) -> None:
-        # Whisper is offered, not adopted. Nothing has run on the Pi yet.
-        self.assertEqual(PipelineConfig().stt_engine, "moonshine")
+    def test_the_shipped_config_runs_whisper(self) -> None:
+        """Adopted, after the Pi produced the number it was waiting on.
+
+        The rule was that the default did not move until base.en had been
+        timed on the target. It measures 0.45x on real voice on a Pi 5,
+        which is 2.2 times faster than real time, and 0.81x on the short
+        synthetic clips, which is the worst case and still under one.
+        """
+
+        self.assertEqual(PipelineConfig().stt_engine, "whisper")
+
+    def test_ankith_never_wakes_it(self) -> None:
+        """Ankit and Ankith are names people have.
+
+        This entry moved to `never` in the same change that made Whisper
+        the default, because the two were coupled: Moonshine needed
+        `ankith` in the spellings to hear its own name at all and pays 25%
+        to 17% wake recall for losing it, while Whisper with the hint
+        never writes Ankith when somebody is talking to the device, so
+        the entry only ever fired on the person.
+
+        Deleting it from the spellings was not enough. `ankith` is six
+        letters and one edit from `onkith`, so the fuzzy matcher caught
+        it anyway and the false wake stayed at 8%. It has to be in
+        `never`, which is checked before the fuzzy path.
+        """
+
+        from app.onkith_music import (
+            WakeWords,
+            configure_wake_words,
+            intercept_onkith_command,
+            wake_words,
+        )
+
+        previous = wake_words()
+        configure_wake_words(WakeWords.from_config(PipelineConfig().wake))
+        try:
+            for sentence in (
+                "Someone named Ankith called me this morning",
+                "someone named Ankit called me this morning",
+            ):
+                with self.subTest(sentence=sentence):
+                    self.assertFalse(
+                        intercept_onkith_command(sentence).command_detected
+                    )
+            # And the device still answers to its own name.
+            self.assertEqual(
+                intercept_onkith_command("Onkith stop").intent, "CLOSE"
+            )
+        finally:
+            configure_wake_words(previous)
 
     def test_the_engine_is_read_loosely(self) -> None:
         config = PipelineConfig()
@@ -138,21 +186,27 @@ class EngineChoiceTest(unittest.TestCase):
 
         The override was applied after that branch had already printed, so
         the one command for checking which recogniser a run would use
-        showed the file instead of the flag. With the shipped config still
-        saying moonshine, that reads as the flag doing nothing, on the day
-        somebody is trying to demonstrate the other one.
+        showed the file instead of the flag, which reads as the flag doing
+        nothing on the day somebody is trying to demonstrate the other one.
+
+        Both directions, and neither is written as a literal engine name:
+        the point is that the flag wins over whatever the file says, and
+        the file has already changed once.
         """
 
         from app.omit_ai_live import main
 
-        def printed(*flags: str) -> dict:
+        def printed(*flags: str) -> str:
             out = io.StringIO()
             with contextlib.redirect_stdout(out):
                 self.assertEqual(main([*flags, "--print-config"]), 0)
-            return json.loads(out.getvalue())
+            return json.loads(out.getvalue())["stt"]["engine"]
 
-        self.assertEqual(printed("--stt", "whisper")["stt"]["engine"], "whisper")
-        self.assertEqual(printed()["stt"]["engine"], "moonshine")
+        shipped = PipelineConfig().stt_engine
+        other = "moonshine" if shipped == "whisper" else "whisper"
+        self.assertEqual(printed(), shipped)
+        self.assertEqual(printed("--stt", other), other)
+        self.assertEqual(printed("--stt", shipped), shipped)
 
 
 class SwapSeamTest(unittest.TestCase):

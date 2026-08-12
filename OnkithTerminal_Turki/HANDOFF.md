@@ -47,7 +47,7 @@ clips kept separate:
 | recorded half | Moonshine 0.0.69 | Whisper base.en int8 | Canary 180M flash |
 |---|---|---|---|
 | Wake recall | 25% (3/12) | **100% (12/12)** | 83% (10/12) |
-| False wake | **0%** | 8% (1/12) | **0%** |
+| False wake | **0%** | **0%** | **0%** |
 | Intent | 25% | **100%** | 75% |
 | Digits kept | 67% | **100%** | 0% |
 | WER with the name | 39.5% | **2.9%** | 16.3% |
@@ -411,18 +411,30 @@ They survive some exits. The temp directories they left behind are swept
 at startup now, but the processes themselves are not, and on a device
 that is power-cycled this is worth a look before the demo.
 
-### The one decision waiting on the Pi
+### Decided, on 2026-08-12, by the Pi
 
-`config/live_config.json` still says `"engine": "moonshine"`, and every
-launcher passes `--stt whisper` explicitly. So clicking the icon, the
-autostart entry and `./run_live.sh --stt whisper` all run Whisper, and a
-bare `./run_live.sh` runs Moonshine.
+The rule was that the default did not move until base.en had been timed
+on the target. The Pi 5 measured it:
 
-That is deliberate rather than an oversight: the standing rule is that
-the default does not move until base.en has been timed on the Pi. It
-does mean two commands behave differently, so it is worth knowing before
-somebody debugs the wrong one. Once the RTF number exists, flipping the
-default and removing `ankith` are one commit.
+| half | Mac | Pi 5 | headroom |
+|---|---|---|---|
+| recorded | 0.17x | **0.45x** | 2.2x faster than real time |
+| synthetic | 0.32x | 0.81x | 1.2x faster than real time |
+
+Whisper costs roughly three times Moonshine's compute and keeps up on
+the device with room to spare, so `config/live_config.json` now says
+`"engine": "whisper"` and a bare `./run_live.sh` runs it.
+
+`ankith` moved to `never` in the same change, because the two were
+coupled: Moonshine needed that spelling to hear its own name and pays
+25% to 17% wake recall for losing it, while Whisper with the hint never
+writes Ankith when somebody is talking to the device. Deleting it from
+the spellings was not enough on its own. It is six letters and one edit
+from `onkith`, so the fuzzy matcher caught it anyway and the false wake
+stayed at 8%. In `never`, which is checked first, it goes to 0%.
+
+Whisper is now clean on every metric on both halves: wake 100%, false
+wake 0%, intent 100%, digits 100%.
 
 ## For Faris: bringing this up on the Pi
 

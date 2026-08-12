@@ -10,6 +10,44 @@ This is the list of what is still wrong with it.
 
 ---
 
+## 0. The Pi cannot speak
+
+**Seen** in the first report back from the device, 2026-08-12:
+
+```
+  piper                -
+  piper-tts            -
+  espeak-ng            -
+```
+
+None of the three. `detect_backend` in `app/speech.py` walks piper,
+kokoro, espeak, say and falls off the end to `NullSpeechBackend`, which
+logs one line and returns. So the device hears, masks, routes, answers
+and shows the answer on screen, and says nothing out loud. Nothing
+crashes, which is why the report is otherwise all green.
+
+**Cause.** `install_pi.sh` installs piper best-effort, because its wheels
+are not always published for aarch64, and falls back to
+`apt-get install -y espeak-ng || true`. Both failed and the `|| true`
+swallowed the second one, so the install finished reporting success.
+
+**Fix, in order of how quickly it gets a voice back:**
+
+```bash
+sudo apt-get install -y espeak-ng      # and read the error if it fails
+```
+
+That alone makes the device speak, badly. For the real voice, piper needs
+both its binary and a voice file, and `ONKITH_PIPER_MODEL` pointing at
+the voice, or `build_piper_backend` returns None and the chain falls
+through again with no error.
+
+The installer should stop hiding this. `|| true` on the last fallback in
+a chain means the one case where nobody gets a voice is the one case that
+reports success.
+
+---
+
 ## 1. The masker redacts the device's own name
 
 **Seen** in a live session on 2026-08-12: every utterance in the
@@ -83,11 +121,16 @@ minutes on the same machine and the battery was at 4%, so the CPU was
 being shared and very likely throttled. This may be entirely explained
 by that and not be a property of the device at all.
 
-**What would settle it.** The same conversation with nothing else
-running, and then the RTF number on the Pi, which is the measurement
-already blocking the config default. If base.en cannot keep up on a Pi 5
-with nothing else on it, that is the whole recogniser decision back
-open.
+**Mostly settled now.** The Pi has since measured base.en at 0.45x on
+the recorded half, 2.2 times faster than real time, and 0.81x worst case
+on the short synthetic clips. It keeps up on the device with room to
+spare, so the backlog on that laptop was the video call, not the
+recogniser.
+
+What is left of this: 0.81x is the worst case on a corpus of clean
+clips, and a command is short, so the fixed cost per utterance is what
+bites. Worth watching the same warning during a long live session on the
+Pi. If it appears there, with nothing else running, that is real.
 
 ---
 
@@ -109,7 +152,7 @@ chase it, not another live session.
 Not seen yet, found by putting Faris's measurement next to our
 thresholds.
 
-He measured the Pi's mic, a `UACDemoV1.0: USB Audio (hw:2,0)`, with `sox
+He measured the Pi's mic, a `UACDemoV1.0: USB Audio`, with `sox
 stat`: speech RMS 0.0123, peak 0.10, roughly ten times of headroom
 before clipping. Our trigger threshold is
 `max(minimum_start_rms, room_noise * noise_multiplier)`, which is
@@ -127,14 +170,22 @@ may not be. The failure is the bad one: the device sits there saying
 "listening" and never hears anybody, which is precisely what the
 `maximum_start_rms` ceiling was added to prevent in the noisy direction.
 
-**Cheapest fix first, and it is not in this repo:** turn the mic gain up
-with `alsamixer` on card 2 and re-measure. Ten times of headroom means
-there is plenty to take. Only if that cannot be done should
-`minimum_start_rms` come down, because lowering it trades against false
-triggers.
+The device reports it at index **0**, `hw:0,0`, 48 kHz, mono. Faris's
+earlier note said `hw:2,0`, so the number moves: read it from
+`./run_live.sh --list-devices` rather than from any document.
 
-Whoever is on the Pi should run `./check_pi.sh --with-mic --device N` in
-the actual demo room and report the calibration numbers it prints.
+**Cheapest fix first, and it is not in this repo:** turn the mic gain up
+with `alsamixer`, pick the USB card with F6, and re-measure. Ten times of
+headroom means there is plenty to take. Only if that cannot be done
+should `minimum_start_rms` come down, because lowering it trades against
+false triggers.
+
+**Still not measured.** The microphone section of the first two reports
+never ran: `--device N` was typed with the letter N, the report went on
+to fail on it, and the summary said `ok` anyway because of a bug in the
+script. Both are fixed. Somebody needs to run
+`./scripts/pi_report.sh --device 0` in the actual demo room and send the
+calibration numbers.
 
 ---
 

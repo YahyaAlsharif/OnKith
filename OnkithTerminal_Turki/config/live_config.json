@@ -41,7 +41,6 @@
       "onkuth",
       "onkoth",
       "onketh",
-      "ankith",
       "unkith",
       "onkit",
       "onket",
@@ -54,12 +53,12 @@
       "setter",
       "ستر"
     ],
-    "never": ["ankit"],
+    "never": ["ankit", "ankith"],
     "fuzzy_minimum_length": 6,
     "edit_distance": 1
   },
   "stt": {
-    "engine": "moonshine",
+    "engine": "whisper",
     "whisper": {
       "model": "base.en",
       "compute_type": "int8",
