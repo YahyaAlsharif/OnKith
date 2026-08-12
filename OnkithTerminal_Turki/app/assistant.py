@@ -14,7 +14,7 @@ import queue
 import threading
 from typing import Any, Callable
 
-from app.llm import LLMUnavailable
+from app.llm import LLMUnavailable, parse_command
 from app.rehydrate import RehydrationMap
 
 LogFunction = Callable[[str], None]
@@ -39,7 +39,9 @@ class AssistantWorker:
         self.speech = speech
         self.bus = bus
         self.log = log
-        self.queue: queue.Queue[tuple[str, list] | None] = queue.Queue()
+        self.queue: queue.Queue[
+            tuple[str, list, Callable[[str], None] | None] | None
+        ] = queue.Queue()
         self.thread: threading.Thread | None = None
         self.errors: list[str] = []
         self._turns: list[dict[str, str]] = []
@@ -61,18 +63,30 @@ class AssistantWorker:
         )
         self.thread.start()
 
-    def submit(self, masked_text: str, entities: list | None = None) -> None:
+    def submit(
+        self,
+        masked_text: str,
+        entities: list | None = None,
+        on_command: Callable[[str], None] | None = None,
+    ) -> None:
         """Queue one already-masked utterance, with its span map.
 
         ``entities`` is the masker's record of what it replaced. It stays
         on this device and is used only to put the values back into the
         reply before it is spoken.
+
+        ``on_command`` is how an utterance the device failed to recognise
+        as an instruction still becomes one. It is given per submission
+        rather than held on the worker because it closes over the raw
+        transcript of this particular utterance, which is the only copy
+        with the numbers and titles still in it, and which never leaves
+        this process.
         """
 
         text = (masked_text or "").strip()
         if not text or self._shutdown:
             return
-        self.queue.put((text, list(entities or ())))
+        self.queue.put((text, list(entities or ()), on_command))
 
     def _record(self, role: str, text: str) -> None:
         # The screen is in the room with the person who spoke, so it shows
@@ -113,7 +127,7 @@ class AssistantWorker:
             try:
                 if item is None:
                     return
-                masked_text, entities = item
+                masked_text, entities, on_command = item
                 # The map is added before the call so a reply can refer to
                 # a placeholder from any earlier turn in the conversation.
                 self._rehydration.add(entities)
@@ -145,6 +159,28 @@ class AssistantWorker:
                     continue
 
                 self._consecutive_failures = 0
+
+                # An instruction the device failed to recognise itself.
+                # Carried out rather than answered, and never spoken:
+                # the line is a wire format and reading "command colon
+                # light on" out loud would be a fault, not a reply.
+                intent = parse_command(reply)
+                if intent is not None:
+                    self._state("idle")
+                    if on_command is None:
+                        # Nothing wired to act on it. Saying so beats
+                        # sitting in silence, which looks like the wake
+                        # word was never heard.
+                        self.log(f"The assistant asked for {intent} with nothing to do it.")
+                        continue
+                    try:
+                        on_command(intent)
+                    except Exception as error:
+                        message = f"{type(error).__name__}: {error}"
+                        self.errors.append(message)
+                        self.log(f"{intent} from the assistant failed: {message}")
+                    continue
+
                 if not reply:
                     # An empty reply used to be dropped in silence here, and
                     # a compound model that answers entirely inside its tool

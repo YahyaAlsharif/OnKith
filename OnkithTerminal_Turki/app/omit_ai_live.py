@@ -43,11 +43,13 @@ from app.live_runtime import (
     deduplicate_boundary,
 )
 from app.onkith_music import (
+    VOLUME_STEP,
     OnkithMusicController,
     OnkithMusicWorker,
     WakeWords,
     configure_wake_words,
     intercept_onkith_command,
+    requested_level,
     without_wake_word,
 )
 from app.terminal_ui import TerminalUI
@@ -350,11 +352,54 @@ def _report_gate(core: Any, state: str) -> None:
         pass
 
 
+def assistant_command(intent: str, raw_transcript: str, core: Any, music: Any) -> None:
+    """Carry out an instruction the device did not recognise itself.
+
+    The model sends a name and nothing else. Every argument is re-read
+    here, from the raw transcript, because the copy the model saw had
+    them taken out: "set the light to 10 percent" reaches it as
+    "[AGE_1] percent" and "play Adele" as "play [GIVENNAME_1]". So the
+    model is asked only what was meant, and the device supplies what was
+    said.
+    """
+
+    if core is not None and intent in ("SHOW", "HIDE"):
+        core.set_panel(intent == "SHOW")
+        return
+    if core is not None and intent in ("LOUDER", "QUIETER"):
+        core.step_volume(VOLUME_STEP if intent == "LOUDER" else -VOLUME_STEP)
+        return
+    if core is not None and intent in (
+        "LIGHT_ON", "LIGHT_OFF", "BRIGHTER", "DIMMER", "LIGHT_LEVEL"
+    ):
+        core.handle_light(intent, requested_level(_words_of(raw_transcript)))
+        return
+    if music is None:
+        return
+    if intent == "CLOSE":
+        music.submit_close()
+    elif intent == "PLAY":
+        # Whatever was said, minus the name that summoned it. The
+        # recogniser may have mangled the title, and if it did there is
+        # nothing here that can un-mangle it, but a bad search is a
+        # better answer than a sentence explaining the wording.
+        query = without_wake_word(raw_transcript).strip()
+        if query:
+            music.submit_play(query)
+
+
+def _words_of(transcript: str) -> list[str]:
+    from app.onkith_music import _WORD_RE, _normalise_word
+
+    return [_normalise_word(m.group(0)) for m in _WORD_RE.finditer(transcript)]
+
+
 def forward_masked_output(
     result: LiveOutput,
     assistant: "AssistantWorker | None",
     on_output: Any,
     core: Any = None,
+    on_command: Any = None,
 ) -> None:
     """Display one finished utterance, then offer it to the assistant.
 
@@ -383,6 +428,7 @@ def forward_masked_output(
         _report_gate(core, "held")
         return
     _report_gate(core, "sent")
+    raw = result.pii.original_text
     # The name goes no further than here. It is how the device was
     # addressed, and a model reading "Onkith, what is your purpose"
     # takes it for who is speaking and answers "users like you, Onkith".
@@ -390,7 +436,17 @@ def forward_masked_output(
     # above still holds.
     # The entity list travels with the masked text so the reply can be
     # rehydrated locally before it is spoken. It is never sent onward.
-    assistant.submit(without_wake_word(result.pii.masked_text), result.pii.entities)
+    assistant.submit(
+        without_wake_word(result.pii.masked_text),
+        result.pii.entities,
+        # Closes over the raw transcript of this utterance so the model
+        # can name an instruction without ever seeing its arguments.
+        on_command=(
+            (lambda intent: on_command(intent, raw))
+            if on_command is not None
+            else None
+        ),
+    )
 
 
 def run_surface_only(args: argparse.Namespace) -> int:
@@ -721,7 +777,16 @@ def main(argv: list[str] | None = None) -> int:
             storage,
             on_event=ui.event,
             on_output=lambda result: forward_masked_output(
-                result, assistant, ui.output, core
+                result,
+                assistant,
+                ui.output,
+                core,
+                # `music` is bound below and read when this runs, which
+                # is after everything has started. The raw transcript
+                # travels no further than this closure.
+                on_command=lambda intent, raw: assistant_command(
+                    intent, raw, core, music
+                ),
             ),
             queue_overflow_count=lambda: (
                 audio.overflow_count if audio is not None else 0

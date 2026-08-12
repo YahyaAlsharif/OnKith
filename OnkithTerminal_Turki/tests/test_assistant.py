@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 from app.assistant import UNREACHABLE_REPLY, AssistantWorker
 from app.event_bus import EventBus
 from app.llm import (
+    ASSISTANT_COMMANDS,
     DEFAULT_MODEL,
     GROQ_URL,
     SYSTEM_PROMPT,
@@ -291,67 +292,96 @@ class GroqClientTest(unittest.TestCase):
         self.assertIn("say so in plain words", SYSTEM_PROMPT)
         self.assertNotIn("ask for just that detail", SYSTEM_PROMPT)
 
-    def test_a_command_that_went_astray_is_answered_as_a_command(self) -> None:
+    def test_a_command_that_went_astray_can_be_carried_out(self) -> None:
         """Routing reads the first word after the name and nothing else.
 
         So "Onkith can you play bones" reaches the assistant, and so does
-        every word the recogniser gets wrong. Told nothing about the music,
-        it answers that it does not understand, which is the one reply that
-        helps nobody. It cannot run the command, but it can say the wording
-        that would have worked.
+        anything phrased another way, misheard at the front, or said in
+        Arabic. This used to be able only to say the wording that would
+        have worked, which is a device explaining itself instead of doing
+        as it was asked. Now it can name the instruction instead.
         """
 
         self.assertIn("plays music", SYSTEM_PROMPT)
-        for wording in ("stop", "show the player", "close the player"):
-            with self.subTest(wording=wording):
-                self.assertIn(wording, SYSTEM_PROMPT)
-        self.assertIn("Never say you have started or stopped anything", SYSTEM_PROMPT)
+        self.assertIn("COMMAND", SYSTEM_PROMPT)
+        self.assertIn("Never write COMMAND in any other situation", SYSTEM_PROMPT)
 
-    def test_it_never_offers_a_command_the_voice_lane_does_not_have(self) -> None:
-        """Every transport word by voice calls close(), which stops the music.
+    def test_it_never_offers_a_command_the_device_does_not_have(self) -> None:
+        """Skipping and pausing have no lane, so they must have no name.
 
-        So "skip" is recognised and then stops the track, and a device that
-        tells somebody to say skip has told them something untrue. The
-        buttons for skipping and pausing exist, on the recorder on screen.
-
-        Volume used to be on that list and is not any more, because there
-        is a lane for it now. This test is the reminder that the two have
-        to move together: a wording offered here that no lane recognises
-        is the same lie in the other direction.
+        Every transport word by voice calls close(), which stops the
+        music, so a device that accepts "skip" and then stops the track
+        has told somebody something untrue. The buttons for those exist,
+        on the recorder on screen.
         """
 
-        self.assertIn("do not offer", SYSTEM_PROMPT)
-        self.assertIn("stop the music instead", SYSTEM_PROMPT)
-        self.assertNotIn("changing the volume", SYSTEM_PROMPT)
+        self.assertNotIn("SKIP", ASSISTANT_COMMANDS)
+        self.assertNotIn("PAUSE", ASSISTANT_COMMANDS)
+        self.assertIn("Skipping and pausing are not on the list", SYSTEM_PROMPT)
 
-    def test_every_wording_it_offers_is_one_the_lane_recognises(self) -> None:
-        """The prompt names the commands, and the lane decides them.
+    def test_every_name_it_may_ask_for_is_one_the_device_has(self) -> None:
+        """The prompt names intents, and the device carries them out.
 
-        Nothing keeps those two in step but this. A wording that reads
-        well in the prompt and routes to conversation is a device that
-        tells you how to talk to it and then does not listen.
+        Nothing keeps those two in step but this. A name the model can
+        ask for and the device cannot perform is a command that silently
+        does nothing, and there is no error anywhere to find.
         """
 
-        from app.onkith_music import intercept_onkith_command
+        from app.onkith_music import Intent
 
-        offered = {
-            "play Bones": "PLAY",
-            "stop": "CLOSE",
-            "show the player": "SHOW",
-            "close the player": "HIDE",
-            "louder": "LOUDER",
-            "quieter": "QUIETER",
-            "turn the light on": "LIGHT_ON",
-            "turn the light off": "LIGHT_OFF",
-            "brighter": "BRIGHTER",
-            "dimmer": "DIMMER",
-        }
-        for wording, intent in offered.items():
-            with self.subTest(wording=wording):
-                self.assertIn(wording.split(" ")[0], SYSTEM_PROMPT)
-                self.assertEqual(
-                    intercept_onkith_command(f"Onkith {wording}").intent,
-                    intent,
+        real = set(Intent.__args__)
+        for name in sorted(ASSISTANT_COMMANDS):
+            with self.subTest(name=name):
+                # In the prompt, so the model knows it exists.
+                self.assertIn(name, SYSTEM_PROMPT)
+                # And a real lane, so something happens when it asks.
+                self.assertIn(name, real)
+
+    def test_it_cannot_ask_for_the_lane_that_answers_questions(self) -> None:
+        # ASK is what brought the utterance to the model in the first
+        # place. Asking for it back is a loop.
+        self.assertNotIn("ASK", ASSISTANT_COMMANDS)
+
+    def test_every_name_it_may_ask_for_is_dispatched(self) -> None:
+        """The prompt, the lane and the dispatcher, all three in step.
+
+        assistant_command is the only thing that turns a name into an
+        action, and a name it does not handle falls through its
+        if-chain in silence.
+        """
+
+        from app.omit_ai_live import assistant_command
+
+        class Core:
+            def __init__(self) -> None:
+                self.calls: list[tuple] = []
+
+            def set_panel(self, open_panel) -> None:
+                self.calls.append(("panel", open_panel))
+
+            def step_volume(self, delta) -> None:
+                self.calls.append(("volume", delta))
+
+            def handle_light(self, intent, level=None) -> None:
+                self.calls.append(("light", intent, level))
+
+        class Music:
+            def __init__(self) -> None:
+                self.calls: list[tuple] = []
+
+            def submit_close(self) -> None:
+                self.calls.append(("close",))
+
+            def submit_play(self, query) -> None:
+                self.calls.append(("play", query))
+
+        for name in sorted(ASSISTANT_COMMANDS):
+            with self.subTest(name=name):
+                core, music = Core(), Music()
+                assistant_command(name, "Onkith do the thing", core, music)
+                self.assertTrue(
+                    core.calls or music.calls,
+                    f"{name} reached the dispatcher and nothing happened",
                 )
 
     def test_the_list_of_commands_is_not_the_answer_to_everything(self) -> None:
@@ -580,10 +610,12 @@ class PrivacyBoundaryTest(unittest.TestCase):
         def __init__(self) -> None:
             self.submitted: list[str] = []
             self.entities: list[list] = []
+            self.commands: list = []
 
-        def submit(self, text: str, entities=None) -> None:
+        def submit(self, text: str, entities=None, on_command=None) -> None:
             self.submitted.append(text)
             self.entities.append(list(entities or ()))
+            self.commands.append(on_command)
 
     def test_cleared_masked_text_is_forwarded(self) -> None:
         assistant = self.Collector()
@@ -763,3 +795,149 @@ class FailureIsVisibleTest(unittest.TestCase):
         # under it.
         worker = self.worker(FakeLLM(reply=""))
         self.assertIn("onkith", self.drain(worker))
+
+
+class AssistantAsAFallbackLaneTest(unittest.TestCase):
+    """The device's own routing reads the first word after the name.
+
+    Anything phrased another way, misheard at the front, or said in
+    Arabic falls through to the assistant. It used to be able only to
+    describe the wording that would have worked. Now it can name the
+    instruction and the device carries it out.
+
+    The fast path is untouched: a recognised command never reaches the
+    network at all, and none of this runs for it.
+    """
+
+    def worker(self, reply: str):
+        bus = EventBus()
+        speech = RecordingSpeech()
+        llm = FakeLLM(reply=reply)
+        worker = AssistantWorker(llm=llm, speech=speech, bus=bus, log=lambda m: None)
+        return worker, speech
+
+    def run_once(self, reply: str, on_command=None):
+        worker, speech = self.worker(reply)
+        worker.start()
+        worker.submit("make it brighter in here", [], on_command=on_command)
+        worker.shutdown()
+        return speech
+
+    def test_a_named_command_is_carried_out_and_never_spoken(self) -> None:
+        done: list[str] = []
+        speech = self.run_once("COMMAND: BRIGHTER", done.append)
+        self.assertEqual(done, ["BRIGHTER"])
+        # Reading "command colon brighter" out loud would be a fault, not
+        # a reply.
+        self.assertEqual(speech.spoken, [])
+
+    def test_an_ordinary_answer_is_still_spoken(self) -> None:
+        done: list[str] = []
+        speech = self.run_once("It is about ten degrees.", done.append)
+        self.assertEqual(done, [])
+        self.assertEqual(speech.spoken, ["It is about ten degrees."])
+
+    def test_a_name_the_device_does_not_have_is_treated_as_speech(self) -> None:
+        # A model inventing a capability must not silently do nothing.
+        done: list[str] = []
+        speech = self.run_once("COMMAND: LAUNCH_ROCKET", done.append)
+        self.assertEqual(done, [])
+        self.assertEqual(speech.spoken, ["COMMAND: LAUNCH_ROCKET"])
+
+    def test_a_command_word_inside_a_sentence_is_not_obeyed(self) -> None:
+        # Otherwise a conversation about lamps becomes a series of
+        # accidents.
+        done: list[str] = []
+        reply = "You could say COMMAND: LIGHT_ON if you wanted to."
+        speech = self.run_once(reply, done.append)
+        self.assertEqual(done, [])
+        self.assertEqual(speech.spoken, [reply])
+
+    def test_a_handler_that_throws_does_not_take_the_worker_down(self) -> None:
+        def broken(intent: str) -> None:
+            raise RuntimeError("the lamp fell off")
+
+        worker, speech = self.worker("COMMAND: LIGHT_ON")
+        worker.start()
+        worker.submit("lights please", [], on_command=broken)
+        # The next utterance still has to be answered.
+        worker.submit("what time is it", [])
+        worker.shutdown()
+        self.assertTrue(worker.errors)
+
+    def test_the_raw_transcript_is_never_what_the_model_sees(self) -> None:
+        """The whole reason the model is asked for a name and not a value.
+
+        It reads masked text, where the number and the title are already
+        gone, so the arguments are re-read on this device from the copy
+        that still has them.
+        """
+
+        from app.omit_ai_live import assistant_command
+
+        seen: list = []
+
+        class Core:
+            def handle_light(self, intent, level=None) -> None:
+                seen.append((intent, level))
+
+        assistant_command(
+            "LIGHT_LEVEL", "Onkith make the light 30 percent", Core(), None
+        )
+        self.assertEqual(seen, [("LIGHT_LEVEL", 30)])
+
+
+class TheFastPathStaysOffTheNetworkTest(unittest.TestCase):
+    """The hybrid is only a fallback, and this is what makes it one.
+
+    A command the device recognises itself is carried out locally,
+    instantly, with no internet and nothing sent anywhere. Only what it
+    could not place goes to the model. If that ever stops being true the
+    device becomes one that needs a network to turn a lamp off.
+    """
+
+    class Collector:
+        def __init__(self) -> None:
+            self.submitted: list[str] = []
+
+        def submit(self, text, entities=None, on_command=None) -> None:
+            self.submitted.append(text)
+
+    class Result:
+        def __init__(self, text: str) -> None:
+            self.pii = type(
+                "PII",
+                (),
+                {
+                    "safe_to_release": True,
+                    "original_text": text,
+                    "masked_text": text,
+                    "entities": [],
+                },
+            )()
+
+    def forwarded(self, transcript: str) -> list[str]:
+        assistant = self.Collector()
+        forward_masked_output(self.Result(transcript), assistant, lambda _: None)
+        return assistant.submitted
+
+    def test_a_recognised_command_never_leaves_the_device(self) -> None:
+        for transcript in (
+            "Onkith play Bones by Imagine Dragons",
+            "Onkith stop",
+            "Onkith show the player",
+            "Onkith turn the light off",
+            "Onkith louder",
+            "Onkith set the light to 30 percent",
+        ):
+            with self.subTest(transcript=transcript):
+                self.assertEqual(self.forwarded(transcript), [])
+
+    def test_only_what_it_could_not_place_is_sent(self) -> None:
+        self.assertEqual(
+            self.forwarded("Onkith make it brighter in here"),
+            ["make it brighter in here"],
+        )
+
+    def test_speech_that_never_addressed_it_is_not_sent_either(self) -> None:
+        self.assertEqual(self.forwarded("the lights are quite dim tonight"), [])

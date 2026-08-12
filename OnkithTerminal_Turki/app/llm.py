@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -60,25 +61,40 @@ SYSTEM_PROMPT = (
     "Never write a placeholder that was not already in the message you "
     "were given. If you do not know something, say so in plain words: a "
     "bracketed token is not a way of saying that you do not know. "
-    # An instruction is recognised by the first word after the name, so
-    # "Onkith can you play bones" and anything the recogniser mishears
-    # arrive here instead of being carried out. Answering those with "I do
-    # not understand" is the worst of both: the person learns nothing, and
-    # the wording that would have worked is never said out loud.
+    # The device recognises an instruction by the first word after its
+    # name, which is fast, private and offline, and misses anything
+    # phrased another way, misheard at the front, or said in Arabic.
+    # Those land here. This used to be able only to say the wording that
+    # would have worked, which is a device explaining itself instead of
+    # doing as it was asked. Now it can ask for the command instead.
+    #
+    # The name only. Never the arguments: the model is reading masked
+    # text, where "set the light to 10 percent" has already become
+    # "[AGE_1] percent" and "play Adele" has become "play
+    # [GIVENNAME_1]". Whatever number or title was said is re-read from
+    # the raw transcript on this device, which is the only copy that
+    # still has it.
     "This device also plays music, can show or hide a player on its "
-    "screen, and has a lamp. Those few instructions are recognised by "
-    "the first word after the name, so one that was misheard or worded "
-    "another way reaches you instead of being carried out. Only when a "
-    "message is plainly asking for music, for the player or for the "
-    "light, and there is no way to answer it as a question, say in one "
-    "sentence the wording that works: play and then what to play, or "
-    "stop, show the player, close the player, louder, quieter, turn the "
-    "light on, turn the light off, brighter, dimmer, or set the light to "
-    "a percentage. Those are the whole "
-    "list by voice, so do not offer skipping or pausing: by voice both "
-    "of those stop the music instead, and the buttons for them are on "
-    "the recorder on screen. Never say you have started or stopped "
-    "anything, because that is not something you can do. "
+    "screen, and has a lamp. It recognises a few instructions itself by "
+    "the first word after its name, and anything worded another way, "
+    "misheard, or said in another language reaches you instead. "
+    "When a message is plainly telling this device to do one of those "
+    "things, do not answer it in words. Reply with exactly one line, "
+    "the word COMMAND, a colon, and one name from this list, and "
+    "nothing else at all:\n"
+    "  PLAY CLOSE SHOW HIDE LOUDER QUIETER\n"
+    "  LIGHT_ON LIGHT_OFF BRIGHTER DIMMER LIGHT_LEVEL\n"
+    "PLAY starts music and CLOSE stops it. SHOW and HIDE are the player "
+    "on screen. LOUDER and QUIETER are the music volume. The rest are "
+    "the lamp, and LIGHT_LEVEL is for a specific brightness such as a "
+    "percentage. Skipping and pausing are not on the list and there is "
+    "no name for them. "
+    "Never write COMMAND in any other situation, never explain it, and "
+    "never mention it when you are answering a question. A remark about "
+    "music or lights is not an instruction: somebody saying it is dark "
+    "in here is talking, and somebody saying make it brighter is not. "
+    "Never say you have started or stopped anything in words, because "
+    "the line above is how you do it. "
     # The first version of this said to treat anything that read as an
     # instruction as a misrouted command. Given "my ID is 1234, how are
     # you doing" it recited the list of commands, which makes a thing
@@ -94,6 +110,49 @@ SYSTEM_PROMPT = (
     "Your name is yours. Whoever is speaking to you has a different one "
     "you have not been told, so never address them by yours."
 )
+
+
+# The only intents the assistant may ask for. A name outside this set is
+# a model inventing a capability, and it is read as prose rather than
+# obeyed.
+ASSISTANT_COMMANDS = frozenset(
+    {
+        "PLAY",
+        "CLOSE",
+        "SHOW",
+        "HIDE",
+        "LOUDER",
+        "QUIETER",
+        "LIGHT_ON",
+        "LIGHT_OFF",
+        "BRIGHTER",
+        "DIMMER",
+        "LIGHT_LEVEL",
+    }
+)
+
+_COMMAND_LINE = re.compile(r"^COMMAND\s*:\s*([A-Z_]+)\s*$")
+
+
+def parse_command(reply: str) -> str | None:
+    """The intent a reply is asking for, or None if it is just an answer.
+
+    Deliberately strict. The whole reply has to be the one line and
+    nothing else, and the name has to be one this device actually has.
+    A model that writes "COMMAND: LIGHT_ON" in the middle of a sentence
+    about lamps is talking, not instructing, and a device that acts on
+    that turns a conversation into a series of accidents.
+
+    Nothing here is ever spoken or shown. It is a wire format between
+    the model and the device, and a person hearing "command colon
+    light on" read aloud would rightly conclude it was broken.
+    """
+
+    match = _COMMAND_LINE.match((reply or "").strip())
+    if match is None:
+        return None
+    name = match.group(1)
+    return name if name in ASSISTANT_COMMANDS else None
 
 
 def ambient_context(now: datetime | None = None) -> str:

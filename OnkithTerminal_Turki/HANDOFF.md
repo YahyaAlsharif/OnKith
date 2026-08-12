@@ -30,7 +30,7 @@ The venv is uv-created. There is **no `pip`** and **no bare `python`**.
 ```bash
 .venv/bin/python                                  # the interpreter
 VIRTUAL_ENV="$PWD/.venv" uv pip install <pkg>     # how to install
-.venv/bin/python -m unittest discover -s tests -q # the tests, 340 of them
+.venv/bin/python -m unittest discover -s tests -q # the tests, 351 of them
 ```
 
 There is no pytest. `unittest discover` is the runner.
@@ -213,7 +213,7 @@ ONKITH_CANARY_BOOST=2.0 ~/.onkith-canary-eval/.venv/bin/python \
 ./install_desktop.sh --remove
 ./install_desktop.sh --no-autostart   # the icon without the boot entry
 
-# the tests, 340 of them
+# the tests, 351 of them
 .venv/bin/python -m unittest discover -s tests -q
 ```
 
@@ -231,6 +231,18 @@ Onkith, hide the player                   Onkith, turn the light off
 Anything else is a question.              Onkith, dimmer
                                           Onkith, set the light to 10 percent
 ```
+
+Anything the device does not place goes to the assistant, which may
+answer with the instruction instead of prose. That is a fallback, not the
+route: a recognised command is carried out locally, instantly, offline,
+and never sent anywhere. Only what the first word after the name did not
+match reaches the model, which is where a phrasing nobody enumerated, a
+mangled first word, or Arabic lands.
+
+The model is given the intent to name and never its arguments, because it
+reads masked text where "set the light to 10 percent" has already become
+"[AGE_1] percent" and "play Adele" has become "play [GIVENNAME_1]". The
+number and the title are re-read from the raw transcript on the device.
 
 Three files have to agree on that list and a test walks every wording
 the prompt offers through the lane. `app/onkith_music.py` recognises it,
