@@ -319,19 +319,34 @@ exception, since nothing else here gets brighter or dimmer.
 Off is remembered, so on returns to the level somebody chose rather than
 to a default, and asking for brighter at a dark lamp turns it on.
 
-**It needs a boot overlay that the installer will not write for you.**
-Editing `config.txt` is how a Pi stops booting, so `install_pi.sh`
-detects and reports it instead:
+**It needs a boot overlay, and `install_pi.sh` now writes it.** That
+used to be a printed instruction, which was the wrong call: hand-editing
+a boot config has no backup, no check for an overlay already there, and
+nothing to notice that the end of `config.txt` is inside a `[pi4]`
+section, which would scope the line to one model and fail silently on
+every other.
 
-```
-dtoverlay=pwm,pin=12,func=4     in /boot/firmware/config.txt, then reboot
-ls /sys/class/pwm/              confirm the chip number
+`scripts/enable_pwm.sh` handles all three. It backs the file up and
+prints where, it is idempotent, and it writes under an explicit `[all]`
+header. It refuses rather than guesses when a different pwm overlay is
+already set, including `pwm-2chan` and `pwm-gpio`, which are the same
+hardware under other names. It can be run on its own:
+
+```bash
+./scripts/enable_pwm.sh --check     # say what the state is
+./scripts/enable_pwm.sh             # add it, for GPIO12
+./scripts/enable_pwm.sh --pin 18    # a different pin
+./scripts/enable_pwm.sh --remove    # take it back out
+sudo reboot                         # the one part no script decides
 ```
 
-If the chip is not `pwmchip0`, set `light.chip` in
-`config/live_config.json` to match. Faris confirmed `pwmchip0` for GPIO12
-on his board and the kernel is free to number it otherwise, which is why
-it is configurable rather than assumed.
+`./install_pi.sh --no-pwm` skips it, for a board with no lamp wired or
+whose boot config belongs to somebody else.
+
+After the reboot, `ls /sys/class/pwm/`. If the chip is not `pwmchip0`,
+set `light.chip` in `config/live_config.json` to match. Faris confirmed
+`pwmchip0` for GPIO12 on his board and the kernel is free to number it
+otherwise, which is why it is configurable rather than assumed.
 
 Without any of that the lamp does nothing and says why, once. Everything
 else on the device works regardless: a lamp that cannot be driven never
@@ -474,8 +489,10 @@ been tested against a room:
   `ONKITH_PIPER_MODEL` pointing at a voice. Missing either, the chain
   falls silently through `piper, kokoro, espeak, say`. Nobody gets an
   error, the device just sounds wrong.
-- **The lamp needs the overlay and a reboot.** See the lamp section
-  above. The installer tells you which of the three states you are in.
+- **The lamp needs a reboot after the install.** `install_pi.sh` writes
+  the overlay, and an overlay only takes effect on boot, so the lamp
+  does nothing until then. The installer says so at the end when it has
+  added it.
 - **The audio stack.** `--device-report` prints the board, OS release,
   kernel, the detected stack, chromium, mpv and yt-dlp. Read it rather
   than assuming ALSA or PulseAudio. It does not report the TTS backend or

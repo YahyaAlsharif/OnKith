@@ -3,12 +3,20 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 CHECK_ONLY=0
-if [[ "${1:-}" == "--check-only" ]]; then
-  CHECK_ONLY=1
-elif [[ $# -gt 0 ]]; then
-  echo "Usage: ./install_pi.sh [--check-only]" >&2
-  exit 2
-fi
+WITH_PWM=1
+PWM_REBOOT=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check-only) CHECK_ONLY=1; shift ;;
+    # For a board with no lamp wired, or one whose boot config somebody
+    # else owns. Nothing but the lamp depends on it.
+    --no-pwm) WITH_PWM=0; shift ;;
+    *)
+      echo "Usage: ./install_pi.sh [--check-only] [--no-pwm]" >&2
+      exit 2
+      ;;
+  esac
+done
 
 ARCH="$(uname -m)"
 echo "[SYSTEM] Architecture: ${ARCH}"
@@ -147,24 +155,25 @@ if model_arch != ModelArch.MEDIUM_STREAMING:
 print(f"[OK] Moonshine English Medium Streaming cached at {model_path}")
 PY
 
-# The lamp needs a boot overlay and a reboot, neither of which belongs in
-# an installer: editing config.txt is how a Pi stops booting, and it is
-# the one thing here that cannot be undone by running the script again.
-# So it is reported, not performed.
-PWM_OVERLAY="dtoverlay=pwm,pin=12,func=4"
-BOOT_CONFIG="/boot/firmware/config.txt"
+# The lamp needs a boot overlay. This used to print instructions and
+# leave it to somebody to hand-edit config.txt, which was the wrong call:
+# by hand there is no backup, nothing checks for an overlay that is
+# already there, and nothing notices when the end of the file is inside a
+# [pi4] section and the line would apply to one model only.
+#
+# enable_pwm.sh does it with all three of those handled, and refuses
+# rather than guesses when a different pwm overlay is already set. It
+# does not reboot, which is the part that stays a decision.
 if [[ -e /sys/class/pwm/pwmchip0 ]]; then
   echo "[OK] Hardware PWM is available at /sys/class/pwm/pwmchip0"
-elif [[ -f "${BOOT_CONFIG}" ]] && grep -qF "${PWM_OVERLAY}" "${BOOT_CONFIG}"; then
-  echo "[WARNING] ${PWM_OVERLAY} is in ${BOOT_CONFIG} but no pwmchip exists."
-  echo "[WARNING] Reboot for the lamp to work."
+elif [[ "${WITH_PWM}" -eq 0 ]]; then
+  echo "[SKIP] --no-pwm given; the lamp will do nothing until the overlay"
+  echo "       is added. Everything else on the device works without it."
+elif "${ROOT_DIR}/scripts/enable_pwm.sh"; then
+  PWM_REBOOT=1
 else
-  echo "[WARNING] No hardware PWM. The lamp will do nothing until you:"
-  echo "[WARNING]   1. add ${PWM_OVERLAY} to ${BOOT_CONFIG}"
-  echo "[WARNING]   2. sudo reboot"
-  echo "[WARNING]   3. confirm the chip number with ls /sys/class/pwm/"
-  echo "[WARNING]      and set light.chip in config/live_config.json to match"
-  echo "[WARNING] Everything else on the device works without this."
+  echo "[WARNING] The PWM overlay was not set; see above."
+  echo "[WARNING] Everything except the lamp works without it."
 fi
 
 "${ROOT_DIR}/check_pi.sh"
@@ -178,3 +187,12 @@ echo "  ./run_live.sh --stt whisper --device 2"
 echo
 echo "For a clickable icon on the desktop, and to start on boot:"
 echo "  ./install_desktop.sh"
+if [[ "${PWM_REBOOT}" -eq 1 ]]; then
+  echo
+  echo "The PWM overlay was added to the boot config. The lamp will not"
+  echo "work until this Pi is rebooted:"
+  echo "  sudo reboot"
+  echo "Then confirm the chip number, and set light.chip in"
+  echo "config/live_config.json if it is not pwmchip0:"
+  echo "  ls /sys/class/pwm/"
+fi
