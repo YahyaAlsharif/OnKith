@@ -22,23 +22,32 @@ bare `./run_live.sh` runs Moonshine. That is deliberate: the default does
 not move until base.en has been timed on the Pi, which has not happened.
 HANDOFF.md explains what the measurement decides.
 
-**The evaluation corpus is not in this folder.** `eval/` has the scorer,
-the manifest, the harness and the recorded results, but not the audio.
-This repository's `.gitignore` says recorded speech is never committed
-and ignores `*.wav`, so the 48 clips were left out on purpose rather than
-forced in. Half of them are recordings of a real person.
+**Everything needs a `.env`, and it goes in this folder.** Copy
+`.env.example` to `.env` beside `onkith` and `run_live.sh`, and fill in
+`GROQ_API_KEY` and `YOUTUBE_API_KEY`. It is read from disk rather than
+from the shell because the device is started from an icon and from boot
+as well as from a terminal, and a launcher inherits nothing. Without it
+the device still hears, masks and shows the player, and says it cannot
+answer or search.
 
-To run `eval/run_eval.py` you need the clips in `eval/corpus/clips/`.
-Either ask Turki for the corpus, or record your own against the same
-script:
+**The evaluation corpus is here**, including the recorded half, as a
+deliberate exception to this repository's rule against committing
+recorded speech. The exception and the reason are written into
+`.gitignore` in this folder. 24 of the 48 clips are one person reading a
+fixed script; the numbers in them are placeholders and are nobody's real
+details.
+
+So `eval/run_eval.py` runs as it stands:
+
+```bash
+.venv/bin/python eval/run_eval.py --engine whisper
+```
+
+To add a second speaker, which the corpus wants and does not have:
 
 ```bash
 .venv/bin/python eval/record.py --speaker faris
 ```
-
-`eval/results/history.jsonl` still has every score that has been taken,
-and `eval/report.py` prints them, so the numbers in HANDOFF.md can be
-checked without the audio.
 
 ## Canary
 
