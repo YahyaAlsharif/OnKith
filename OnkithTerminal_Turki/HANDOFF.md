@@ -277,6 +277,12 @@ text went to the model, name and all. The name comes off first now, from
 the masked text and never the raw, and only the occurrence that did the
 summoning, so "what does Onkith mean" survives being asked.
 
+**That last one does not work in production, and ISSUES.md #1 says
+why.** The masker redacts the device's own name as a person's given
+name, so by the time the strip looks for it there is a `[GIVENNAME_1]`
+where the name was and nothing to remove. The code is right and it never
+runs. Read ISSUES.md before trusting this section.
+
 **Louder and quieter by voice.** The mechanism was all there and there
 was no lane to reach it. Read before the transport, because "turn it
 down" and "turn it off" share a verb.
@@ -354,6 +360,10 @@ reaches back into the voice path, because it is on the same thread as a
 transcript and it is the least important thing here.
 
 ## Open issues
+
+The running list, with what has been diagnosed on each, is in
+[ISSUES.md](ISSUES.md). Read that one before picking anything up: the
+first entry there undoes a fix this document describes as done.
 
 Ranked by what would embarrass the demo.
 
