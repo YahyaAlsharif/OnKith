@@ -30,7 +30,7 @@ The venv is uv-created. There is **no `pip`** and **no bare `python`**.
 ```bash
 .venv/bin/python                                  # the interpreter
 VIRTUAL_ENV="$PWD/.venv" uv pip install <pkg>     # how to install
-.venv/bin/python -m unittest discover -s tests -q # the tests, 324 of them
+.venv/bin/python -m unittest discover -s tests -q # the tests, 340 of them
 ```
 
 There is no pytest. `unittest discover` is the runner.
@@ -160,8 +160,8 @@ builds this from the configured wake names, never hardcoded beside them:
 > Onkith is the name of this device. It also answers to Sada, Sitr, Echo.
 > Onkith, play Bones by Imagine Dragons. Onkith, stop the music. Onkith,
 > show the player. Onkith, hide the player. Onkith, turn the volume up.
-> Onkith, turn the light off. My number is 0512345678. My id card number
-> is 1234567890.
+> Onkith, turn the light off. Onkith, set the light to 40 percent. My
+> number is 0512345678. My id card number is 1234567890.
 
 Naming the device alone was not enough. It got the name right and ran the
 next word into it, so "Onkith play bones" came back as "Onkith Playbons":
@@ -213,7 +213,7 @@ ONKITH_CANARY_BOOST=2.0 ~/.onkith-canary-eval/.venv/bin/python \
 ./install_desktop.sh --remove
 ./install_desktop.sh --no-autostart   # the icon without the boot entry
 
-# the tests, 324 of them
+# the tests, 340 of them
 .venv/bin/python -m unittest discover -s tests -q
 ```
 
@@ -229,6 +229,7 @@ Onkith, show the player                   Onkith, turn the light on
 Onkith, hide the player                   Onkith, turn the light off
                                           Onkith, brighter
 Anything else is a question.              Onkith, dimmer
+                                          Onkith, set the light to 10 percent
 ```
 
 Three files have to agree on that list and a test walks every wording

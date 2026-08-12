@@ -274,12 +274,13 @@ class CoreRuntime:
             return
         self.playback.set_volume(self.playback.volume + int(delta))
 
-    def handle_light(self, intent: str) -> None:
+    def handle_light(self, intent: str, level: int | None = None) -> None:
         """One spoken instruction for the lamp.
 
-        The intent arrives rather than a number because on and off are
+        The intent leads rather than the number, because on and off are
         not points on the same scale: turning it off has to remember the
-        level so that turning it back on returns to it.
+        level so turning it back on returns to it. Only LIGHT_LEVEL
+        carries a number, and only when the words held one.
         """
 
         if intent == "LIGHT_ON":
@@ -290,6 +291,8 @@ class CoreRuntime:
             self.light.step(self.light.step_size)
         elif intent == "DIMMER":
             self.light.step(-self.light.step_size)
+        elif intent == "LIGHT_LEVEL" and level is not None:
+            self.light.set_brightness(level)
 
     # -------------------------------------------------------------- speech
 

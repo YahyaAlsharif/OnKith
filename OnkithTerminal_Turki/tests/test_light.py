@@ -127,6 +127,76 @@ class LightLaneTests(unittest.TestCase):
                 self.assertIn(word, hint)
 
 
+class LightLevelTests(unittest.TestCase):
+    """Setting the lamp to a percentage rather than nudging it.
+
+    The lane had only directions and switches in it, so a number had
+    nowhere to travel. This is the one intent that carries a value.
+    """
+
+    def read(self, transcript: str):
+        result = intercept_onkith_command(transcript)
+        return result.intent, result.level
+
+    def test_the_ways_people_name_a_level(self) -> None:
+        for transcript, level in [
+            ("Onkith set the light to 10 percent", 10),
+            ("Onkith set light to 10", 10),
+            ("Onkith set the light at 40%", 40),
+            ("Onkith light 25 percent", 25),
+            ("Onkith set the lamp to 60 percent", 60),
+            ("Onkith put the light at half", 50),
+            ("Onkith set the light to ninety percent", 90),
+            ("Onkith set the light to zero percent", 0),
+            ("Onkith set the light to one hundred percent", 100),
+        ]:
+            with self.subTest(transcript=transcript):
+                self.assertEqual(self.read(transcript), ("LIGHT_LEVEL", level))
+
+    def test_a_level_beats_the_direction_it_was_asked_with(self) -> None:
+        # "Dim the light to 20" names a level. Reading it as one step
+        # down would ignore the number the person actually said.
+        self.assertEqual(self.read("Onkith dim the light to 20"), ("LIGHT_LEVEL", 20))
+        self.assertEqual(
+            self.read("Onkith brighten the light to 80"), ("LIGHT_LEVEL", 80)
+        )
+
+    def test_a_number_elsewhere_in_the_sentence_is_not_a_level(self) -> None:
+        # The guard that earns its place. Without it this sets the lamp
+        # to 20% instead of turning it on.
+        self.assertEqual(
+            self.read("Onkith turn the light on I paid 20 dollars for it"),
+            ("LIGHT_ON", None),
+        )
+
+    def test_off_still_wins(self) -> None:
+        self.assertEqual(self.read("Onkith turn the light off"), ("LIGHT_OFF", None))
+
+    def test_a_question_containing_a_percentage_is_still_a_question(self) -> None:
+        self.assertEqual(self.read("Onkith what is 10 percent of 40"), ("ASK", None))
+
+    def test_a_level_outside_the_range_is_not_one(self) -> None:
+        # "Set the light to 2024" is not somebody asking for a
+        # brightness, and clamping it would pretend otherwise.
+        intent, level = self.read("Onkith set the light to 2024")
+        self.assertNotEqual(intent, "LIGHT_LEVEL")
+        self.assertIsNone(level)
+
+    def test_the_level_survives_the_five_word_command_cap(self) -> None:
+        # command_text is capped at five words and would drop the number
+        # off the end of the longest phrasing, so the level is read from
+        # the full command instead.
+        self.assertEqual(
+            self.read("Onkith please set the light to ninety percent"),
+            ("LIGHT_LEVEL", 90),
+        )
+
+    def test_the_hint_shows_the_recogniser_a_percentage(self) -> None:
+        from integrated_pipeline.whisper_adapter import name_hint
+
+        self.assertIn("percent", name_hint(["onkith"]))
+
+
 class LightControllerTests(unittest.TestCase):
     def test_on_lights_it_at_the_remembered_level(self) -> None:
         light, backend = controller()
@@ -230,13 +300,24 @@ class SpokenToDutyTests(unittest.TestCase):
         self.core = Core()
 
     def say(self, transcript: str) -> None:
-        intent = intercept_onkith_command(transcript).intent
+        result = intercept_onkith_command(transcript)
         self.assertIn(
-            intent,
-            ("LIGHT_ON", "LIGHT_OFF", "BRIGHTER", "DIMMER"),
+            result.intent,
+            ("LIGHT_ON", "LIGHT_OFF", "BRIGHTER", "DIMMER", "LIGHT_LEVEL"),
             f"{transcript!r} did not reach the lamp",
         )
-        self.core.handle_light(intent)
+        self.core.handle_light(result.intent, result.level)
+
+    def test_a_spoken_level_reaches_the_duty_cycle(self) -> None:
+        self.say("Onkith set the light to 25 percent")
+        self.assertEqual(self.backend.duties[-1], 25.0)
+        self.say("Onkith set the light to zero percent")
+        self.assertEqual(self.backend.duties[-1], 0.0)
+        self.assertFalse(self.light.is_on)
+        # And a level puts it back on without needing "on" said first.
+        self.say("Onkith set the light to 70 percent")
+        self.assertEqual(self.backend.duties[-1], 70.0)
+        self.assertTrue(self.light.is_on)
 
     def test_a_spoken_instruction_reaches_the_duty_cycle(self) -> None:
         self.say("Onkith turn the light on")

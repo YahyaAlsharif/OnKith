@@ -83,6 +83,17 @@ COMMAND_SHAPES = (
     "{name}, hide the player.",
     "{name}, turn the volume up.",
     "{name}, turn the light off.",
+    # Measured before being added, since eight shapes cost a digit once
+    # already: 6/6 numbers kept with it and 6/6 without. It carries a
+    # number of its own, which is probably why it does not pull the way
+    # the short command words do.
+    #
+    # It is not free. Word error rate on the clips that never address the
+    # device went from 9.7% to 11.4%, which is the prompt tugging at
+    # ordinary speech. Kept because a command the recogniser has never
+    # been shown is the failure this project keeps hitting, and 1.7
+    # points on speech that was not talking to it is the cheaper side.
+    "{name}, set the light to 40 percent.",
 )
 
 # A long number is the one thing this device must never round off, and the

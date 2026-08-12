@@ -174,7 +174,7 @@ class LiveSTTRuntime:
         music_worker: OnkithMusicWorker | None = None,
         on_panel: Callable[[bool], None] | None = None,
         on_volume: Callable[[int], None] | None = None,
-        on_light: Callable[[str], None] | None = None,
+        on_light: Callable[[str, int | None], None] | None = None,
         utc_now: Callable[[], str] = utc_now_iso,
     ):
         self.completed_recording_queue = completed_recording_queue
@@ -285,10 +285,13 @@ class LiveSTTRuntime:
                         "LIGHT_OFF",
                         "BRIGHTER",
                         "DIMMER",
+                        "LIGHT_LEVEL",
                     ):
                         if self.on_light is not None:
                             try:
-                                self.on_light(interception.intent)
+                                self.on_light(
+                                    interception.intent, interception.level
+                                )
                             except Exception:
                                 # A lamp is the least important thing on
                                 # this device and must never reach back

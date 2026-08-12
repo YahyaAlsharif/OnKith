@@ -59,6 +59,7 @@ Intent = Literal[
     "LIGHT_OFF",
     "BRIGHTER",
     "DIMMER",
+    "LIGHT_LEVEL",
 ]
 LogFunction = Callable[[str], None]
 
@@ -228,6 +229,19 @@ _DIMMER_WORDS = {"dimmer", "dim"}
 _LIGHT_OFF_WORDS = {"off", "out"}
 _LIGHT_ON_WORDS = {"on"}
 
+# "Set the light to ten percent" arrives as a word about as often as it
+# arrives as a numeral, and which one depends on the recogniser rather
+# than on the person, so both are read. Only the round tens: nobody asks
+# a lamp for thirty seven percent, and every extra word here is another
+# way to mishear an ordinary sentence as a command.
+_SPOKEN_LEVELS = {
+    "zero": 0, "ten": 10, "twenty": 20, "thirty": 30, "forty": 40,
+    "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+    "hundred": 100,
+    # What people say instead of a number.
+    "half": 50, "full": 100, "max": 100, "maximum": 100, "minimum": 0,
+}
+
 
 @dataclass(frozen=True)
 class OnkithInterception:
@@ -238,6 +252,9 @@ class OnkithInterception:
     command_span_start: int | None
     command_span_end: int | None
     remaining_text: str
+    # Only LIGHT_LEVEL carries one. Every other lane is a direction or a
+    # switch, and a number would mean nothing to it.
+    level: int | None = None
 
 
 @dataclass(frozen=True)
@@ -393,6 +410,44 @@ def _leads_with_close(words: list[str]) -> bool:
     return lead in {"turn", "switch"} and "off" in words[1:4]
 
 
+# How far into the command a level can sit, and what marks it as one.
+# "Set the light to ten percent" is the longest anybody says.
+_LEVEL_WINDOW = 6
+_LEVEL_MARKERS = {"to", "at", "percent", "%"}
+
+
+def requested_level(words: list[str]) -> int | None:
+    """A brightness out of 100, if these words are asking for one.
+
+    Two guards, and both earn their place. The number has to be near the
+    front, inside the command rather than anywhere in the sentence, and
+    something has to mark it as a level: "to", "at" or "percent".
+    Without them "turn the light on, I paid 20 dollars for it" sets the
+    lamp to 20%.
+
+    Strictly 0 to 100. Anything outside that is not a percentage somebody
+    meant for a lamp, and reading "set the light to 2024" as a level is
+    worse than not hearing it.
+
+    The largest match wins rather than the first, because "one hundred"
+    is two tokens and reads as 1 then 100, and a sentence carries one
+    level.
+    """
+
+    window = words[:_LEVEL_WINDOW]
+    if not _LEVEL_MARKERS.intersection(words[: _LEVEL_WINDOW + 1]):
+        return None
+    found: list[int] = []
+    for word in window:
+        if word.isdigit():
+            value = int(word)
+            if 0 <= value <= 100:
+                found.append(value)
+        elif word in _SPOKEN_LEVELS:
+            found.append(_SPOKEN_LEVELS[word])
+    return max(found) if found else None
+
+
 def _light_command(words: list[str]) -> Intent | None:
     """The lamp, which has to be named before it is touched.
 
@@ -404,11 +459,28 @@ def _light_command(words: list[str]) -> Intent | None:
     """
 
     lead = words[0]
+    names_the_lamp = any(word in _LIGHT_NOUNS for word in words[:4])
+    comparative = lead in _BRIGHTER_WORDS or (
+        lead in _DIMMER_WORDS and not _mentions_screen(words)
+    )
+
+    # A number beats every direction. "Dim the light to 20" names a level
+    # and reading it as one step down ignores what was asked for, so this
+    # has to come before the comparatives rather than after them. "Off"
+    # still wins: "turn the light off" with a stray number later in the
+    # sentence is off.
+    if (
+        (names_the_lamp or comparative)
+        and not _LIGHT_OFF_WORDS.intersection(words)
+        and requested_level(words) is not None
+    ):
+        return "LIGHT_LEVEL"
+
     if lead in _BRIGHTER_WORDS:
         return "BRIGHTER"
     if lead in _DIMMER_WORDS and not _mentions_screen(words):
         return "DIMMER"
-    if not any(word in _LIGHT_NOUNS for word in words[:4]):
+    if not names_the_lamp:
         return None
     if _LIGHT_OFF_WORDS.intersection(words) or lead in _CLOSE_WORDS:
         return "LIGHT_OFF"
@@ -637,6 +709,14 @@ def intercept_onkith_command(transcript: str) -> OnkithInterception:
         command_span_start=wake_start,
         command_span_end=command_end,
         remaining_text=remaining_text,
+        # Read from the same words the lane was decided on, not from
+        # command_text, which is capped at five words and would drop the
+        # number out of "set the light to ten percent".
+        level=(
+            requested_level(normalised_words[command_start:])
+            if intent == "LIGHT_LEVEL"
+            else None
+        ),
     )
 
 
