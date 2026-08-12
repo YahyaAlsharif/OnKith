@@ -611,11 +611,18 @@ class PrivacyBoundaryTest(unittest.TestCase):
             self.submitted: list[str] = []
             self.entities: list[list] = []
             self.commands: list = []
+            self.noted: list[str] = []
 
         def submit(self, text: str, entities=None, on_command=None) -> None:
             self.submitted.append(text)
             self.entities.append(list(entities or ()))
             self.commands.append(on_command)
+
+        def note_command(self, text: str, entities=None) -> None:
+            # Shown on screen, never sent. Kept apart from `submitted`
+            # so a test asking what left the device gets a straight
+            # answer.
+            self.noted.append(text)
 
     def test_cleared_masked_text_is_forwarded(self) -> None:
         assistant = self.Collector()
@@ -899,9 +906,13 @@ class TheFastPathStaysOffTheNetworkTest(unittest.TestCase):
     class Collector:
         def __init__(self) -> None:
             self.submitted: list[str] = []
+            self.noted: list[str] = []
 
         def submit(self, text, entities=None, on_command=None) -> None:
             self.submitted.append(text)
+
+        def note_command(self, text, entities=None) -> None:
+            self.noted.append(text)
 
     class Result:
         def __init__(self, text: str) -> None:
@@ -917,9 +928,16 @@ class TheFastPathStaysOffTheNetworkTest(unittest.TestCase):
             )()
 
     def forwarded(self, transcript: str) -> list[str]:
+        """What actually left the device. Not what reached the screen."""
+
         assistant = self.Collector()
         forward_masked_output(self.Result(transcript), assistant, lambda _: None)
         return assistant.submitted
+
+    def shown(self, transcript: str) -> list[str]:
+        assistant = self.Collector()
+        forward_masked_output(self.Result(transcript), assistant, lambda _: None)
+        return assistant.noted
 
     def test_a_recognised_command_never_leaves_the_device(self) -> None:
         for transcript in (
@@ -941,3 +959,70 @@ class TheFastPathStaysOffTheNetworkTest(unittest.TestCase):
 
     def test_speech_that_never_addressed_it_is_not_sent_either(self) -> None:
         self.assertEqual(self.forwarded("the lights are quite dim tonight"), [])
+        self.assertEqual(self.shown("the lights are quite dim tonight"), [])
+
+    def test_a_command_is_shown_even_though_it_is_not_sent(self) -> None:
+        # The two are different questions and this test is here because
+        # they were confused once: nothing sent used to mean nothing
+        # shown, and the screen sat blank through every command.
+        self.assertEqual(self.forwarded("Onkith turn the light off"), [])
+        self.assertEqual(self.shown("Onkith turn the light off"), ["Onkith turn the light off"])
+
+
+class CommandsAppearOnTheScreenTest(unittest.TestCase):
+    """A command was heard, acted on, and the screen stayed blank.
+
+    Recognised commands never reach the network, which is the point, and
+    that also meant they never reached the conversation. Somebody said
+    "turn the light on", the lamp changed, and the screen showed nothing,
+    which is indistinguishable from not having been heard.
+    """
+
+    def turns_after(self, transcript: str) -> list[dict]:
+        bus = EventBus()
+        worker = AssistantWorker(
+            llm=FakeLLM(reply="unused"),
+            speech=RecordingSpeech(),
+            bus=bus,
+            log=lambda message: None,
+        )
+        worker.start()
+
+        class Result:
+            pii = type(
+                "PII",
+                (),
+                {
+                    "safe_to_release": True,
+                    "original_text": transcript,
+                    "masked_text": transcript,
+                    "entities": [],
+                },
+            )()
+
+        forward_masked_output(Result(), worker, lambda _: None)
+        worker.shutdown()
+        return bus.snapshot()["conversation"]["turns"]
+
+    def test_a_command_reaches_the_screen(self) -> None:
+        turns = self.turns_after("Onkith turn the light on")
+        self.assertEqual([turn["role"] for turn in turns], ["user"])
+        self.assertIn("turn the light on", turns[0]["text"])
+
+    def test_it_is_shown_without_being_asked_about(self) -> None:
+        # The model is never called for a command. Shown, not sent.
+        bus = EventBus()
+        llm = FakeLLM(reply="should not be asked")
+        worker = AssistantWorker(
+            llm=llm, speech=RecordingSpeech(), bus=bus, log=lambda m: None
+        )
+        worker.start()
+        worker.note_command("Onkith turn the light on", [])
+        worker.shutdown()
+        self.assertEqual(llm.seen, [])
+
+    def test_speech_that_never_addressed_it_is_still_not_shown(self) -> None:
+        # It was not talking to the device, so it does not go on its
+        # screen. The device hears the whole room and shows what was
+        # said to it.
+        self.assertEqual(self.turns_after("the lights are quite dim tonight"), [])

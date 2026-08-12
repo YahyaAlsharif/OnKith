@@ -40,7 +40,7 @@ class AssistantWorker:
         self.bus = bus
         self.log = log
         self.queue: queue.Queue[
-            tuple[str, list, Callable[[str], None] | None] | None
+            tuple[str, list, Callable[[str], None] | None, bool] | None
         ] = queue.Queue()
         self.thread: threading.Thread | None = None
         self.errors: list[str] = []
@@ -86,7 +86,25 @@ class AssistantWorker:
         text = (masked_text or "").strip()
         if not text or self._shutdown:
             return
-        self.queue.put((text, list(entities or ()), on_command))
+        self.queue.put((text, list(entities or ()), on_command, True))
+
+    def note_command(self, masked_text: str, entities: list | None = None) -> None:
+        """Put a command on the screen without asking the model anything.
+
+        A command the device recognises never reaches the network, which
+        is the point of recognising it. Until now that also meant it
+        never reached the screen: somebody said "turn the light on", the
+        lamp changed, and the conversation showed nothing at all, which
+        reads as the device not having heard.
+
+        Queued rather than recorded here, so the worker thread stays the
+        only owner of the turns and the rehydration map. Nothing is sent.
+        """
+
+        text = (masked_text or "").strip()
+        if not text or self._shutdown:
+            return
+        self.queue.put((text, list(entities or ()), None, False))
 
     def _record(self, role: str, text: str) -> None:
         # The screen is in the room with the person who spoke, so it shows
@@ -127,11 +145,15 @@ class AssistantWorker:
             try:
                 if item is None:
                     return
-                masked_text, entities, on_command = item
+                masked_text, entities, on_command, answer = item
                 # The map is added before the call so a reply can refer to
                 # a placeholder from any earlier turn in the conversation.
                 self._rehydration.add(entities)
                 self._record("user", masked_text)
+                if not answer:
+                    # A command. Shown, carried out elsewhere, not asked
+                    # about.
+                    continue
                 self._state("thinking")
                 try:
                     reply = self.llm.reply_to(masked_text)

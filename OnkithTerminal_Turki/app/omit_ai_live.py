@@ -426,6 +426,13 @@ def forward_masked_output(
         # Cleared, and it stayed here. Which is most of what this device
         # hears, and is meant to be.
         _report_gate(core, "held")
+        # A command was still spoken to it, and the screen showed nothing
+        # at all: the lamp changed and the conversation stayed blank,
+        # which reads as not having been heard. Shown, not sent. Speech
+        # that never addressed the device is still not shown, because it
+        # was not talking to it.
+        if assistant is not None and spoken_to.command_detected:
+            assistant.note_command(result.pii.masked_text, result.pii.entities)
         return
     _report_gate(core, "sent")
     raw = result.pii.original_text
