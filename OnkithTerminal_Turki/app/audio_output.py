@@ -267,6 +267,15 @@ def _describe_speech() -> dict[str, Any]:
         "piper_voice": os.environ.get("ONKITH_PIPER_MODEL"),
         "espeak": shutil.which("espeak-ng") or shutil.which("espeak"),
         "output_devices": outputs,
+        # A Pi 5 has no headphone jack. It was on the Pi 4 and it is gone,
+        # so there are exactly two ways off the board: HDMI, or USB. A
+        # board with no screen attached and a USB microphone rather than a
+        # USB speaker has nowhere at all to put sound, and every symptom
+        # of that reads as a broken application: the music plays with no
+        # error, the voice synthesises with no error, and the room is
+        # silent.
+        "only_hdmi_output": bool(outputs)
+        and all("hdmi" in card.lower() for card in outputs),
     }
 
 
@@ -323,10 +332,26 @@ def format_device_report(report: dict[str, Any]) -> str:
     # the default can be an HDMI output with nothing on the end of it.
     for index, card in enumerate(speech.get("output_devices") or []):
         lines.append(f"{'Output' if index == 0 else '':<14} {card}")
-    if not speech.get("output_devices") and platform.system() == "Linux":
+    if platform.system() == "Linux":
         # Only where aplay is the right question. A Mac has no aplay and
         # an empty list there means nothing at all.
-        lines.append("Output         none found by aplay -l; nothing can be heard")
+        if not speech.get("output_devices"):
+            lines.append(
+                "Output         NONE. A Pi 5 has no headphone jack, so sound"
+            )
+            lines.append(
+                "               leaves it by HDMI or by USB and neither is here."
+            )
+        elif speech.get("only_hdmi_output") and session == "none":
+            lines.append(
+                "Output         HDMI only, and no display is attached. Nothing"
+            )
+            lines.append(
+                "               will be audible until a screen with speakers is"
+            )
+            lines.append(
+                "               plugged in, or a USB speaker is."
+            )
 
     for note in audio.get("notes", []):
         lines.append(f"Note           {note}")

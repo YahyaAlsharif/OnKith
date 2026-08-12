@@ -10,41 +10,51 @@ This is the list of what is still wrong with it.
 
 ---
 
-## 0. The Pi cannot speak
+## 0. The Pi has nowhere to put sound
 
-**Seen** in the first report back from the device, 2026-08-12:
+Not a speech problem. The music does not play either, which is the fact
+that identifies it: two unrelated subsystems, mpv and the voice, both
+silent and both reporting success.
 
-```
-  piper                -
-  piper-tts            -
-  espeak-ng            -
-```
+**A Raspberry Pi 5 has no headphone jack.** It was on the Pi 4 and it
+was removed. Sound leaves a Pi 5 by HDMI or by USB, and there is no
+third way. The first report from the device says `Display none`, so no
+HDMI is attached, and the `UACDemoV1.0` is a one channel capture device,
+which is a microphone rather than a speaker.
 
-None of the three. `detect_backend` in `app/speech.py` walks piper,
-kokoro, espeak, say and falls off the end to `NullSpeechBackend`, which
-logs one line and returns. So the device hears, masks, routes, answers
-and shows the answer on screen, and says nothing out loud. Nothing
-crashes, which is why the report is otherwise all green.
+So there is likely no output hardware on the board at all, and every
+symptom of that reads as broken software: mpv loads the track and plays
+it with no error, the voice synthesises with no error, and the room
+stays quiet.
 
-**Cause.** `install_pi.sh` installs piper best-effort, because its wheels
-are not always published for aarch64, and falls back to
-`apt-get install -y espeak-ng || true`. Both failed and the `|| true`
-swallowed the second one, so the install finished reporting success.
-
-**Fix, in order of how quickly it gets a voice back:**
+**Confirm with one command** on the Pi:
 
 ```bash
-sudo apt-get install -y espeak-ng      # and read the error if it fails
+aplay -l
+speaker-test -t sine -f 440 -c 2 -l 1
 ```
 
-That alone makes the device speak, badly. For the real voice, piper needs
-both its binary and a voice file, and `ONKITH_PIPER_MODEL` pointing at
-the voice, or `build_piper_backend` returns None and the chain falls
-through again with no error.
+If `aplay -l` lists only `vc4-hdmi` cards, that is the whole answer.
 
-The installer should stop hiding this. `|| true` on the last fallback in
-a chain means the one case where nobody gets a voice is the one case that
-reports success.
+`--device-report` now says this in words rather than leaving it to be
+worked out, including the HDMI-with-no-screen case.
+
+**What it needs.** One of:
+
+- a **USB speaker** or USB audio dongle with speakers on it, which is the
+  most likely right answer for an appliance and works headless
+- the **HDMI monitor** that will be there on the day, if it has speakers,
+  which many monitors do not
+- a small **I2S or USB DAC** with an amplifier, if the enclosure is
+  supposed to have its own speaker
+
+This is a hardware decision, not a code one, and it needs making before
+the demo rather than on the day. Nothing in this repo can produce sound
+on a board that has no way to emit it.
+
+Once there is an output, `espeak-ng` still has to be installed for the
+voice: `sudo apt-get install -y espeak-ng`. Both are needed, and until
+the first one is solved the second cannot be tested.
 
 ---
 
