@@ -30,7 +30,7 @@ The venv is uv-created. There is **no `pip`** and **no bare `python`**.
 ```bash
 .venv/bin/python                                  # the interpreter
 VIRTUAL_ENV="$PWD/.venv" uv pip install <pkg>     # how to install
-.venv/bin/python -m unittest discover -s tests -q # the tests, 315 of them
+.venv/bin/python -m unittest discover -s tests -q # the tests, 324 of them
 ```
 
 There is no pytest. `unittest discover` is the runner.
@@ -50,8 +50,8 @@ clips kept separate:
 | False wake | **0%** | 8% (1/12) | **0%** |
 | Intent | 25% | **100%** | 75% |
 | Digits kept | 67% | **100%** | 0% |
-| WER with the name | 39.5% | **5.0%** | 16.3% |
-| WER without it | 14.2% | 10.5% | 2.2% on prose, 50.2% overall |
+| WER with the name | 39.5% | **2.9%** | 16.3% |
+| WER without it | 14.2% | 9.7% | 2.2% on prose, 50.2% overall |
 
 **Whisper base.en is the recogniser to ship.** Two reasons the other two
 are out:
@@ -160,15 +160,20 @@ builds this from the configured wake names, never hardcoded beside them:
 > Onkith is the name of this device. It also answers to Sada, Sitr, Echo.
 > Onkith, play Bones by Imagine Dragons. Onkith, stop the music. Onkith,
 > show the player. Onkith, hide the player. Onkith, turn the volume up.
-> Onkith, turn it down. Onkith, turn the light on. Onkith, turn the light
-> off. My number is 0512345678 and my id is 1234567890.
+> Onkith, turn the light off. My number is 0512345678. My id card number
+> is 1234567890.
 
 Naming the device alone was not enough. It got the name right and ran the
 next word into it, so "Onkith play bones" came back as "Onkith Playbons":
 wake word perfect, command gone, music request answered as conversation.
-Showing whole commands took intent from 83% to 100%. Biasing toward four
-short command words then cost a digit out of a phone number, so the
-full-length number on the end buys it back at a cost of 2.1 points of WER.
+Showing whole commands took intent from 83% to 100%. Biasing toward short
+command words costs a digit out of a long number, so the numbers on the
+end buy it back, and the two sides have to be measured together every
+time either grows. Adding volume and the lamp took the list to eight
+examples and lost a digit out of an id number until the list came back
+down to six, one per lane rather than one per wording. The comment on
+DIGIT_SHAPE has the measurements, including the variant that says part of
+why this works is the examples resembling the answer.
 
 Measured and rejected: `condition_on_previous_text=False` changed nothing
 on any clip. `small.en` reached 1.7% WER on the name and then 52% on the
@@ -208,7 +213,7 @@ ONKITH_CANARY_BOOST=2.0 ~/.onkith-canary-eval/.venv/bin/python \
 ./install_desktop.sh --remove
 ./install_desktop.sh --no-autostart   # the icon without the boot entry
 
-# the tests, 315 of them
+# the tests, 324 of them
 .venv/bin/python -m unittest discover -s tests -q
 ```
 
@@ -255,7 +260,7 @@ e87dc77 fix: --print-config showed the file, not the run
 5cfefbb feat: score Abdullah's Canary on the same corpus as the other two
 ```
 
-315 tests pass. Nothing is pushed.
+324 tests pass.
 
 ## What changed since the last handoff
 

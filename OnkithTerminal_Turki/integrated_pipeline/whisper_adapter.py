@@ -72,23 +72,46 @@ class WhisperCounters:
 # A command the hint does not demonstrate is a command the recogniser is
 # not biased toward, so this list and the lanes in onkith_music.py have
 # to be added to together.
+# One example per lane, not one per wording. Eight of these cost a digit
+# (see DIGIT_SHAPE below) and the four that were cut share every word
+# with the four that stayed except "down", "on" and "it", which are among
+# the commonest words in English and need no help.
 COMMAND_SHAPES = (
     "{name}, play Bones by Imagine Dragons.",
     "{name}, stop the music.",
     "{name}, show the player.",
     "{name}, hide the player.",
     "{name}, turn the volume up.",
-    "{name}, turn it down.",
-    "{name}, turn the light on.",
     "{name}, turn the light off.",
 )
 
 # A long number is the one thing this device must never round off, and the
-# hint above biases toward short command words, which cost a digit:
-# 0501234567 came back as 050123457. One example of a full-length number
-# restores it. Both values are shaped like the real thing and are not
-# anybody's: a phone number in the local format and a ten digit id.
-DIGIT_SHAPE = "My number is 0512345678 and my id is 1234567890."
+# hint above biases toward short command words, which costs a digit:
+# 0501234567 came back as 050123457. A full-length number in the hint
+# restores it.
+#
+# The two sides have to be kept in balance, and adding to one without
+# re-measuring breaks it. Growing the command list to eight, for volume
+# and the lamp, tipped it and 1098765432 came back as 109876542.
+#
+# Measured on the six corpus clips that carry a verbatim number, both
+# halves, kept as digits only:
+#
+#   4 commands, 1 combined number sentence      6/6
+#   8 commands, 2 number sentences              5/6
+#   6 commands, 2 number sentences              6/6   <- this
+#   8 commands, 3 number sentences              6/6
+#   8 commands, 2 sentences, unrelated digits   3/6
+#
+# That last row is the one to be careful about. Changing the example
+# numbers to unrelated values lost half of them, which means part of what
+# makes this work is the examples resembling the answer. On a number this
+# corpus has never seen, expect worse than 100%. The corpus is the only
+# evidence there is, and it is not the same thing as the world.
+#
+# Both values are shaped like the real thing and are nobody's: a phone
+# number in the local format and a ten digit id.
+DIGIT_SHAPE = "My number is 0512345678. My id card number is 1234567890."
 
 
 def name_hint(names: Any) -> str:

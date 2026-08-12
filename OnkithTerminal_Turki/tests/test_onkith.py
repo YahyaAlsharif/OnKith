@@ -278,13 +278,18 @@ class VolumeLaneTests(unittest.TestCase):
         # the transport. Only the comparative means the level.
         self.assertNotIn(self.lane("Onkith quiet"), ("LOUDER", "QUIETER"))
 
-    def test_the_hint_shows_the_recogniser_the_new_words(self) -> None:
-        # A command the hint does not demonstrate is one the recogniser
-        # is not biased toward, which is how "play bones" became
-        # "Playbons" before the shapes were added.
+    def test_the_hint_shows_the_recogniser_the_word_volume(self) -> None:
+        # A word the hint does not contain is one the recogniser is not
+        # biased toward, which is how "play bones" became "Playbons"
+        # before the shapes were added.
+        #
+        # The word, not a particular wording. The hint carries one
+        # example per lane rather than one per phrasing, because eight
+        # examples cost a digit out of an id number, so asserting an
+        # exact sentence here would fight the thing that keeps digits.
         hint = name_hint(["onkith"])
-        self.assertIn("volume up", hint)
-        self.assertIn("turn it down", hint)
+        self.assertIn("volume", hint)
+        self.assertIn("Onkith, turn the volume up.", hint)
 
 
 class WakeWordStrippingTests(unittest.TestCase):

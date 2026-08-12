@@ -93,12 +93,38 @@ class LightLaneTests(unittest.TestCase):
         self.assertEqual(self.lane("Onkith why is the light so bright"), "ASK")
         self.assertEqual(self.lane("Onkith what colour is the light"), "ASK")
 
-    def test_the_hint_shows_the_recogniser_the_lamp(self) -> None:
+    def test_the_hint_shows_the_recogniser_the_word_light(self) -> None:
         from integrated_pipeline.whisper_adapter import name_hint
 
+        # The word, not both wordings. One example per lane: eight
+        # examples cost a digit out of an id number, and "on" needs no
+        # help from a prompt.
         hint = name_hint(["onkith"])
-        self.assertIn("light on", hint)
-        self.assertIn("light off", hint)
+        self.assertIn("light", hint)
+        self.assertIn("Onkith, turn the light off.", hint)
+
+    def test_every_lane_the_device_has_is_somewhere_in_the_hint(self) -> None:
+        """The hint and the lanes have to grow together.
+
+        A lane with no word in the hint is a command the recogniser was
+        never told about, and it will mishear it into conversation. This
+        is the check that survives the hint being trimmed, which it was:
+        it names the vocabulary each lane needs rather than a sentence.
+        """
+
+        from integrated_pipeline.whisper_adapter import name_hint
+
+        hint = name_hint(["onkith"]).lower()
+        for lane, word in (
+            ("PLAY", "play"),
+            ("CLOSE", "stop"),
+            ("SHOW", "show"),
+            ("HIDE", "hide"),
+            ("LOUDER/QUIETER", "volume"),
+            ("LIGHT_*", "light"),
+        ):
+            with self.subTest(lane=lane):
+                self.assertIn(word, hint)
 
 
 class LightControllerTests(unittest.TestCase):
