@@ -100,6 +100,34 @@ class PipelineConfig:
         )
 
     @property
+    def never_masked_words(self) -> tuple[str, ...]:
+        """The device's own names, which are not somebody's personal data.
+
+        TinyBERT reads Onkith as a person's given name, correctly as far
+        as it knows, and redacts it. Every utterance to this device begins
+        with its name, so every utterance arrived at the assistant as
+        "[GIVENNAME_1], turn the light off". The reply is rehydrated on the
+        way out, so the model answering "users like you, [GIVENNAME_1]"
+        says the name out loud, which is the thing the wake word strip was
+        written to stop.
+
+        Seeded from the wake list rather than written out, so renaming the
+        device keeps this true. The trade is real and worth stating: Sada
+        and Echo are names people have, so a person called Echo is no
+        longer masked by name in a transcript. Only an exact whole-span
+        match is released, so "Echo Alshuaibi" still goes, and the device
+        being unable to hear its own name on every single utterance is the
+        larger harm.
+        """
+
+        wake = self.wake
+        words = [*(wake.get("names") or []), *(wake.get("spellings") or [])]
+        words.extend(self.pii.get("never_mask_words", []))
+        return tuple(
+            sorted({str(word).strip().casefold() for word in words if str(word).strip()})
+        )
+
+    @property
     def stt(self) -> dict[str, Any]:
         """Which recogniser listens, and how.
 

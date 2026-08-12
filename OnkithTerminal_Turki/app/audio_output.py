@@ -231,6 +231,42 @@ def describe_device() -> dict[str, Any]:
             "mpv": shutil.which("mpv"),
             "yt-dlp": shutil.which("yt-dlp"),
         },
+        "speech": _describe_speech(),
+    }
+
+
+def _describe_speech() -> dict[str, Any]:
+    """Which voice the app would actually pick, and where it would play.
+
+    The report used to list the binaries and stop there, which is not the
+    same question. A device came back with all three missing and nobody
+    read the three dashes as "this cannot speak", and knowing the binary
+    exists still does not say whether the sound has anywhere to go: the
+    voice plays to the default ALSA device, and on a Pi with no screen
+    attached that can be an HDMI sink with nothing on the end of it.
+    """
+
+    from app.speech import detect_backend
+
+    outputs: list[str] = []
+    try:
+        # aplay is in alsa-utils, which install_pi.sh requires.
+        listing = subprocess.run(
+            ["aplay", "-l"], capture_output=True, text=True, timeout=5
+        )
+        outputs = [
+            line.strip()
+            for line in listing.stdout.splitlines()
+            if line.startswith("card ")
+        ]
+    except Exception:
+        outputs = []
+    return {
+        "backend": detect_backend().name,
+        "piper": shutil.which("piper") or shutil.which("piper-tts"),
+        "piper_voice": os.environ.get("ONKITH_PIPER_MODEL"),
+        "espeak": shutil.which("espeak-ng") or shutil.which("espeak"),
+        "output_devices": outputs,
     }
 
 
@@ -271,6 +307,26 @@ def format_device_report(report: dict[str, Any]) -> str:
     session = display.get("wayland") or display.get("x11") or "none"
     lines.append(f"Display        {session}")
     lines.append(f"Chromium       {display.get('chromium') or 'not found'}")
+
+    speech = report.get("speech", {})
+    backend = speech.get("backend", "none")
+    lines.append(
+        f"Voice          {backend}"
+        + ("  CANNOT SPEAK" if backend == "none" else "")
+    )
+    if backend == "none":
+        lines.append("Note           sudo apt-get install -y espeak-ng")
+    elif backend == "piper" and not speech.get("piper_voice"):
+        lines.append("Note           piper has no voice file; set ONKITH_PIPER_MODEL")
+    # Where the voice would actually come out. A binary that exists and a
+    # sink that plays are different questions, and on a Pi with no screen
+    # the default can be an HDMI output with nothing on the end of it.
+    for index, card in enumerate(speech.get("output_devices") or []):
+        lines.append(f"{'Output' if index == 0 else '':<14} {card}")
+    if not speech.get("output_devices") and platform.system() == "Linux":
+        # Only where aplay is the right question. A Mac has no aplay and
+        # an empty list there means nothing at all.
+        lines.append("Output         none found by aplay -l; nothing can be heard")
 
     for note in audio.get("notes", []):
         lines.append(f"Note           {note}")

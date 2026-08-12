@@ -110,3 +110,77 @@ class ReleasedEntityTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheDevicesOwnNameTest(unittest.TestCase):
+    """TinyBERT read Onkith as a person and redacted it, every utterance.
+
+    Seen on the Pi: the transcript said "[GIVENNAME_1], turn the light
+    off" every single time. Correct of the classifier, as far as it
+    knows, and wrong for this device: the name is how it was addressed,
+    not somebody's personal detail.
+
+    It also silently killed the wake word strip. That runs on the masked
+    text, by design, so the raw transcript never reaches a network model,
+    and by then the name was a placeholder and there was nothing to
+    remove. The assistant got the placeholder and its reply was
+    rehydrated on the way out, so the model saying "users like you,
+    [GIVENNAME_1]" said the name out loud.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.config = PipelineConfig()
+        cls.masker = FailClosedMasker(PIIMaskerAdapter(cls.config))
+
+    def masked(self, text: str) -> str:
+        return self.masker.mask_text(text).masked_text
+
+    def test_the_device_keeps_its_own_name(self) -> None:
+        for name in self.config.wake.get("names", []):
+            spoken = name[:1].upper() + name[1:]
+            with self.subTest(name=spoken):
+                self.assertIn(spoken, self.masked(f"{spoken}, turn the light off"))
+
+    def test_a_person_is_still_masked_beside_it(self) -> None:
+        # The whole point of the device, in one sentence: its own name
+        # released, everything about the person kept back.
+        out = self.masked("Onkith, call Turki on 0501234567")
+        self.assertIn("Onkith", out)
+        self.assertNotIn("Turki", out)
+        self.assertNotIn("0501234567", out)
+
+    def test_a_longer_name_containing_it_is_still_masked(self) -> None:
+        # Only an exact whole-span match is released. A person whose name
+        # merely contains the device's is still a person.
+        self.assertNotIn("Alshuaibi", self.masked("my name is Onkith Alshuaibi"))
+
+    def test_a_name_that_only_sounds_like_it_is_still_masked(self) -> None:
+        # Ankith is a name people have. It is in the wake `never` list so
+        # it cannot wake the device, and it is not in the release list, so
+        # it stays masked like any other person.
+        self.assertNotIn("Ankith", self.masked("someone named Ankith called me"))
+
+    def test_the_release_list_follows_the_configured_names(self) -> None:
+        # Written out beside the names rather than derived from them, a
+        # renamed device would go back to masking itself.
+        config = PipelineConfig()
+        config.data["wake"] = {"names": ["jarvis"], "spellings": [], "never": []}
+        self.assertIn("jarvis", config.never_masked_words)
+        self.assertNotIn("onkith", config.never_masked_words)
+
+    def test_the_wake_word_strip_works_again(self) -> None:
+        from app.onkith_music import (
+            WakeWords,
+            configure_wake_words,
+            without_wake_word,
+            wake_words,
+        )
+
+        previous = wake_words()
+        configure_wake_words(WakeWords.from_config(self.config.wake))
+        try:
+            handed_over = without_wake_word(self.masked("Onkith, what is your purpose?"))
+            self.assertEqual(handed_over, "what is your purpose?")
+        finally:
+            configure_wake_words(previous)

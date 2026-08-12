@@ -51,6 +51,7 @@ class PIIMaskerAdapter:
         self._id2label: dict[int, str] = {}
         self._structured = StructuredPIIRecognizer()
         self.never_masked = frozenset(config.never_masked_entities)
+        self.never_masked_words = frozenset(config.never_masked_words)
         self.load_count = 0
 
     @property
@@ -200,6 +201,21 @@ class PIIMaskerAdapter:
         )[..., 0]
         return predictions, confidence
 
+    def _is_the_devices_own_name(self, span: SpanCandidate) -> bool:
+        """A span that is exactly the device's name and nothing else.
+
+        Whole span only. "Onkith" is released; "Onkith Alshuaibi" is not,
+        because the second word makes it a person again, and a span that
+        merely contains the name is somebody whose name contains it.
+
+        Structured spans are not offered here on purpose. A phone number
+        is a phone number whatever it sits next to, and this exists for
+        one narrow thing: the classifier reading the device's name as a
+        person's.
+        """
+
+        return span.text.strip().casefold() in self.never_masked_words
+
     def mask_text(self, text: str) -> PIIResult:
         """Mask one complete buffer; callers enforce fail-closed exceptions."""
 
@@ -295,6 +311,7 @@ class PIIMaskerAdapter:
             span
             for span in consolidated.spans
             if span.entity_type not in self.never_masked
+            and not self._is_the_devices_own_name(span)
         ]
         structured_started = time.perf_counter()
         structured_spans = [
