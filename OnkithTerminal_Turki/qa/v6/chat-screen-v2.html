@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onkith chat screen v2</title>
+<style>
+  @font-face {
+    font-family: "Archivo";
+    src: url("../../assets/player/archivo-regular-v1.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Archivo";
+    src: url("../../assets/player/archivo-medium-v1.ttf") format("truetype");
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Archivo";
+    src: url("../../assets/player/archivo-semibold-v1.ttf") format("truetype");
+    font-weight: 600;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../../assets/player/ibm-plex-mono-v1.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  :root {
+    --void: #080706;
+    --surface: #131110;
+    --raise: #1c1917;
+    --hairline: #252220;
+    --hairline-lit: #3a3532;
+    --ink: #f5f2ee;
+    --ink-2: #8d8781;
+    --ink-3: #56514d;
+    --hold-wash: rgba(245, 242, 238, 0.07);
+    --lift: #ff5a36;
+    --lift-dim: #a85337;
+    --lift-wash: rgba(255, 90, 54, 0.12);
+    --lift-dim-wash: rgba(168, 83, 55, 0.14);
+    --display: "Archivo", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s5: 24px;
+    --s6: 32px;
+    --s7: 48px;
+    --r: 2px;
+    --r-lg: 4px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    block-size: 100%;
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--display);
+    overflow: hidden;
+  }
+
+  .screen {
+    block-size: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 0fr;
+    transition: grid-template-columns 460ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .screen[data-player="open"] { grid-template-columns: minmax(0, 1fr) minmax(0, 0.46fr); }
+
+  /* The room is one centred column: history above, the creature in the
+     middle, the answer below. An appliance is looked at from across a room,
+     so there is one thing to look at. */
+  .room {
+    min-inline-size: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 0.8fr) auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    padding: var(--s5) var(--s6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ----------------------------------------------------------- the creature */
+
+  .creature {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(160px, 26vh, 280px);
+    aspect-ratio: 1;
+  }
+
+  /* Flat rings, no blur and no glow. They are geometry, not light: speech
+     arriving, drawn the way a ripple is drawn. */
+  .ring {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--lift);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  [data-pet="listening"] .ring { animation: arrive 2.6s cubic-bezier(0.2, 0, 0.4, 1) infinite; }
+  [data-pet="listening"] .ring:nth-child(2) { animation-delay: 0.86s; }
+  [data-pet="listening"] .ring:nth-child(3) { animation-delay: 1.72s; }
+  @keyframes arrive {
+    0% { transform: scale(1.34); opacity: 0; }
+    28% { opacity: 0.85; }
+    100% { transform: scale(0.62); opacity: 0; }
+  }
+  [data-pet="thinking"] .ring:first-child {
+    opacity: 0.55;
+    border-color: var(--lift-dim-wash);
+    border-inline-end-color: var(--lift);
+    animation: turn 2.1s linear infinite;
+  }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  .mark { inline-size: 62%; block-size: 62%; overflow: visible; }
+  .mark rect { fill: var(--ink); }
+  .mark .sheltered {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: fill 220ms ease;
+  }
+
+  /* The sheltered block is the creature. The eave is where it lives, so the
+     cover and the wall never move and it is the block that has a life:
+     resting it breathes, listening it leans out toward the room, thinking it
+     paces, speaking it rides the voice, and when the gate stops something it
+     goes back under the cover and waits. */
+  [data-pet="resting"] .mark .sheltered { animation: rest 5.2s ease-in-out infinite; }
+  @keyframes rest {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(0, 0.5px) scale(0.955); }
+  }
+
+  [data-pet="listening"] .mark .sheltered { animation: lean 1.9s ease-in-out infinite; }
+  @keyframes lean {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    45% { transform: translate(-1.5px, 1.5px) scale(1.1); }
+  }
+
+  [data-pet="thinking"] .mark .sheltered { animation: pace 1.5s ease-in-out infinite; }
+  @keyframes pace {
+    0%, 100% { transform: translate(-2.4px, 0) scale(0.88); }
+    50% { transform: translate(2.4px, -0.9px) scale(0.88); }
+  }
+
+  [data-pet="speaking"] .mark .sheltered { animation: voice 0.42s ease-in-out infinite; }
+  @keyframes voice {
+    0%, 100% { transform: scale(0.84, 0.7); }
+    50% { transform: scale(1.06, 1.14); }
+  }
+
+  /* Colour says the device is doing something, and nothing else. At rest it
+     is colourless, which is the rule that carries the concept: silence is
+     the product working. The moment it hears, thinks or answers, the
+     creature takes the accent and the room can see that from the doorway.
+     The eave it lives under stays ink throughout, so the shelter reads as
+     the constant and the life inside it as the thing that changes. */
+  [data-pet="listening"] .mark .sheltered,
+  [data-pet="thinking"] .mark .sheltered,
+  [data-pet="speaking"] .mark .sheltered { fill: var(--lift); }
+
+  /* What happened to the words is a separate channel and stays on the chip,
+     so a single hue is never asked to carry two meanings at once. The gate
+     stopping something is told apart by behaviour rather than by colour:
+     the creature goes back under the cover and waits there. */
+  [data-gate="blocked"] .mark .sheltered {
+    fill: var(--lift);
+    animation: hide 1.6s ease-in-out infinite !important;
+  }
+  @keyframes hide {
+    0%, 100% { transform: translate(3px, -2.6px) scale(0.6); }
+    50% { transform: translate(3px, -3.1px) scale(0.56); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark .sheltered, .ring { animation: none !important; }
+  }
+
+  .state-line {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    margin-block-start: var(--s4);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  /* The word takes the accent alongside the creature, so the state reads the
+     same whether you are close enough to read it or across the room. */
+  [data-pet="listening"] #stateWord,
+  [data-pet="thinking"] #stateWord,
+  [data-pet="speaking"] #stateWord { color: var(--lift); }
+  .chip {
+    padding: 5px 12px;
+    border-radius: var(--r);
+    background: var(--hold-wash);
+    color: var(--ink);
+    letter-spacing: 0.1em;
+  }
+  .chip[data-gate="sent"] { background: var(--lift-dim-wash); color: #c4714f; }
+  .chip[data-gate="blocked"] { background: var(--lift-wash); color: var(--lift); }
+
+  /* ------------------------------------------------------------- the words */
+
+  /* What came before, kept quiet. You can see there is a conversation
+     without being able to read it from the far side of the room. */
+  .before {
+    align-self: end;
+    inline-size: min(100%, 62ch);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s2);
+    margin-block-end: var(--s5);
+    text-align: center;
+  }
+  .before p {
+    margin: 0;
+    max-inline-size: 48ch;
+    font-size: clamp(13px, 1.15vw, 16px);
+    line-height: 1.5;
+  }
+  .before p[data-role="room"] { font-family: var(--mono); color: var(--ink-3); }
+  .before p[data-role="onkith"] { color: var(--ink-2); }
+  .before p[data-age="1"] { opacity: 0.55; }
+  .before p[data-age="2"] { opacity: 0.3; }
+  .before p[data-age="3"] { opacity: 0.14; }
+
+  /* Now: what was heard, then what was said back. */
+  .now {
+    align-self: center;
+    inline-size: min(100%, 46ch);
+    min-block-size: 0;
+    margin-block-start: var(--s5);
+    text-align: center;
+  }
+  .heard {
+    font-family: var(--mono);
+    font-size: clamp(13px, 1.2vw, 16px);
+    line-height: 1.5;
+    color: var(--ink-2);
+    min-block-size: 1.5em;
+  }
+  .heard::after {
+    content: "";
+    display: inline-block;
+    inline-size: 7px;
+    block-size: 1em;
+    background: var(--ink-3);
+    vertical-align: text-bottom;
+    margin-inline-start: 3px;
+    opacity: 0;
+  }
+  [data-pet="listening"] .heard::after { opacity: 1; animation: caret 1.1s steps(1, end) infinite; }
+  @keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+  /* Sized against the height as well as the width: a long answer on a short
+     screen must not run off the bottom of an appliance that cannot scroll. */
+  .said {
+    margin-block-start: var(--s4);
+    font-size: clamp(20px, min(2.6vw, 3.4vh), 38px);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  /* ------------------------------------------------------------ the player */
+
+  .player {
+    min-inline-size: 0;
+    border-inline-start: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: var(--s5);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--s4);
+    opacity: 0;
+    transition: opacity 260ms ease 140ms;
+  }
+  [data-player="open"] .player { opacity: 1; }
+
+  .player-stage {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    display: grid;
+    place-items: center;
+    min-block-size: 0;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: var(--s4);
+  }
+  .player-title {
+    font-size: clamp(15px, 1.4vw, 19px);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .player-artist {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-block-start: var(--s1);
+  }
+  .meter { block-size: 2px; background: var(--hairline); border-radius: var(--r); overflow: hidden; }
+  .meter span { display: block; block-size: 100%; inline-size: 34%; background: var(--lift-dim); }
+  .times {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+    margin-block-start: var(--s2);
+  }
+
+  /* ------------------------------------------------ narrow and portrait */
+
+  @media (max-aspect-ratio: 3/4), (max-width: 640px) {
+    .screen, .screen[data-player="open"] {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) 0fr;
+    }
+    .screen[data-player="open"] { grid-template-rows: minmax(0, 1fr) minmax(0, 0.42fr); }
+    .room { padding: var(--s4); grid-template-rows: minmax(0, 0.8fr) auto minmax(0, 1fr); }
+    .player { border-inline-start: 0; border-block-start: 1px solid var(--hairline); }
+  }
+
+  /* ------------------------------------------------ mockup controls only */
+
+  .rig {
+    position: fixed;
+    inset-block-end: 0;
+    inset-inline: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    padding: var(--s3) var(--s4);
+    background: rgba(8, 7, 6, 0.94);
+    border-block-start: 1px solid var(--hairline);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .rig strong { color: var(--ink-3); font-weight: 400; align-self: center; margin-inline-end: var(--s2); }
+  .rig button {
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--ink-2);
+    background: transparent;
+    border: 1px solid var(--hairline-lit);
+    border-radius: var(--r);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .rig button:hover { background: var(--raise); border-color: var(--ink-3); color: var(--ink); }
+  .rig button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink-3); background: var(--raise); }
+  .rig button:focus-visible { outline: 2px solid var(--lift); outline-offset: 2px; }
+
+  /* Hiding the bar leaves a way back: a corner dot, or the D key. */
+  body[data-rig="off"] .rig { display: none; }
+  .rig-dot {
+    position: fixed;
+    inset-block-end: var(--s3);
+    inset-inline-end: var(--s3);
+    inline-size: 26px;
+    block-size: 26px;
+    border: 1px solid var(--hairline);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    display: none;
+  }
+  body[data-rig="off"] .rig-dot { display: block; }
+  .rig-dot:hover { border-color: var(--ink-3); color: var(--ink); }
+</style>
+</head>
+<body data-rig="on">
+  <div class="screen" id="screen" data-pet="resting" data-gate="held" data-player="closed">
+
+    <main class="room">
+      <div class="before" id="before">
+        <p data-role="room" data-age="3">put something on</p>
+        <p data-role="onkith" data-age="2">Playing Bones by Imagine Dragons.</p>
+        <p data-role="room" data-age="1">onkith what time does the library close</p>
+      </div>
+
+      <div>
+        <div class="creature">
+          <span class="ring"></span>
+          <span class="ring"></span>
+          <span class="ring"></span>
+          <svg class="mark" viewBox="0 0 24 24" role="img" aria-label="Onkith">
+            <rect class="cover" x="2.6" y="3.4" width="18.8" height="2.8" rx="0.6"/>
+            <rect class="wall" x="18.6" y="3.4" width="2.8" height="17" rx="0.6"/>
+            <rect class="sheltered" x="7.6" y="10.6" width="7.6" height="7.6" rx="1"/>
+          </svg>
+        </div>
+        <div class="state-line">
+          <span class="chip" id="chip" data-gate="held">Held</span>
+          <span id="stateWord">Resting</span>
+        </div>
+      </div>
+
+      <div class="now">
+        <div class="heard" id="heard">onkith what was that band called</div>
+        <div class="said" id="said">Imagine Dragons. The track was Bones.</div>
+      </div>
+    </main>
+
+    <aside class="player" aria-label="Now playing">
+      <div>
+        <div class="player-title">Imagine Dragons Bones</div>
+        <div class="player-artist">Pizza Music</div>
+      </div>
+      <div class="player-stage">Recorder<br>goes here</div>
+      <div>
+        <div class="meter"><span></span></div>
+        <div class="times"><span>00:54</span><span>02:42</span></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="rig">
+    <strong>Pet</strong>
+    <button type="button" data-pet-state="resting" aria-pressed="true">Resting</button>
+    <button type="button" data-pet-state="listening" aria-pressed="false">Listening</button>
+    <button type="button" data-pet-state="thinking" aria-pressed="false">Thinking</button>
+    <button type="button" data-pet-state="speaking" aria-pressed="false">Speaking</button>
+    <strong>Gate</strong>
+    <button type="button" data-gate-state="held" aria-pressed="true">Held</button>
+    <button type="button" data-gate-state="sent" aria-pressed="false">Sent</button>
+    <button type="button" data-gate-state="blocked" aria-pressed="false">Blocked</button>
+    <strong>Screen</strong>
+    <button type="button" id="togglePlayer" aria-pressed="false">Player panel</button>
+    <button type="button" id="runScene">Play a whole exchange</button>
+    <button type="button" id="hideRig">Hide this bar</button>
+  </div>
+  <button type="button" class="rig-dot" id="rigDot" title="Show the mockup controls, or press D">D</button>
+
+<script>
+  const screen = document.getElementById("screen");
+  const chip = document.getElementById("chip");
+  const stateWord = document.getElementById("stateWord");
+  const before = document.getElementById("before");
+  const heard = document.getElementById("heard");
+  const said = document.getElementById("said");
+
+  const GATE_LABEL = { held: "Held", sent: "Sent", blocked: "Blocked" };
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  function setPet(state) {
+    screen.dataset.pet = state;
+    stateWord.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+    document.querySelectorAll("[data-pet-state]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.petState === state));
+    });
+  }
+
+  function setGate(state) {
+    screen.dataset.gate = state;
+    chip.dataset.gate = state;
+    chip.textContent = GATE_LABEL[state];
+    document.querySelectorAll("[data-gate-state]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.gateState === state));
+    });
+  }
+
+  // Finishing an exchange pushes it up into the quiet stack behind the
+  // creature, which keeps only the last three.
+  function retire(roomText, onkithText) {
+    [["room", roomText], ["onkith", onkithText]].forEach(([role, text]) => {
+      if (!text) return;
+      before.querySelectorAll("p").forEach((line) => {
+        const age = Number(line.dataset.age) + 1;
+        if (age > 3) line.remove();
+        else line.dataset.age = String(age);
+      });
+      const line = document.createElement("p");
+      line.dataset.role = role;
+      line.dataset.age = "0";
+      line.textContent = text;
+      before.append(line);
+    });
+  }
+
+  async function typeHeard(text) {
+    heard.textContent = "";
+    for (const character of text) {
+      heard.textContent += character;
+      await wait(36);
+    }
+  }
+
+  document.querySelectorAll("[data-pet-state]").forEach((button) => {
+    button.addEventListener("click", () => setPet(button.dataset.petState));
+  });
+  document.querySelectorAll("[data-gate-state]").forEach((button) => {
+    button.addEventListener("click", () => setGate(button.dataset.gateState));
+  });
+
+  const togglePlayer = document.getElementById("togglePlayer");
+  togglePlayer.addEventListener("click", () => {
+    const open = screen.dataset.player === "open";
+    screen.dataset.player = open ? "closed" : "open";
+    togglePlayer.setAttribute("aria-pressed", String(!open));
+  });
+
+  const setRig = (on) => { document.body.dataset.rig = on ? "on" : "off"; };
+  document.getElementById("hideRig").addEventListener("click", () => setRig(false));
+  document.getElementById("rigDot").addEventListener("click", () => setRig(true));
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "d" || event.key === "D") setRig(document.body.dataset.rig === "off");
+  });
+
+  let running = false;
+  document.getElementById("runScene").addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    retire(heard.textContent, said.textContent);
+    said.textContent = "";
+    setGate("held");
+    setPet("listening");
+    await typeHeard("onkith remind me what the wifi password is");
+    await wait(420);
+    setPet("thinking");
+    // The masker replaced the value, so what leaves is a placeholder. That
+    // is a sanctioned transfer, which is the dim intensity, not vermillion.
+    setGate("sent");
+    await wait(1500);
+    setGate("held");
+    setPet("speaking");
+    said.textContent = "It is the one on the router, still unchanged.";
+    await wait(3000);
+    setPet("resting");
+    running = false;
+  });
+
+  setPet("resting");
+  setGate("held");
+</script>
+</body>
+</html>

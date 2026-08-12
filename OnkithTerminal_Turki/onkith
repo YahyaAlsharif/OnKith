@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [[ -L "${SCRIPT_PATH}" ]]; do
+  SCRIPT_DIR="$(cd -- "$(dirname -- "${SCRIPT_PATH}")" && pwd)"
+  SCRIPT_PATH="$(readlink "${SCRIPT_PATH}")"
+  if [[ "${SCRIPT_PATH}" != /* ]]; then
+    SCRIPT_PATH="${SCRIPT_DIR}/${SCRIPT_PATH}"
+  fi
+done
+ROOT_DIR="$(cd -- "$(dirname -- "${SCRIPT_PATH}")" && pwd)"
+ONKITH_PYTHON="${ROOT_DIR}/.venv/bin/python"
+
+if [[ ! -x "${ONKITH_PYTHON}" ]]; then
+  echo "Onkith terminal is not installed. Run ${ROOT_DIR}/install.sh first." >&2
+  exit 1
+fi
+
+cd "${ROOT_DIR}"
+exec "${ONKITH_PYTHON}" "${ROOT_DIR}/app/omit_ai_live.py" "$@"

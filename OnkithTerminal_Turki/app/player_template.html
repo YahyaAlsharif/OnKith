@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#080706">
+  <link rel="icon" href="assets/onkith-favicon.svg" type="image/svg+xml">
+  <title>Player \ Onkith</title>
+  <style>
+    @font-face {
+      font-family: "Archivo";
+      src: url("assets/archivo-regular-v1.ttf") format("truetype");
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Archivo";
+      src: url("assets/archivo-medium-v1.ttf") format("truetype");
+      font-weight: 500;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Archivo";
+      src: url("assets/archivo-semibold-v1.ttf") format("truetype");
+      font-weight: 600;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "IBM Plex Mono";
+      src: url("assets/ibm-plex-mono-v1.ttf") format("truetype");
+      font-weight: 400 500;
+      font-display: swap;
+    }
+
+    :root {
+      --void: #080706;
+      --surface: #131110;
+      --raise: #1c1917;
+      --hairline: #252220;
+      --hairline-lit: #3a3532;
+      --ink: #f5f2ee;
+      --ink-2: #8d8781;
+      --ink-3: #56514d;
+      --hold: #f5f2ee;
+      --hold-wash: rgba(245, 242, 238, 0.07);
+      --lift: #ff5a36;
+      --lift-dim: #a85337;
+      --lift-wash: rgba(255, 90, 54, 0.12);
+      --lift-dim-wash: rgba(168, 83, 55, 0.14);
+      --void-glass: rgba(8, 7, 6, 0.9);
+      --display: "Archivo", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --s1: 4px;
+      --s2: 8px;
+      --s3: 12px;
+      --s4: 16px;
+      --s5: 24px;
+      --s6: 32px;
+      --s7: 48px;
+      --s8: 64px;
+      --s9: 96px;
+      --r: 2px;
+      --r-lg: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--void);
+      color-scheme: dark;
+    }
+
+    body {
+      min-block-size: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--void);
+      color: var(--ink);
+      font-family: var(--display);
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid var(--lift);
+      outline-offset: 2px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* The conversation is the screen. The player is a companion that arrives
+       beside it when music starts and leaves when it stops, which is why the
+       second column is measured in fr and animated rather than hidden: the
+       recorder inside it fits itself to whatever box it is given. */
+    /* The track itself is not animated. Measured here, a transition on
+       grid-template-columns never progresses: it reports the closed value
+       forever and leaves the panel a sliver wide, with fr tracks and with
+       percentages alike. The panel snaps to width and carries its own
+       arrival instead, which is also the cheaper of the two on a Pi given
+       there is a WebGL canvas inside the track being resized. */
+    .app-shell {
+      block-size: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 0;
+      overflow: hidden;
+    }
+    .app-shell[data-player="open"] {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.52fr);
+    }
+
+    .room {
+      min-inline-size: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 0.8fr) auto minmax(0, 1fr);
+      align-items: center;
+      justify-items: center;
+      padding: var(--s5) var(--s6);
+      overflow: hidden;
+    }
+
+    .player-panel {
+      min-inline-size: 0;
+      border-inline-start: 1px solid var(--hairline);
+      background: var(--surface);
+      padding: var(--s5);
+      overflow: auto;
+      opacity: 0;
+      transform: translateX(var(--s5));
+      transition: opacity 300ms ease, transform 300ms cubic-bezier(0.2, 0, 0, 1);
+      /* A closed panel still overflows its zero width track by a few dozen
+         pixels. Invisible is not the same as gone: on a touchscreen that
+         strip would quietly eat taps at the edge of the conversation. */
+      pointer-events: none;
+      /* Everything inside is sized against this panel rather than against
+         the window, which is what lets the same markup be a column beside
+         the conversation and a sheet underneath it. */
+      container-type: inline-size;
+    }
+    .app-shell[data-player="open"] .player-panel {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    /* The player was written when it was the whole page, so its type and its
+       rail are measured in vw. In a panel that is roughly twice too big. The
+       numbers below are the same design at panel scale, in container units,
+       so nothing here needs to know how wide the window is. */
+    .player-panel .section-heading h1 {
+      font-size: clamp(19px, 7cqi, 34px);
+      max-inline-size: 16ch;
+    }
+    .player-panel .track-flow {
+      min-block-size: 0;
+      gap: var(--s3);
+      padding-inline: var(--s2);
+      scroll-padding-inline: var(--s2);
+    }
+    .player-panel .track-flow-wrap { margin-inline: 0; }
+    .player-panel .flow-card { flex-basis: clamp(5.5rem, 30cqi, 9rem); }
+    .player-panel .flow-card:not(.is-active) {
+      flex-basis: clamp(6.5rem, 36cqi, 10.5rem);
+    }
+    .player-panel .flow-card.is-active { flex-basis: clamp(7rem, 40cqi, 12rem); }
+    .player-panel .timeline-readout,
+    .player-panel .player-alert:not([hidden]) { inline-size: 100%; }
+    .player-panel .machine-stage { margin-inline: 0; }
+
+    /* ------------------------------------------------------- the creature */
+
+    /* The mark is the device and the block under its eave is what lives
+       there. The cover and the wall never move: the shelter is the constant
+       and the life inside it is what changes. */
+    .creature {
+      position: relative;
+      display: grid;
+      place-items: center;
+      inline-size: clamp(160px, 26vh, 280px);
+      aspect-ratio: 1;
+      margin-inline: auto;
+    }
+
+    /* Flat rings, no blur and no glow. They are geometry rather than light:
+       speech arriving, drawn the way a ripple is drawn. */
+    .ring {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--lift);
+      border-radius: 50%;
+      opacity: 0;
+    }
+    [data-pet="listening"] .ring { animation: arrive 2.6s cubic-bezier(0.2, 0, 0.4, 1) infinite; }
+    [data-pet="listening"] .ring:nth-child(2) { animation-delay: 0.86s; }
+    [data-pet="listening"] .ring:nth-child(3) { animation-delay: 1.72s; }
+    @keyframes arrive {
+      0% { transform: scale(1.34); opacity: 0; }
+      28% { opacity: 0.85; }
+      100% { transform: scale(0.62); opacity: 0; }
+    }
+    [data-pet="thinking"] .ring:first-child {
+      opacity: 0.55;
+      border-color: var(--lift-dim-wash);
+      border-inline-end-color: var(--lift);
+      animation: turn 2.1s linear infinite;
+    }
+    @keyframes turn { to { transform: rotate(360deg); } }
+
+    .mark { inline-size: 62%; block-size: 62%; overflow: visible; }
+    .mark rect { fill: var(--ink); }
+    .mark .sheltered {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: fill 220ms ease;
+    }
+
+    [data-pet="resting"] .mark .sheltered { animation: rest 5.2s ease-in-out infinite; }
+    @keyframes rest {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(0, 0.5px) scale(0.955); }
+    }
+    [data-pet="listening"] .mark .sheltered { animation: lean 1.9s ease-in-out infinite; }
+    @keyframes lean {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      45% { transform: translate(-1.5px, 1.5px) scale(1.1); }
+    }
+    [data-pet="thinking"] .mark .sheltered { animation: pace 1.5s ease-in-out infinite; }
+    @keyframes pace {
+      0%, 100% { transform: translate(-2.4px, 0) scale(0.88); }
+      50% { transform: translate(2.4px, -0.9px) scale(0.88); }
+    }
+    [data-pet="speaking"] .mark .sheltered { animation: voice 0.42s ease-in-out infinite; }
+    @keyframes voice {
+      0%, 100% { transform: scale(0.84, 0.7); }
+      50% { transform: scale(1.06, 1.14); }
+    }
+
+    /* Colour says the device is doing something and nothing else. At rest it
+       is colourless, which is the rule that carries the concept. */
+    [data-pet="listening"] .mark .sheltered,
+    [data-pet="thinking"] .mark .sheltered,
+    [data-pet="speaking"] .mark .sheltered { fill: var(--lift); }
+
+    /* What became of the words is a separate channel, so one hue is never
+       asked to carry two meanings. The gate stopping something is told apart
+       by behaviour: the creature goes back under the cover and waits. */
+    [data-gate="blocked"] .mark .sheltered {
+      fill: var(--lift);
+      animation: hide 1.6s ease-in-out infinite !important;
+    }
+    @keyframes hide {
+      0%, 100% { transform: translate(3px, -2.6px) scale(0.6); }
+      50% { transform: translate(3px, -3.1px) scale(0.56); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mark .sheltered, .ring { animation: none !important; }
+    }
+
+    .state-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s3);
+      margin-block-start: var(--s4);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    [data-pet="listening"] #pet-state,
+    [data-pet="thinking"] #pet-state,
+    [data-pet="speaking"] #pet-state { color: var(--lift); }
+
+    .chip {
+      padding: 5px 12px;
+      border-radius: var(--r);
+      background: var(--hold-wash);
+      color: var(--ink);
+      letter-spacing: 0.1em;
+    }
+    .chip[data-gate="sent"] { background: var(--lift-dim-wash); color: #c4714f; }
+    .chip[data-gate="blocked"] { background: var(--lift-wash); color: var(--lift); }
+
+    /* --------------------------------------------------------- the words */
+
+    /* What came before, kept quiet. You can see there is a conversation
+       without being able to read it from the far side of the room. */
+    .before {
+      align-self: end;
+      inline-size: min(100%, 62ch);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--s2);
+      margin-block-end: var(--s5);
+      text-align: center;
+    }
+    .before p {
+      margin: 0;
+      max-inline-size: 48ch;
+      font-size: clamp(13px, 1.15vw, 16px);
+      line-height: 1.5;
+    }
+    .before p[data-role="room"] { font-family: var(--mono); color: var(--ink-3); }
+    .before p[data-role="onkith"] { color: var(--ink-2); }
+    .before p[data-age="1"] { opacity: 0.55; }
+    .before p[data-age="2"] { opacity: 0.3; }
+    .before p[data-age="3"] { opacity: 0.14; }
+
+    .now {
+      align-self: center;
+      inline-size: min(100%, 46ch);
+      min-block-size: 0;
+      margin-block-start: var(--s5);
+      text-align: center;
+    }
+    /* The one place full vermillion belongs, and the reason it is reserved:
+       the cover lifted on something private. These are the exact words the
+       masker held back, sitting in the sentence on a screen that is in the
+       room, while the model was given a placeholder in their place. Nothing
+       else on this screen is allowed to use it for ordinary traffic. */
+    .revealed { color: var(--lift); }
+
+    .heard {
+      font-family: var(--mono);
+      font-size: clamp(13px, 1.2vw, 16px);
+      line-height: 1.5;
+      color: var(--ink-2);
+      min-block-size: 1.5em;
+    }
+    .heard::after {
+      content: "";
+      display: inline-block;
+      inline-size: 7px;
+      block-size: 1em;
+      background: var(--ink-3);
+      vertical-align: text-bottom;
+      margin-inline-start: 3px;
+      opacity: 0;
+    }
+    [data-pet="listening"] .heard::after {
+      opacity: 1;
+      animation: caret 1.1s steps(1, end) infinite;
+    }
+    @keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+    /* Sized against the height as well as the width: a long answer on a
+       short screen must not run off an appliance that cannot scroll. */
+    .said {
+      margin-block-start: var(--s4);
+      font-size: clamp(20px, min(2.6vw, 3.4vh), 38px);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      line-height: 1.18;
+      color: var(--ink);
+      text-wrap: balance;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s4);
+      padding-block-end: var(--s5);
+      border-block-end: 1px solid var(--hairline);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s3);
+      min-inline-size: 0;
+    }
+
+    .brand img {
+      inline-size: var(--s5);
+      block-size: var(--s5);
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: var(--s1);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .mono-label,
+    .brand-product,
+    .track-index,
+    .timecode,
+    .flow-position,
+    .hotspot-label {
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.16em;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .connection {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s2);
+      color: var(--ink-2);
+      font-size: 13px;
+    }
+
+    .connection-dot {
+      inline-size: var(--s2);
+      block-size: var(--s2);
+      border: 1px solid var(--hairline-lit);
+      border-radius: 50%;
+      background: var(--raise);
+    }
+
+    .connection.is-ready .connection-dot {
+      border-color: var(--lift-dim);
+      background: var(--lift-dim-wash);
+    }
+
+    .connection.is-error {
+      color: var(--ink);
+    }
+
+    .connection.is-error .connection-dot {
+      border-color: var(--lift);
+      background: var(--lift-wash);
+    }
+
+    main {
+      display: grid;
+      gap: var(--s2);
+      min-inline-size: 0;
+      padding-block-start: var(--s7);
+    }
+
+    main > * {
+      min-inline-size: 0;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--s5);
+    }
+
+    .section-heading > div {
+      min-inline-size: 0;
+    }
+
+    .section-heading h1 {
+      max-inline-size: 18ch;
+      margin: 0;
+      font-size: clamp(34px, 5vw, 76px);
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+      text-wrap: balance;
+    }
+
+    .section-heading .mono-label {
+      margin-block: 0 var(--s3);
+    }
+
+    .track-channel {
+      margin-block: var(--s2) 0;
+      color: var(--ink-2);
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .track-flow-wrap {
+      min-inline-size: 0;
+      overflow: hidden;
+      margin-inline: calc(var(--s6) * -1);
+      padding-block: var(--s5) var(--s2);
+    }
+
+    .track-flow {
+      display: flex;
+      align-items: center;
+      gap: var(--s4);
+      min-block-size: 23rem;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      padding-block: var(--s4);
+      padding-inline: max(var(--s6), calc((100vw - 88rem) / 2));
+      scroll-padding-inline: 25%;
+      scroll-snap-type: inline mandatory;
+      scrollbar-width: none;
+      touch-action: pan-x pan-y;
+      cursor: grab;
+    }
+
+    .track-flow::-webkit-scrollbar {
+      display: none;
+    }
+
+    .track-flow.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
+    }
+
+    /* Each suggestion is a record. The active one is not here: it is down on
+       the platter, so its slot reads as the empty sleeve it came out of. */
+    .flow-card {
+      position: relative;
+      flex: 0 0 clamp(9rem, 15vw, 13rem);
+      aspect-ratio: 1;
+      min-inline-size: 0;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      opacity: 0.46;
+      scroll-snap-align: center;
+      transform: scale(0.92);
+      transition: flex-basis 260ms ease, opacity 260ms ease, transform 260ms ease, border-color 260ms ease;
+    }
+
+    /* The card is a record plus a caption underneath, so its height comes
+       from its content rather than a fixed ratio. */
+    .flow-card:not(.is-active) {
+      aspect-ratio: auto;
+      /* Wider than the playing disc's slot because the record stands out of
+         its sleeve rather than sitting inside the card's own square. */
+      flex-basis: clamp(11rem, 18vw, 15.5rem);
+    }
+
+    .flow-card:not(.is-active) > button {
+      display: flex;
+      flex-direction: column;
+      block-size: auto;
+    }
+
+    /* A record that is not playing is held the way a record is held: in its
+       sleeve, disc drawn out to the right. The proportions are the ones in
+       a real LP photograph, jacket square, disc 0.91 of it, and the disc's
+       centre just clear of the opening so its label stays readable. */
+    .flow-card:not(.is-active) .flow-card-media {
+      position: relative;
+      /* The element is a span, so without this the box below never applies. */
+      display: block;
+      aspect-ratio: 1.53;
+      inline-size: 100%;
+      block-size: auto;
+      overflow: visible;
+      background: none;
+    }
+
+    .flow-card-sleeve {
+      position: absolute;
+      z-index: 1;
+      inset-block: 0;
+      inset-inline-start: 0;
+      display: block;
+      aspect-ratio: 1;
+      inline-size: 65.4%;
+      overflow: hidden;
+      border-radius: 1px;
+      /* A rim and a cast shadow, or dark artwork on a black page has no
+         edge at all and simply disappears. */
+      box-shadow:
+        0 0 0 1px rgba(245, 242, 238, 0.14),
+        0 16px 30px rgba(0, 0, 0, 0.62);
+      background: var(--surface);
+    }
+
+    .flow-card-sleeve > img {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      object-position: 50% 50%;
+    }
+
+    /* The paper inner sleeve, standing a little proud of the opening. It is
+       the detail that says the jacket is open on that side and the disc
+       came out of it rather than being parked behind it. */
+    .flow-card-sleeve::after {
+      position: absolute;
+      z-index: 1;
+      inset-block: 2.5%;
+      inset-inline-end: 0;
+      inline-size: 4.6%;
+      background: linear-gradient(90deg,
+        rgba(8, 7, 6, 0.6) 0%,
+        rgba(226, 219, 208, 0.86) 44%,
+        rgba(186, 177, 165, 0.92) 100%);
+      content: "";
+    }
+
+    .flow-card-disc {
+      position: absolute;
+      z-index: 0;
+      inset-block-start: 50%;
+      /* 40.5% start plus 59.5% width puts the right edge of the disc on the
+         right edge of the card, and its centre past the sleeve. */
+      inset-inline-start: 40.5%;
+      display: block;
+      aspect-ratio: 1;
+      inline-size: 59.5%;
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 1px rgba(245, 242, 238, 0.1),
+        0 14px 26px rgba(0, 0, 0, 0.55);
+      transform: translateY(-50%);
+      /* Painted once and then only composited. These deliberately do not
+         spin: four animated layers beside a live WebGL canvas is real cost
+         on a Pi for no gain. */
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 31%,
+          rgba(245, 242, 238, 0.07) 31% 32.4%, transparent 32.4%),
+        /* The specular sweep is what makes it read as a solid object rather
+           than a flat circle. */
+        conic-gradient(from 208deg at 50% 50%,
+          rgba(245, 242, 238, 0) 0deg,
+          rgba(245, 242, 238, 0.11) 38deg,
+          rgba(245, 242, 238, 0) 96deg,
+          rgba(245, 242, 238, 0) 188deg,
+          rgba(245, 242, 238, 0.08) 224deg,
+          rgba(245, 242, 238, 0) 282deg,
+          rgba(245, 242, 238, 0) 360deg),
+        repeating-radial-gradient(circle at 50% 50%,
+          #100e0d 0 2px, #1c1a17 2px 3px, #100e0d 3px 5px),
+        radial-gradient(circle at 34% 26%, rgba(245, 242, 238, 0.15), transparent 58%),
+        #0c0b0a;
+    }
+
+    /* The printed paper label. The artwork is on the jacket now, at four
+       times the size it had as a label, so printing it here as well would
+       only be the same picture twice. 0.34 of the disc is the real LP
+       label ratio, the one the record on the platter uses. */
+    .flow-card-disc::before {
+      position: absolute;
+      inset: 33%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 40%,
+          rgba(8, 7, 6, 0.26) 40% 42%, transparent 42% 62%,
+          rgba(8, 7, 6, 0.16) 62% 63.5%, transparent 63.5%),
+        radial-gradient(circle at 38% 30%, #cdc4b7, #a89e91 66%, #8d8478);
+      box-shadow: 0 0 0 1px rgba(8, 7, 6, 0.7);
+      content: "";
+    }
+
+    .flow-card-disc::after {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      inline-size: 5%;
+      block-size: 5%;
+      border-radius: 50%;
+      background: var(--void);
+      content: "";
+      transform: translate(-50%, -50%);
+    }
+
+    .flow-card[data-distance="1"] {
+      opacity: 0.68;
+      transform: scale(0.96);
+    }
+
+    /* The playing track is the record that is out of its sleeve. It is the
+       same object as its neighbours, in the same black vinyl and the same
+       proportions, only larger and unsleeved: that is what says it is the
+       one on the platter, so it needs no frame and no second material. */
+    .flow-card.is-active {
+      flex-basis: clamp(13rem, 22vw, 19rem);
+      aspect-ratio: 1;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .flow-card.is-active .youtube-stage {
+      position: relative;
+      display: block;
+      aspect-ratio: 1;
+      inline-size: 100%;
+      block-size: auto;
+      min-inline-size: 0;
+      min-block-size: 0;
+      overflow: hidden;
+      border-radius: 50%;
+      /* The same black vinyl as the records in the rail and as the record
+         on the platter below it. The sweep is a little stronger and the
+         grooves a little wider only because this one is twice the size;
+         the material is not a different material. */
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 29%,
+          rgba(245, 242, 238, 0.08) 29% 30.5%, transparent 30.5%),
+        conic-gradient(from 200deg at 50% 50%,
+          rgba(245, 242, 238, 0) 0deg,
+          rgba(245, 242, 238, 0.14) 34deg,
+          rgba(245, 242, 238, 0.02) 92deg,
+          rgba(245, 242, 238, 0) 168deg,
+          rgba(245, 242, 238, 0.1) 214deg,
+          rgba(245, 242, 238, 0.01) 276deg,
+          rgba(245, 242, 238, 0) 360deg),
+        repeating-radial-gradient(circle at 50% 50%,
+          #100e0d 0 3px, #1c1a17 3px 4px, #100e0d 4px 7px),
+        radial-gradient(circle at 34% 26%, rgba(245, 242, 238, 0.16), transparent 58%),
+        #0c0b0a;
+      box-shadow:
+        0 0 0 1px rgba(245, 242, 238, 0.14),
+        0 20px 40px rgba(0, 0, 0, 0.62);
+    }
+
+    .flow-card.is-active .youtube-stage::after {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      inline-size: 5%;
+      block-size: 5%;
+      border-radius: 50%;
+      background: var(--void);
+      content: "";
+      transform: translate(-50%, -50%);
+    }
+
+    .flow-card button,
+    .flow-card-media,
+    .youtube-stage {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+
+    /* The kiosk surface is an appliance screen, so the pointer fades out
+       when it stops being used. It returns on the next movement, which is
+       what keeps the window usable while the player is being reviewed. */
+    html.pointer-idle,
+    html.pointer-idle * {
+      cursor: none !important;
+    }
+
+    .flow-card button {
+      display: block;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      text-align: start;
+    }
+
+
+    .flow-card button:hover img,
+    .flow-card button:focus-visible img {
+      opacity: 0.72;
+    }
+
+    /* Outside the sleeve, and only as wide as it: centred on the whole card
+       the caption would sit under the gap between this record and the next
+       one rather than under its own jacket. */
+    .flow-card:not(.is-active) .flow-card-copy {
+      display: grid;
+      gap: var(--s1);
+      inline-size: 65.4%;
+      margin-block-start: var(--s3);
+      padding: 0;
+      border: 0;
+      background: none;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .flow-card.is-active .flow-card-copy {
+      position: absolute;
+      inset-inline: var(--s3);
+      inset-block-end: var(--s3);
+      display: grid;
+      gap: var(--s1);
+      padding: var(--s3);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r);
+      background: var(--void-glass);
+      pointer-events: none;
+    }
+
+    .flow-card-title {
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .flow-card-channel {
+      overflow: hidden;
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .youtube-stage {
+      position: relative;
+      min-inline-size: 12rem;
+      min-block-size: 12rem;
+      background: var(--surface);
+    }
+
+    .youtube-stage:not(.is-mounted) {
+      display: none;
+    }
+
+    /* The artwork is the record's label, not a frame of video. 0.34 of the
+       disc is the real LP label ratio, the one the records in the rail and
+       the record on the platter are both cut to. */
+    #current-artwork {
+      position: absolute;
+      z-index: 0;
+      display: block;
+      inset: 33%;
+      inline-size: 34%;
+      block-size: 34%;
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px rgba(8, 7, 6, 0.7);
+      object-fit: cover;
+    }
+
+    .machine-section {
+      min-inline-size: 0;
+    }
+
+    .timeline-readout {
+      display: grid;
+      gap: var(--s3);
+      inline-size: clamp(18rem, 34vw, 30rem);
+      max-inline-size: 100%;
+      margin-inline: auto;
+    }
+
+    .player-alert:not([hidden]) {
+      inline-size: clamp(18rem, 34vw, 30rem);
+      max-inline-size: 100%;
+      margin-block: var(--s4) 0;
+      margin-inline: auto;
+      padding-block: var(--s3);
+      padding-inline: var(--s4);
+      border: 1px solid var(--lift-dim);
+      border-radius: var(--r);
+      background: var(--lift-dim-wash);
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--s4);
+    }
+
+    progress {
+      inline-size: 100%;
+      block-size: var(--s1);
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: var(--hairline);
+      color: var(--lift-dim);
+    }
+
+    progress::-webkit-progress-bar {
+      background: var(--hairline);
+    }
+
+    progress::-webkit-progress-value {
+      background: var(--lift-dim);
+    }
+
+    progress::-moz-progress-bar {
+      background: var(--lift-dim);
+    }
+
+    /* The canvas used to be pulled up to close a gap, which clipped the top
+       of the object against this box. The stage is sized to the object
+       instead, so nothing is cut off. */
+    .machine-stage {
+      position: relative;
+      min-block-size: clamp(30rem, 54vw, 44rem);
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: var(--void);
+      isolation: isolate;
+    }
+
+    /* The viewer fills the stage rather than sizing itself, so the object
+       cannot push the page wider or taller than the box it was given. The
+       page's own controls sit over it and own the pointer. */
+    #machine-viewer {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      max-inline-size: 100%;
+      max-block-size: 100%;
+      overflow: hidden;
+      /* The object is not a scroll trap. A finger dragged up the stage
+         scrolls the page, the same as anywhere else on it; only the two
+         controls that are dragged take the gesture for themselves. */
+      touch-action: pan-y;
+      /* The object is a display surface: the page's own controls sit over
+         it and own every pointer. Left interactive, a click that missed a
+         control would reach the scene, which answers with a click sample
+         baked into it by its author, and this device makes two sounds. */
+      pointer-events: none;
+      /* The scene opens by flying its own camera into place, at the three
+         quarter angle it was composed at, and is then turned square on and
+         sized to the stage. Shown while that happens the object arrives
+         tilted and cropped and then jumps. It is held back until it has
+         been placed, which is a beat of black rather than a wrong object
+         correcting itself in front of the room. */
+      opacity: 0;
+      transition: opacity 260ms ease;
+    }
+
+    #machine-viewer.is-ready {
+      opacity: 1;
+    }
+
+    /* Before the custom element is defined it is an unknown inline tag with
+       no box, and the stage would collapse and then jump. */
+    #machine-viewer:not(:defined) {
+      background: var(--void);
+    }
+
+    .machine-hotspots {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .machine-hotspot {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      inline-size: var(--s8);
+      block-size: var(--s8);
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+    }
+
+    /* The object carries its own printed symbols, so the written label is
+       not shown at rest. It appears on hover and on keyboard focus, where
+       it is doing work rather than adding clutter. Screen readers read the
+       aria-label regardless. */
+    .machine-hotspot::after {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      padding-block: var(--s1);
+      padding-inline: var(--s2);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r);
+      background: var(--void-glass);
+      color: var(--ink);
+      content: attr(data-label);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      pointer-events: none;
+      text-transform: uppercase;
+      transform: translate(-50%, -50%);
+      transition: opacity 120ms ease;
+      visibility: hidden;
+      white-space: nowrap;
+    }
+
+    .machine-hotspot:hover,
+    .machine-hotspot:focus-visible {
+      border-color: var(--lift);
+      background: var(--lift-wash);
+    }
+
+    /* Seek is the whole platter and volume is a knob that is dragged, so
+       both take the gesture rather than letting the page scroll under
+       them. */
+    .machine-hotspot[role="slider"] {
+      touch-action: none;
+    }
+
+    /* A wash reads as a highlight on a key. On the platter it is a third of
+       the front of the device going orange, so those two get the outline
+       and the label and nothing else. */
+    .machine-hotspot[role="slider"]:hover,
+    .machine-hotspot[role="slider"]:focus-visible {
+      background: transparent;
+    }
+
+    .machine-hotspot:hover::after,
+    .machine-hotspot:focus-visible::after {
+      border-color: var(--lift);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .machine-hotspot[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    /* Sizes are replaced at run time with the projected size of the part
+       each control operates; these are the pre-projection defaults. */
+    .machine-hotspot[data-machine-action="seek"] {
+      inline-size: var(--s9);
+      block-size: var(--s9);
+    }
+
+    .fallback-controls {
+      position: absolute;
+      z-index: 6;
+      inset-block-end: var(--s5);
+      inset-inline: var(--s5);
+      display: grid;
+      gap: var(--s4);
+      padding: var(--s4);
+      border: 1px solid var(--hairline-lit);
+      border-radius: var(--r);
+      background: var(--void-glass);
+    }
+
+    .fallback-controls[hidden] {
+      display: none;
+    }
+
+    .fallback-transport,
+    .fallback-ranges {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+    }
+
+    .fallback-button {
+      min-block-size: var(--s7);
+      padding-block: var(--s2);
+      padding-inline: var(--s4);
+      border: 1px solid var(--hairline-lit);
+      border-radius: var(--r);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .fallback-button:hover:not(:disabled) {
+      border-color: var(--ink-3);
+      background: var(--raise);
+    }
+
+    .fallback-button:disabled {
+      color: var(--ink-3);
+      cursor: not-allowed;
+    }
+
+    .fallback-ranges label {
+      display: grid;
+      flex: 1;
+      gap: var(--s2);
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      inline-size: 100%;
+      min-inline-size: 0;
+      accent-color: var(--lift-dim);
+    }
+
+    /* Below a square the two columns cannot both hold their content, so the
+       player becomes a sheet under the conversation rather than a panel
+       beside it. The recorder refits itself either way. */
+    @media (max-aspect-ratio: 3/4), (max-width: 640px) {
+      .app-shell,
+      .app-shell[data-player="open"] {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .app-shell { grid-template-rows: minmax(0, 1fr) 0; }
+      .app-shell[data-player="open"] {
+        grid-template-rows: minmax(0, 1fr) minmax(0, 0.46fr);
+      }
+      .player-panel { transform: translateY(var(--s5)); }
+      .room { padding: var(--s4); }
+      .player-panel {
+        border-inline-start: 0;
+        border-block-start: 1px solid var(--hairline);
+        padding: var(--s4);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .track-flow-wrap {
+        margin-inline: calc(var(--s4) * -1);
+      }
+
+      .track-flow {
+        min-block-size: 23rem;
+        padding-inline: var(--s4);
+      }
+
+      .flow-card:not(.is-active) {
+        flex-basis: 12rem;
+      }
+
+      .flow-card.is-active {
+        flex-basis: min(76vw, 34rem);
+      }
+
+      .timeline-readout,
+      .player-alert:not([hidden]) {
+        inline-size: min(76vw, 34rem);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .connection,
+      .track-index {
+        display: none;
+      }
+
+      main {
+        gap: var(--s2);
+        padding-block-start: var(--s6);
+      }
+
+      .section-heading h1 {
+        font-size: 34px;
+      }
+
+      .track-flow {
+        min-block-size: 20rem;
+        gap: var(--s3);
+      }
+
+      .flow-card:not(.is-active) {
+        flex-basis: 9.5rem;
+      }
+
+      .flow-card.is-active {
+        flex-basis: min(82vw, 27rem);
+        aspect-ratio: 1 / 1;
+      }
+
+      .timeline-readout,
+      .player-alert:not([hidden]) {
+        inline-size: min(82vw, 27rem);
+      }
+
+      .machine-stage {
+        min-block-size: 40rem;
+      }
+
+      .fallback-controls {
+        inset-inline: var(--s3);
+        inset-block-end: var(--s3);
+      }
+
+      .fallback-transport,
+      .fallback-ranges {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app-shell" data-pet="resting" data-gate="held" data-player="closed">
+
+    <main class="room" aria-label="Conversation">
+      <div class="before" id="before"></div>
+
+      <div class="creature-block">
+        <div class="creature">
+          <span class="ring"></span>
+          <span class="ring"></span>
+          <span class="ring"></span>
+          <svg class="mark" viewBox="0 0 24 24" role="img" aria-label="Onkith">
+            <rect class="cover" x="2.6" y="3.4" width="18.8" height="2.8" rx="0.6"/>
+            <rect class="wall" x="18.6" y="3.4" width="2.8" height="17" rx="0.6"/>
+            <rect class="sheltered" x="7.6" y="10.6" width="7.6" height="7.6" rx="1"/>
+          </svg>
+        </div>
+        <div class="state-line">
+          <span class="chip" id="gate-chip" data-gate="held">Held</span>
+          <span id="pet-state">Resting</span>
+        </div>
+      </div>
+
+      <div class="now">
+        <div class="heard" id="heard"></div>
+        <div class="said" id="said"></div>
+      </div>
+    </main>
+
+    <aside class="player-panel" id="player-panel" aria-label="Now playing">
+      <header class="masthead">
+        <div class="brand">
+          <img src="assets/onkith-favicon.svg" alt="">
+          <div class="brand-copy">
+            <span class="brand-name">Onkith</span>
+            <span class="brand-product">Local player</span>
+          </div>
+        </div>
+        <div class="connection" id="connection" aria-label="Playback source">
+          <span class="connection-dot" aria-hidden="true"></span>
+          <span id="connection-copy">YouTube source</span>
+        </div>
+      </header>
+
+      <section aria-labelledby="title">
+        <header class="section-heading">
+          <div>
+            <p class="mono-label">Now playing</p>
+            <h1 id="title">Waiting for a track</h1>
+            <p class="track-channel" id="channel">Say &ldquo;Onkith play&rdquo; to start</p>
+          </div>
+          <p class="track-index" id="track-index">Track 01 / 01</p>
+        </header>
+
+        <div class="youtube-stage" id="youtube-stage">
+          <img id="current-artwork" src="" alt="">
+        </div>
+
+        <div class="track-flow-wrap">
+          <div class="track-flow" id="track-flow" role="list" aria-label="Music suggestions"></div>
+        </div>
+
+        <div class="timeline-readout" aria-label="Playback position">
+          <div class="time-row">
+            <span class="timecode" id="elapsed">00:00</span>
+            <span class="timecode" id="duration">00:00</span>
+          </div>
+          <progress id="progress" max="1000" value="0" aria-label="Playback position">0%</progress>
+        </div>
+        <p class="visually-hidden" id="status" aria-live="polite" aria-atomic="true">Preparing the recorder.</p>
+        <p class="player-alert" id="player-alert" role="alert" aria-atomic="true" hidden></p>
+      </section>
+
+      <section class="machine-section" aria-label="Recorder controls">
+        <div class="machine-stage" id="machine-stage">
+          <!-- loading="eager" because the viewer otherwise waits for the
+               element to enter the viewport, and the recorder sits below
+               the fold on a kiosk screen: it would stay a black box until
+               someone scrolled, and the page would give up waiting. -->
+          <spline-viewer id="machine-viewer" url="assets/spline/scene.splinecode" loading="eager" background="transparent" aria-label="Interactive 3D tape recorder"></spline-viewer>
+
+          <div class="machine-hotspots" id="machine-hotspots" aria-label="Recorder controls">
+            <button class="machine-hotspot" type="button" data-machine-action="previous" data-model-node="-" data-label="Previous" aria-label="Previous result"></button>
+            <button class="machine-hotspot" type="button" data-machine-action="toggle" data-model-node="play" data-label="Play or pause" aria-label="Play or pause"></button>
+            <button class="machine-hotspot" type="button" data-machine-action="stop" data-model-node="stop" data-label="Stop" aria-label="Stop playback"></button>
+            <button class="machine-hotspot" type="button" data-machine-action="mute" data-model-node="record" data-label="Mute" aria-label="Mute or unmute"></button>
+            <button class="machine-hotspot" type="button" data-machine-action="next" data-model-node="+" data-label="Next" aria-label="Next result"></button>
+            <div class="machine-hotspot" data-machine-action="seek" data-model-node="disk" data-label="Seek" role="slider" tabindex="0" aria-label="Track position" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0" aria-valuetext="00:00 of 00:00"></div>
+            <div class="machine-hotspot" data-machine-action="volume" data-model-node="bottom_knob_stick" data-label="Volume" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="82" aria-valuetext="82 percent"></div>
+          </div>
+
+          <div class="fallback-controls" id="fallback-controls" hidden>
+            <span class="mono-label">Recorder unavailable. Use these controls.</span>
+            <div class="fallback-transport">
+              <button class="fallback-button" type="button" data-fallback-action="previous">Previous</button>
+              <button class="fallback-button" type="button" data-fallback-action="toggle">Play</button>
+              <button class="fallback-button" type="button" data-fallback-action="stop">Stop</button>
+              <button class="fallback-button" type="button" data-fallback-action="mute">Mute</button>
+              <button class="fallback-button" type="button" data-fallback-action="next">Next</button>
+            </div>
+            <div class="fallback-ranges">
+              <label>Position<input id="fallback-seek" type="range" min="0" max="1000" value="0"></label>
+              <label>Volume<input id="fallback-volume" type="range" min="0" max="100" value="82"></label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- Both the viewer and the scene are served from this device. Nothing
+       here is fetched from a CDN, so the object still appears on a Pi with
+       no network at all. -->
+  <script type="module" src="assets/spline/spline-viewer.js"></script>
+  <script type="module" src="assets/player-app-v1.mjs"></script>
+</body>
+</html>

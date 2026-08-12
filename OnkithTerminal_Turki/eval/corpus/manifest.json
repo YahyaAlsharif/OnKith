@@ -1,0 +1,497 @@
+{
+  "version": 1,
+  "clips": [
+    {
+      "id": "wake-play-song",
+      "file": "clips/wake-play-song.wav",
+      "transcript": "Onkith play bones",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-play-artist",
+      "file": "clips/wake-play-artist.wav",
+      "transcript": "Onkith play bones by imagine dragons",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-play-vague",
+      "file": "clips/wake-play-vague.wav",
+      "transcript": "Onkith put on some jazz",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-stop",
+      "file": "clips/wake-stop.wav",
+      "transcript": "Onkith stop the music",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-stop-bare",
+      "file": "clips/wake-stop-bare.wav",
+      "transcript": "Onkith stop",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-show",
+      "file": "clips/wake-show.wav",
+      "transcript": "Onkith show the player",
+      "expect_wake": true,
+      "expect_intent": "SHOW",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-hide",
+      "file": "clips/wake-hide.wav",
+      "transcript": "Onkith close the player",
+      "expect_wake": true,
+      "expect_intent": "HIDE",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-ask-time",
+      "file": "clips/wake-ask-time.wav",
+      "transcript": "Onkith what time is it in Riyadh",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-ask-open",
+      "file": "clips/wake-ask-open.wav",
+      "transcript": "Onkith what is the weather",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-echo",
+      "file": "clips/wake-echo.wav",
+      "transcript": "Echo what time is it",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-sada",
+      "file": "clips/wake-sada.wav",
+      "transcript": "Sada stop the music",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-ordinary-1",
+      "file": "clips/quiet-ordinary-1.wav",
+      "transcript": "the quick brown fox jumps over the lazy dog",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-ordinary-2",
+      "file": "clips/quiet-ordinary-2.wav",
+      "transcript": "please turn the lights on in the kitchen",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-ordinary-3",
+      "file": "clips/quiet-ordinary-3.wav",
+      "transcript": "the meeting has been moved to the conference room upstairs",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-ordinary-4",
+      "file": "clips/quiet-ordinary-4.wav",
+      "transcript": "I would like to know the weather forecast for tomorrow",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-near-miss-1",
+      "file": "clips/quiet-near-miss-1.wav",
+      "transcript": "someone named Ankit called me this morning",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-near-miss-2",
+      "file": "clips/quiet-near-miss-2.wav",
+      "transcript": "I left it on the kitchen counter",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "quiet-near-miss-3",
+      "file": "clips/quiet-near-miss-3.wav",
+      "transcript": "the jar is empty and so is the tin",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "pii-phone",
+      "file": "clips/pii-phone.wav",
+      "transcript": "my number is 0501234567",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "0501234567"
+      ],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "pii-name-phone",
+      "file": "clips/pii-name-phone.wav",
+      "transcript": "my name is Turki and my number is 0501234567",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "0501234567"
+      ],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "pii-id",
+      "file": "clips/pii-id.wav",
+      "transcript": "my id card number is 1098765432",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "1098765432"
+      ],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "pii-email",
+      "file": "clips/pii-email.wav",
+      "transcript": "you can email me at turki at example dot com",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "long-1",
+      "file": "clips/long-1.wav",
+      "transcript": "I need to book a flight to London next Tuesday morning and a hotel near the station for three nights",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "long-2",
+      "file": "clips/long-2.wav",
+      "transcript": "Onkith play something calm and quiet that will help me concentrate while I am working this afternoon",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "synthetic:Daniel@175",
+      "source": "synthetic"
+    },
+    {
+      "id": "wake-play-song--turki",
+      "file": "clips/wake-play-song--turki.wav",
+      "transcript": "Onkith play bones",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-play-artist--turki",
+      "file": "clips/wake-play-artist--turki.wav",
+      "transcript": "Onkith play bones by imagine dragons",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-play-vague--turki",
+      "file": "clips/wake-play-vague--turki.wav",
+      "transcript": "Onkith put on some jazz",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-stop--turki",
+      "file": "clips/wake-stop--turki.wav",
+      "transcript": "Onkith stop the music",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-stop-bare--turki",
+      "file": "clips/wake-stop-bare--turki.wav",
+      "transcript": "Onkith stop",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-show--turki",
+      "file": "clips/wake-show--turki.wav",
+      "transcript": "Onkith show the player",
+      "expect_wake": true,
+      "expect_intent": "SHOW",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-hide--turki",
+      "file": "clips/wake-hide--turki.wav",
+      "transcript": "Onkith close the player",
+      "expect_wake": true,
+      "expect_intent": "HIDE",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-ask-time--turki",
+      "file": "clips/wake-ask-time--turki.wav",
+      "transcript": "Onkith what time is it in Riyadh",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-ask-open--turki",
+      "file": "clips/wake-ask-open--turki.wav",
+      "transcript": "Onkith what is the weather",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-echo--turki",
+      "file": "clips/wake-echo--turki.wav",
+      "transcript": "Echo what time is it",
+      "expect_wake": true,
+      "expect_intent": "ASK",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "wake-sada--turki",
+      "file": "clips/wake-sada--turki.wav",
+      "transcript": "Sada stop the music",
+      "expect_wake": true,
+      "expect_intent": "CLOSE",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-ordinary-1--turki",
+      "file": "clips/quiet-ordinary-1--turki.wav",
+      "transcript": "the quick brown fox jumps over the lazy dog",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-ordinary-2--turki",
+      "file": "clips/quiet-ordinary-2--turki.wav",
+      "transcript": "please turn the lights on in the kitchen",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-ordinary-3--turki",
+      "file": "clips/quiet-ordinary-3--turki.wav",
+      "transcript": "the meeting has been moved to the conference room upstairs",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-ordinary-4--turki",
+      "file": "clips/quiet-ordinary-4--turki.wav",
+      "transcript": "I would like to know the weather forecast for tomorrow",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-near-miss-1--turki",
+      "file": "clips/quiet-near-miss-1--turki.wav",
+      "transcript": "someone named Ankit called me this morning",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-near-miss-2--turki",
+      "file": "clips/quiet-near-miss-2--turki.wav",
+      "transcript": "I left it on the kitchen counter",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "quiet-near-miss-3--turki",
+      "file": "clips/quiet-near-miss-3--turki.wav",
+      "transcript": "the jar is empty and so is the tin",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "pii-phone--turki",
+      "file": "clips/pii-phone--turki.wav",
+      "transcript": "my number is 0501234567",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "0501234567"
+      ],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "pii-name-phone--turki",
+      "file": "clips/pii-name-phone--turki.wav",
+      "transcript": "my name is Turki and my number is 0501234567",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "0501234567"
+      ],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "pii-id--turki",
+      "file": "clips/pii-id--turki.wav",
+      "transcript": "my id card number is 1098765432",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [
+        "1098765432"
+      ],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "pii-email--turki",
+      "file": "clips/pii-email--turki.wav",
+      "transcript": "you can email me at turki at example dot com",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "long-1--turki",
+      "file": "clips/long-1--turki.wav",
+      "transcript": "I need to book a flight to London next Tuesday morning and a hotel near the station for three nights",
+      "expect_wake": false,
+      "expect_intent": null,
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    },
+    {
+      "id": "long-2--turki",
+      "file": "clips/long-2--turki.wav",
+      "transcript": "Onkith play something calm and quiet that will help me concentrate while I am working this afternoon",
+      "expect_wake": true,
+      "expect_intent": "PLAY",
+      "must_contain": [],
+      "voice": "turki",
+      "source": "recorded"
+    }
+  ]
+}

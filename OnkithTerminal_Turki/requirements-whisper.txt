@@ -1,0 +1,9 @@
+# The alternative recogniser, kept out of the accepted deployment until it
+# has been measured on the Pi. Install it only to run --stt whisper:
+#
+#   python -m pip install --requirement requirements-whisper.txt
+#
+# faster-whisper runs on CTranslate2, not torch. Torch appears in its
+# metadata once, under an optional extra for converting models, which is
+# not installed here and must not be.
+faster-whisper==1.2.1

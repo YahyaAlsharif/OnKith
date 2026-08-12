@@ -1,0 +1,8 @@
+moonshine-voice==0.0.69
+numpy==2.0.2
+sounddevice==0.5.5
+onnxruntime==1.27.0
+transformers==5.0.0
+# The lamp, on hardware PWM. Pure Python over /sys/class/pwm, so it
+# installs anywhere and does nothing until a pwmchip is actually there.
+rpi-hardware-pwm==0.3.1
