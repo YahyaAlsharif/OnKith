@@ -52,6 +52,25 @@ def _predict(masker, cases) -> dict[str, dict]:
     return predictions
 
 
+def _model_metadata(model_files: dict[str, Path] | None) -> dict:
+    """Fingerprint whatever artifacts this run actually used."""
+
+    if model_files is None:
+        model_files = {"fp32_onnx": FP32_ONNX, "int8_onnx": INT8_ONNX}
+    metadata = {}
+    for name, path in model_files.items():
+        path = Path(path)
+        if not path.is_file():
+            metadata[name] = {"path": str(path), "missing": True}
+            continue
+        metadata[name] = {
+            "path": str(path),
+            "bytes": path.stat().st_size,
+            "sha256": _sha256(path),
+        }
+    return metadata
+
+
 def run_partition(
     fixtures: Path,
     output_dir: Path,
@@ -59,7 +78,20 @@ def run_partition(
     stages: tuple[str, ...],
     limit: int | None = None,
     retain_predictions: bool = False,
+    *,
+    model_id: str = "tinybert",
+    masker_factory=None,
+    model_files: dict[str, Path] | None = None,
 ) -> dict:
+    """Evaluate one partition.
+
+    ``model_id`` names the result files, and ``masker_factory`` lets a caller
+    supply a non-production masker - for example
+    ``model_v2_adapter.build_model_v2_masker`` - so a candidate checkpoint can be
+    measured without changing the pinned production adapter. The defaults keep
+    every existing TinyBERT invocation byte-for-byte identical.
+    """
+
     fixture_path = fixtures / f"ood_{partition}.jsonl"
     manifest_path = fixtures / f"ood_{partition}.manifest.json"
     cases = load_cases(fixture_path)
@@ -67,10 +99,11 @@ def run_partition(
         cases = cases[:limit]
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     output_dir.mkdir(parents=True, exist_ok=True)
+    build = masker_factory or stage_factory
     summaries = {}
     for stage in stages:
         print(f"{partition}: {stage}")
-        masker = stage_factory(stage)
+        masker = build(stage)
         predictions = _predict(masker, cases)
         metrics = evaluate_predictions(cases, predictions)
         payload = {
@@ -84,17 +117,15 @@ def run_partition(
             "fixture_manifest_sha256": _sha256(manifest_path),
             "frozen_final": bool(manifest["frozen"]),
             "host": {"platform": platform.platform(), "python": platform.python_version()},
-            "models": {
-                "fp32_onnx": {"path": str(FP32_ONNX), "bytes": FP32_ONNX.stat().st_size, "sha256": _sha256(FP32_ONNX)},
-                "int8_onnx": {"path": str(INT8_ONNX), "bytes": INT8_ONNX.stat().st_size, "sha256": _sha256(INT8_ONNX)},
-            },
+            "model_id": model_id,
+            "models": _model_metadata(model_files),
             "metrics": metrics,
             "controlled_pairs": controlled_pair_analysis(cases, predictions),
         }
         if retain_predictions:
             payload["predictions"] = predictions
         suffix = f"_{limit}" if limit is not None else ""
-        result_path = output_dir / f"tinybert_{partition}_{stage}{suffix}.json"
+        result_path = output_dir / f"{model_id}_{partition}_{stage}{suffix}.json"
         result_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
         summaries[stage] = {
             "result_file": result_path.name,
@@ -103,13 +134,14 @@ def run_partition(
         }
     matrix = {
         "partition": partition,
+        "model_id": model_id,
         "case_count": len(cases),
         "fixture_sha256": _sha256(fixture_path),
         "stages": summaries,
         "note": "Development-host measurements; never interpret latency as Raspberry Pi latency.",
     }
     suffix = f"_{limit}" if limit is not None else ""
-    matrix_path = output_dir / f"tinybert_{partition}_summary{suffix}.json"
+    matrix_path = output_dir / f"{model_id}_{partition}_summary{suffix}.json"
     matrix_path.write_text(json.dumps(matrix, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return matrix
 
@@ -127,6 +159,11 @@ def main() -> None:
         action="store_true",
         help="Store every case prediction; off by default to keep committed results compact.",
     )
+    parser.add_argument(
+        "--model-id",
+        default="tinybert",
+        help="Prefix for result files. Use a distinct id when comparing checkpoints.",
+    )
     args = parser.parse_args()
     partitions = ("dev", "final") if args.partition == "all" else (args.partition,)
     for partition in partitions:
@@ -137,6 +174,7 @@ def main() -> None:
             tuple(args.stages),
             args.limit,
             args.retain_predictions,
+            model_id=args.model_id,
         )
 
 

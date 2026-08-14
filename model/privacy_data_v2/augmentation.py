@@ -15,6 +15,22 @@ from pathlib import Path
 from typing import Callable, Iterable, Mapping, Sequence
 
 FROZEN_FINAL_PARTITION = "ood_final"
+
+#: Partitions that must never be mutated. Augmentation may only ever touch the
+#: training side; every evaluation set - the original AI4Privacy validation, the
+#: supplementary holdout, the training-side test split and both OOD suites - is
+#: rejected at the mutation boundary so a transform the model saw during
+#: training can never leak into a reported number.
+PROTECTED_PARTITIONS = frozenset(
+    {
+        "test",
+        "val_original",
+        "val_supplementary",
+        "ood_dev",
+        FROZEN_FINAL_PARTITION,
+    }
+)
+
 _DIGIT_WORDS = (
     "zero", "one", "two", "three", "four",
     "five", "six", "seven", "eight", "nine",
@@ -44,6 +60,11 @@ def _assert_mutable(record: Mapping[str, object]) -> None:
     partition = str(record.get("partition", "")).lower()
     if partition == FROZEN_FINAL_PARTITION or bool(record.get("frozen", False)):
         raise ValueError("Frozen OOD-final records may not be augmented.")
+    if partition in PROTECTED_PARTITIONS:
+        raise ValueError(
+            f"Records in the protected partition {partition!r} may not be augmented. "
+            "Only the training split is augmentable."
+        )
 
 
 def validate_record(record: Mapping[str, object]) -> None:

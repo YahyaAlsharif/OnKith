@@ -1,14 +1,103 @@
 {
-  "GIVENNAME": [
-    "Aarav", "Aiko", "Amara", "Ana-María", "Chiamaka", "Dae-Hyun",
-    "Fatou", "İrem", "João", "Kwame", "Léa", "Mariam", "Noura",
-    "Oluwaseun", "Priyanka", "Rami", "Saoirse", "Thiago", "Xiomara", "Yuna"
+  "ACCOUNTNUM": [
+    "GB82 WEST 1234 5698 7654 32",
+    "SA03 8000 0000 6080 1016 7519",
+    "DE89 3704 0044 0532 0130 00",
+    "001-442-90871"
   ],
-  "SURNAME": [
-    "Al-Hassan", "Björkman", "D'Souza", "El-Sayed", "Fernández-Ruiz",
-    "Haddad", "Ibrahim", "Kovačević", "López", "Mensah", "Nguyễn",
-    "O'Connell", "Okafor", "Papadopoulos", "Qureshi", "Rossi",
-    "Singh", "Tanaka", "Winterbourne", "Zieliński"
+  "AGE": [
+    "34",
+    "7",
+    "62",
+    "19",
+    "48",
+    "81",
+    "twenty six",
+    "forty-three"
+  ],
+  "AMOUNT": [
+    "1,249.99",
+    "45.60",
+    "3,000",
+    "18,750.25",
+    "99.00",
+    "220,400.10"
+  ],
+  "BANKNAME": [
+    "Al Rajhi Bank",
+    "Riyad Bank",
+    "Saudi National Bank",
+    "Bank Albilad",
+    "Arab National Bank",
+    "Banque Saudi Fransi",
+    "Northwind Savings Bank",
+    "Meridian Trust Bank",
+    "Bank AlJazira",
+    "Alinma Bank"
+  ],
+  "BUILDINGNUM": [
+    "4417",
+    "12B",
+    "8",
+    "1904",
+    "77",
+    "2049"
+  ],
+  "CITY": [
+    "Abidjan",
+    "AlUla",
+    "Chișinău",
+    "Kraków",
+    "Mombasa",
+    "Recife",
+    "Şanlıurfa"
+  ],
+  "COUNTRY": [
+    "Saudi Arabia",
+    "the United Kingdom",
+    "Japan",
+    "Nigeria",
+    "Brazil",
+    "New Zealand",
+    "the Netherlands",
+    "Cote d'Ivoire",
+    "United Arab Emirates",
+    "Ireland",
+    "South Korea",
+    "Egypt"
+  ],
+  "CREDITCARDNUMBER": [
+    "4485-9012-3344-7761",
+    "4111 1111 1111 1111",
+    "5555555555554444"
+  ],
+  "CURRENCY": [
+    "Saudi riyal",
+    "SAR",
+    "pounds sterling",
+    "GBP",
+    "euros",
+    "EUR",
+    "yen",
+    "JPY",
+    "US dollars",
+    "USD",
+    "naira",
+    "AED"
+  ],
+  "DATE": [
+    "10 May 2026",
+    "2026-08-14",
+    "14/08/2026",
+    "August 14 2026",
+    "the third of March",
+    "1998-11-02",
+    "Jan 7, 2049"
+  ],
+  "DRIVERLICENSENUM": [
+    "D-SOUZA-77-041",
+    "DL 0429 8816",
+    "KSA-19-773301"
   ],
   "EMAIL": [
     "ana.maria+receipts@example.travel",
@@ -19,28 +108,189 @@
     "ops+pi@subunit.example.cloud",
     "x9.y_test@xn--bcher-kva.example"
   ],
-  "TELEPHONENUM": [
-    "+966 55 123 4567", "+81-3-1234-5678", "+234 (0) 803 123 4567",
-    "0117 496 0182", "06 12 34 56 78", "03-1234-5678"
+  "GENDER": [
+    "female",
+    "male",
+    "non-binary",
+    "woman",
+    "man"
   ],
-  "ACCOUNTNUM": [
-    "GB82 WEST 1234 5698 7654 32", "SA03 8000 0000 6080 1016 7519",
-    "DE89 3704 0044 0532 0130 00", "001-442-90871"
+  "GIVENNAME": [
+    "Aarav",
+    "Aiko",
+    "Amara",
+    "Ana-María",
+    "Chiamaka",
+    "Dae-Hyun",
+    "Fatou",
+    "İrem",
+    "João",
+    "Kwame",
+    "Léa",
+    "Mariam",
+    "Noura",
+    "Oluwaseun",
+    "Priyanka",
+    "Rami",
+    "Saoirse",
+    "Thiago",
+    "Xiomara",
+    "Yuna"
   ],
-  "IDCARDNUM": ["QX-77device-2291", "ID-KSA-2049-7712", "A9 44 2X 701"],
-  "PASSPORTNUM": ["L898902C3", "N42-771-AX", "P 0048 219"],
-  "DRIVERLICENSENUM": ["D-SOUZA-77-041", "DL 0429 8816", "KSA-19-773301"],
-  "TAXNUM": ["VAT-GB-771-2049-18", "TIN 48-220-7719", "TXA901177"],
-  "CREDITCARDNUMBER": [
-    "4485-9012-3344-7761", "4111 1111 1111 1111", "5555555555554444"
+  "IDCARDNUM": [
+    "QX-77device-2291",
+    "ID-KSA-2049-7712",
+    "A9 44 2X 701"
+  ],
+  "IPV4": [
+    "192.0.2.14",
+    "198.51.100.8",
+    "203.0.113.77",
+    "10.14.220.3",
+    "172.16.44.129",
+    "192.168.1.104",
+    "198.51.100.201",
+    "203.0.113.5"
   ],
   "ORGANISATION": [
-    "Meridian Trust", "Northwind Research Cooperative", "Sakura Health Lab",
-    "Al Noor Community Foundation", "Ndlovu & Partners"
+    "Meridian Trust",
+    "Northwind Research Cooperative",
+    "Sakura Health Lab",
+    "Al Noor Community Foundation",
+    "Ndlovu & Partners"
   ],
-  "CITY": ["Abidjan", "AlUla", "Chișinău", "Kraków", "Mombasa", "Recife", "Şanlıurfa"],
+  "PASSPORTNUM": [
+    "L898902C3",
+    "N42-771-AX",
+    "P 0048 219"
+  ],
+  "PASSWORD": [
+    "BlueHorse!92",
+    "kaust2026",
+    "MoonLight44",
+    "Summer#2026",
+    "Tuwaiq!4417",
+    "falcon_dune_71",
+    "Qamar$3390",
+    "482913",
+    "7741",
+    "Nakhla-2027!",
+    "gr33nOasis",
+    "Pearl.Harbour88",
+    "Zahra#9021",
+    "riyadh2026wifi",
+    "Cedar%Lantern5",
+    "081726",
+    "Manara!5512",
+    "north-star-2049"
+  ],
+  "SALARY": [
+    "12,500.00",
+    "8,400",
+    "144000 a year",
+    "3,250.75",
+    "27,900.00",
+    "65,000"
+  ],
+  "SEX": [
+    "F",
+    "M",
+    "female",
+    "male"
+  ],
+  "SOCIALNUM": [
+    "078-05-1120",
+    "219 44 7712",
+    "AB 12 34 56 C"
+  ],
   "STREET": [
-    "47 Harrowgate Lane", "12B Rue des Lilas", "8 Kingfisher Close",
-    "٢١ شارع النخيل", "5-12 Sakura-dori"
+    "47 Harrowgate Lane",
+    "12B Rue des Lilas",
+    "8 Kingfisher Close",
+    "21 Al Nakheel Street",
+    "5-12 Sakura-dori",
+    "1904 O'Rourke Terrace",
+    "King Abdulaziz Road",
+    "Plaza de la Constitucion 14"
+  ],
+  "SURNAME": [
+    "Al-Hassan",
+    "Björkman",
+    "D'Souza",
+    "El-Sayed",
+    "Fernández-Ruiz",
+    "Haddad",
+    "Ibrahim",
+    "Kovačević",
+    "López",
+    "Mensah",
+    "Nguyễn",
+    "O'Connell",
+    "Okafor",
+    "Papadopoulos",
+    "Qureshi",
+    "Rossi",
+    "Singh",
+    "Tanaka",
+    "Winterbourne",
+    "Zieliński"
+  ],
+  "TAXNUM": [
+    "VAT-GB-771-2049-18",
+    "TIN 48-220-7719",
+    "TXA901177"
+  ],
+  "TELEPHONENUM": [
+    "+966 55 123 4567",
+    "+81-3-1234-5678",
+    "+234 (0) 803 123 4567",
+    "0117 496 0182",
+    "06 12 34 56 78",
+    "03-1234-5678"
+  ],
+  "TIME": [
+    "09:15",
+    "5 pm",
+    "17:45",
+    "half past two",
+    "23:59",
+    "8:05 in the morning"
+  ],
+  "TIMEZONE": [
+    "Asia/Riyadh",
+    "UTC+03:00",
+    "GMT",
+    "Europe/London",
+    "Asia/Tokyo",
+    "UTC-05:00",
+    "Pacific/Auckland",
+    "Africa/Lagos",
+    "CET",
+    "AST"
+  ],
+  "TITLE": [
+    "Dr",
+    "Ms",
+    "Mr",
+    "Eng.",
+    "Prof",
+    "Sheikh",
+    "Mx"
+  ],
+  "URL": [
+    "https://example.com/sa/services/4417",
+    "http://northwind-consulting.co.uk/billing",
+    "https://alerts.lab.example/status",
+    "example.org/renewals",
+    "https://subunit.example.cloud/portal/login",
+    "www.example.travel/booking/2049"
+  ],
+  "ZIPCODE": [
+    "11564",
+    "SW1A 1AA",
+    "90210",
+    "K1A 0B1",
+    "100-0001",
+    "31952"
   ]
 }

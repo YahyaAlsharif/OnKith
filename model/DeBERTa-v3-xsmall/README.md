@@ -1,11 +1,68 @@
-# DeBERTa-v3-xsmall deployment preflight
+# DeBERTa-v3-xsmall — Model V2
 
-This folder contains the Phase 4 deployment compatibility test for
-`microsoft/deberta-v3-xsmall`. It does not contain a trained Model V2.
+Two things live here:
+
+1. **`model_v2_deberta_v3_xsmall.ipynb`** — the Model V2 training notebook.
+   Builds the data, trains the 63-label model, evaluates six separate sets, and
+   exports the ONNX/INT8 deployment artifacts. Ready to run end to end; no
+   training has been performed yet.
+2. **the Phase 4 deployment preflight** (documented below) — the compatibility
+   test that justified choosing this backbone.
+
+## Model V2 notebook
+
+| | |
+|---|---|
+| Backbone | `microsoft/deberta-v3-xsmall` @ `4b419818330868dff6a60ad3e6b1c730f8b8c0c6` |
+| Ontology | 31 entities / **63 BIO labels** (see `config/model_v2_label_map.json`) |
+| Windowing | 512 / 128 — the production contract, unchanged |
+| Budget | up to 10 epochs, early stopping patience 2 |
+| Selection | typed entity F1 on combined validation |
+
+Run it from the repository root with `PYTHONUTF8=1`. Every expensive stage
+writes an artifact and is skipped on rerun; `FORCE_REBUILD_DATA = True` rebuilds
+the corpora from scratch.
+
+**Evaluation sets, kept separate throughout:**
+
+| # | Set | Notes |
+|---|---|---|
+| 1 | training-side `test` | the pinned historical 16,374 rows, so TinyBERT stays comparable |
+| 2 | `val_original` | the untouched 40,909-row AI4Privacy English validation |
+| 3 | `val_supplementary` | grouped 20% holdout of the gap-filler sources |
+| 4 | combined validation | 2 + 3, reconstructed rather than materialised; the selection metric |
+| 5 | OOD dev | free to iterate on |
+| 6 | frozen OOD final | gated behind `RUN_FROZEN_FINAL`, run **once**, at the end |
+
+Because Model V2 removes `WEIGHT` and adds `PASSWORD`, TinyBERT comparisons are
+reported twice: restricted to the 30 shared entity types, and over the full
+Model V2 ontology. A single aggregate across both label spaces would be
+misleading and is never produced.
+
+**Committed evidence:** `config/` (label map, data manifest, source mapping,
+training config), `artifacts/model_v2/metrics/`, `artifacts/model_v2/tokenizer/`.
+**Local and gitignored:** corpora, checkpoints, weights, ONNX graphs.
+
+**Not done here:** the production migration from the TinyBERT 67-label contract
+to this model. That is a separate reviewed release; see the deployment summary
+the notebook writes for the exact change list.
+
+Data preparation lives in `model/privacy_data_v2/`; evaluation tooling lives in
+`model/privacy_evaluation/`.
+
+---
+
+## Phase 4 deployment preflight
+
+The compatibility test for `microsoft/deberta-v3-xsmall`. It does not contain a
+trained model.
 
 The preflight attaches a deterministic random 67-label token-classification
-head using OnKith's existing ontology. Its predictions have no quality meaning;
-the head exists only to prove tokenizer, ONNX, quantization and runtime contracts.
+head using OnKith's then-current ontology. Its predictions have no quality
+meaning; the head exists only to prove tokenizer, ONNX, quantization and runtime
+contracts. Model V2 uses **63** labels, which changes the head from 25,795 to
+24,255 parameters — about 0.002% of the model — so every measurement below still
+applies.
 
 ## Reproduce
 

@@ -5,6 +5,15 @@ artifacts/preflight/cache/
 # Generated ONNX graphs are large and reproducible from the preflight script.
 artifacts/preflight/onnx_model/
 
+# Model V2 training run. Materialized corpora, checkpoints, weights and ONNX
+# graphs stay local; config/, artifacts/model_v2/metrics/ and
+# artifacts/model_v2/tokenizer/ are the tracked, reviewable evidence.
+artifacts/model_v2/data/
+artifacts/model_v2/checkpoints/
+artifacts/model_v2/huggingface_model/
+artifacts/model_v2/onnx_model/
+artifacts/model_v2/cache/
+
 # Disposable production-pin compatibility environment.
 .venv-production/
 

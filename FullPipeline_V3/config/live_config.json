@@ -93,6 +93,8 @@
     "overflow_stride": 128,
     "label_count": 67,
     "word_policy": "whole_word_union",
-    "structured_enabled": true
+    "structured_enabled": true,
+    "mask_policy_note": "Per-label masking policy. Every detected entity type defaults to true (masked). Set an entry to false to keep that label detected and reported but left visible in masked_text, e.g. \"CITY\": false lets \"what time is it in Riyadh\" through unchanged. Absent or malformed entries always mask.",
+    "mask_policy": {}
   }
 }

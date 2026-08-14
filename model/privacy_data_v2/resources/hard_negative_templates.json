@@ -1,42 +1,586 @@
 [
-  {"category": "product_code", "text": "The replacement filter is model HX-77A-2049."},
-  {"category": "product_code", "text": "Install cartridge QX-771-229 before restarting."},
-  {"category": "model_number", "text": "The camera body is an X-T5 and the lens is 16-80mm."},
-  {"category": "model_number", "text": "Firmware build RPI5-2026.08 passed the smoke test."},
-  {"category": "temperature", "text": "The processor reached 72 degrees Celsius during the benchmark."},
-  {"category": "temperature", "text": "Set the oven to 180 C for twenty minutes."},
-  {"category": "price", "text": "The quoted price is $249.99 before shipping."},
-  {"category": "price", "text": "A day pass costs 35 euros at the station."},
-  {"category": "time", "text": "The meeting begins at 14:30 and ends at 16:00."},
-  {"category": "time", "text": "Wake me at seven forty five tomorrow."},
-  {"category": "generic_date", "text": "The public holiday falls on 1 January every year."},
-  {"category": "generic_date", "text": "Version 2.0 was released in March 2024."},
-  {"category": "benign_sequence", "text": "Count backward: nine eight seven six five four three."},
-  {"category": "benign_sequence", "text": "The scoreboard showed 4 2 1 after the final round."},
-  {"category": "room_number", "text": "The workshop moved from room 205 to room 310."},
-  {"category": "quantity", "text": "We need twelve boxes with six bottles in each box."},
-  {"category": "domain_like", "text": "The documentation uses service.example as a reserved hostname."},
-  {"category": "domain_like", "text": "Type localhost.localdomain into the test configuration."},
-  {"category": "reference_identifier", "text": "RFC 2606 defines reserved example domain names."},
-  {"category": "reference_identifier", "text": "Issue GH-2049 documents the expected parser behavior."},
-  {"category": "fictional_identifier", "text": "In the novel the starship registry is NCC-1701-D."},
-  {"category": "fictional_identifier", "text": "Agent 007 is a fictional character reference."},
-  {"category": "ambiguous_name_word", "text": "May can be a month or an auxiliary verb."},
-  {"category": "ambiguous_name_word", "text": "The rose garden needs water before noon."},
-  {"category": "ambiguous_name_word", "text": "Pat the surface dry with a clean towel."},
-  {"category": "ambiguous_name_word", "text": "Jordan is also the name of a country in this geography quiz."},
-  {"category": "code_fragment", "text": "Set retry_count = 5 and timeout_ms = 3000."},
-  {"category": "code_fragment", "text": "The function returns error_code_404 for the fixture."},
-  {"category": "network_reference", "text": "The example subnet 192.0.2.0 slash 24 is reserved for documentation."},
-  {"category": "network_reference", "text": "IPv6 documentation commonly uses 2001:db8::1."},
-  {"category": "measurement", "text": "The board measures 120 by 80 millimetres."},
-  {"category": "measurement", "text": "The parcel weighs 2.5 kilograms."},
-  {"category": "version", "text": "Python 3.11.9 is installed in the research environment."},
-  {"category": "version", "text": "ONNX opset 17 is the current export target."},
-  {"category": "sports_score", "text": "The match ended three one after extra time."},
-  {"category": "sports_score", "text": "She won the set 6-4 3-6 7-5."},
-  {"category": "coordinates_reference", "text": "The chart grid reference is B4, not a home address."},
-  {"category": "inventory", "text": "Shelf A-12 contains part 8842 and shelf B-09 is empty."},
-  {"category": "order_count", "text": "Prepare order number one, then order number two."},
-  {"category": "music", "text": "Play track 7 from disc 2 at half volume."}
+  {
+    "category": "product_code",
+    "text": "The replacement filter is model HX-77A-2049."
+  },
+  {
+    "category": "product_code",
+    "text": "Install cartridge QX-771-229 before restarting."
+  },
+  {
+    "category": "model_number",
+    "text": "The camera body is an X-T5 and the lens is 16-80mm."
+  },
+  {
+    "category": "model_number",
+    "text": "Firmware build RPI5-2026.08 passed the smoke test."
+  },
+  {
+    "category": "temperature",
+    "text": "The processor reached 72 degrees Celsius during the benchmark."
+  },
+  {
+    "category": "temperature",
+    "text": "Set the oven to 180 C for twenty minutes."
+  },
+  {
+    "category": "price",
+    "text": "The quoted price is $249.99 before shipping."
+  },
+  {
+    "category": "price",
+    "text": "A day pass costs 35 euros at the station."
+  },
+  {
+    "category": "time",
+    "text": "The meeting begins at 14:30 and ends at 16:00."
+  },
+  {
+    "category": "time",
+    "text": "Wake me at seven forty five tomorrow."
+  },
+  {
+    "category": "generic_date",
+    "text": "The public holiday falls on 1 January every year."
+  },
+  {
+    "category": "generic_date",
+    "text": "Version 2.0 was released in March 2024."
+  },
+  {
+    "category": "benign_sequence",
+    "text": "Count backward: nine eight seven six five four three."
+  },
+  {
+    "category": "benign_sequence",
+    "text": "The scoreboard showed 4 2 1 after the final round."
+  },
+  {
+    "category": "room_number",
+    "text": "The workshop moved from room 205 to room 310."
+  },
+  {
+    "category": "quantity",
+    "text": "We need twelve boxes with six bottles in each box."
+  },
+  {
+    "category": "domain_like",
+    "text": "The documentation uses service.example as a reserved hostname."
+  },
+  {
+    "category": "domain_like",
+    "text": "Type localhost.localdomain into the test configuration."
+  },
+  {
+    "category": "reference_identifier",
+    "text": "RFC 2606 defines reserved example domain names."
+  },
+  {
+    "category": "reference_identifier",
+    "text": "Issue GH-2049 documents the expected parser behavior."
+  },
+  {
+    "category": "fictional_identifier",
+    "text": "In the novel the starship registry is NCC-1701-D."
+  },
+  {
+    "category": "fictional_identifier",
+    "text": "Agent 007 is a fictional character reference."
+  },
+  {
+    "category": "ambiguous_name_word",
+    "text": "May can be a month or an auxiliary verb."
+  },
+  {
+    "category": "ambiguous_name_word",
+    "text": "The rose garden needs water before noon."
+  },
+  {
+    "category": "ambiguous_name_word",
+    "text": "Pat the surface dry with a clean towel."
+  },
+  {
+    "category": "ambiguous_name_word",
+    "text": "Jordan is also the name of a country in this geography quiz."
+  },
+  {
+    "category": "code_fragment",
+    "text": "Set retry_count = 5 and timeout_ms = 3000."
+  },
+  {
+    "category": "code_fragment",
+    "text": "The function returns error_code_404 for the fixture."
+  },
+  {
+    "category": "network_reference",
+    "text": "The example subnet 192.0.2.0 slash 24 is reserved for documentation."
+  },
+  {
+    "category": "network_reference",
+    "text": "IPv6 documentation commonly uses 2001:db8::1."
+  },
+  {
+    "category": "measurement",
+    "text": "The board measures 120 by 80 millimetres."
+  },
+  {
+    "category": "measurement",
+    "text": "The parcel weighs 2.5 kilograms."
+  },
+  {
+    "category": "version",
+    "text": "Python 3.11.9 is installed in the research environment."
+  },
+  {
+    "category": "version",
+    "text": "ONNX opset 17 is the current export target."
+  },
+  {
+    "category": "sports_score",
+    "text": "The match ended three one after extra time."
+  },
+  {
+    "category": "sports_score",
+    "text": "She won the set 6-4 3-6 7-5."
+  },
+  {
+    "category": "coordinates_reference",
+    "text": "The chart grid reference is B4, not a home address."
+  },
+  {
+    "category": "inventory",
+    "text": "Shelf A-12 contains part 8842 and shelf B-09 is empty."
+  },
+  {
+    "category": "order_count",
+    "text": "Prepare order number one, then order number two."
+  },
+  {
+    "category": "music",
+    "text": "Play track 7 from disc 2 at half volume."
+  },
+  {
+    "category": "password_talk",
+    "text": "I forgot my password again"
+  },
+  {
+    "category": "password_talk",
+    "text": "how do i reset my password"
+  },
+  {
+    "category": "password_talk",
+    "text": "never share your password with anyone"
+  },
+  {
+    "category": "password_talk",
+    "text": "the password must contain eight characters and a number"
+  },
+  {
+    "category": "password_talk",
+    "text": "password authentication is enabled on this account"
+  },
+  {
+    "category": "password_talk",
+    "text": "my password manager keeps everything in sync"
+  },
+  {
+    "category": "password_talk",
+    "text": "the password field is greyed out"
+  },
+  {
+    "category": "password_talk",
+    "text": "can you remind me to change my password next month"
+  },
+  {
+    "category": "password_talk",
+    "text": "two factor authentication is stronger than a password alone"
+  },
+  {
+    "category": "password_talk",
+    "text": "the password expired so i need a new one"
+  },
+  {
+    "category": "password_talk",
+    "text": "she said the wifi password is written on the router"
+  },
+  {
+    "category": "password_talk",
+    "text": "i typed the password wrong three times and got locked out"
+  },
+  {
+    "category": "password_talk",
+    "text": "passwords should never be reused across sites"
+  },
+  {
+    "category": "password_talk",
+    "text": "the login prompt asks for a username and password"
+  },
+  {
+    "category": "security_terminology",
+    "text": "the account was flagged for unusual activity"
+  },
+  {
+    "category": "security_terminology",
+    "text": "please verify your identity before continuing"
+  },
+  {
+    "category": "security_terminology",
+    "text": "the security question is about your first school"
+  },
+  {
+    "category": "security_terminology",
+    "text": "encryption is enabled for data at rest"
+  },
+  {
+    "category": "security_terminology",
+    "text": "the session token expires after fifteen minutes"
+  },
+  {
+    "category": "security_terminology",
+    "text": "multi factor authentication was rolled out last quarter"
+  },
+  {
+    "category": "security_terminology",
+    "text": "the firewall blocked an inbound connection attempt"
+  },
+  {
+    "category": "security_terminology",
+    "text": "we rotate our api keys every ninety days"
+  },
+  {
+    "category": "security_terminology",
+    "text": "the audit log shows a failed sign in"
+  },
+  {
+    "category": "security_terminology",
+    "text": "customer accounts are locked after five attempts"
+  },
+  {
+    "category": "generic_date",
+    "text": "the meeting is on tuesday afternoon"
+  },
+  {
+    "category": "generic_date",
+    "text": "the museum is closed on public holidays"
+  },
+  {
+    "category": "generic_date",
+    "text": "the warranty lasts twenty four months"
+  },
+  {
+    "category": "generic_date",
+    "text": "delivery takes three to five working days"
+  },
+  {
+    "category": "generic_date",
+    "text": "the quarter ends in september"
+  },
+  {
+    "category": "generic_time",
+    "text": "set a timer for twenty minutes"
+  },
+  {
+    "category": "generic_time",
+    "text": "what time is sunset today"
+  },
+  {
+    "category": "generic_time",
+    "text": "the train leaves every fifteen minutes"
+  },
+  {
+    "category": "generic_time",
+    "text": "wake me up in half an hour"
+  },
+  {
+    "category": "generic_time",
+    "text": "the shop opens at nine and closes at six"
+  },
+  {
+    "category": "location_query",
+    "text": "what time is it in riyadh"
+  },
+  {
+    "category": "location_query",
+    "text": "what is the weather in london tomorrow"
+  },
+  {
+    "category": "location_query",
+    "text": "how far is jeddah from mecca"
+  },
+  {
+    "category": "location_query",
+    "text": "find me a coffee shop nearby"
+  },
+  {
+    "category": "location_query",
+    "text": "is the ring road busy right now"
+  },
+  {
+    "category": "location_query",
+    "text": "which countries use the euro"
+  },
+  {
+    "category": "location_query",
+    "text": "play some music from brazil"
+  },
+  {
+    "category": "location_query",
+    "text": "how long is the flight to tokyo"
+  },
+  {
+    "category": "name_like_word",
+    "text": "please add basil and rosemary to the shopping list"
+  },
+  {
+    "category": "name_like_word",
+    "text": "the rose garden opens in april"
+  },
+  {
+    "category": "name_like_word",
+    "text": "we should book the summit meeting room"
+  },
+  {
+    "category": "name_like_word",
+    "text": "victoria station is closed for maintenance"
+  },
+  {
+    "category": "name_like_word",
+    "text": "the falcon prototype passed its review"
+  },
+  {
+    "category": "name_like_word",
+    "text": "i would like the earl grey tea please"
+  },
+  {
+    "category": "name_like_word",
+    "text": "put jasmine rice on the list"
+  },
+  {
+    "category": "name_like_word",
+    "text": "the dawn shift starts before sunrise"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the recipe needs 350 grams of flour"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "our target is 1200 units this month"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the room temperature is 22 degrees"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the bus route is 447 and it runs hourly"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "we finished 3 to 1 in the second half"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the file is 4096 kilobytes"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "chapter 12 starts on page 210"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the engine takes 5w30 oil"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "add 250 millilitres of water"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the invoice total was under 40 riyals"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "we need 15 chairs and 4 tables"
+  },
+  {
+    "category": "numeric_pattern",
+    "text": "the pressure should stay near 32 psi"
+  },
+  {
+    "category": "product_code",
+    "text": "the part number is BX-4417-QA"
+  },
+  {
+    "category": "product_code",
+    "text": "order the RJ45 cables not the RJ11 ones"
+  },
+  {
+    "category": "product_code",
+    "text": "the printer model is LX-2049DN"
+  },
+  {
+    "category": "model_number",
+    "text": "we upgraded from the v2 board to the v3 board"
+  },
+  {
+    "category": "model_number",
+    "text": "the router is an AX3000 dual band"
+  },
+  {
+    "category": "reference_identifier",
+    "text": "quote reference QT-7712 is still open"
+  },
+  {
+    "category": "reference_identifier",
+    "text": "ticket 44219 was closed yesterday"
+  },
+  {
+    "category": "reference_identifier",
+    "text": "the tracking number for the parcel is in the email"
+  },
+  {
+    "category": "fictional_identifier",
+    "text": "in the film the access code was seven seven four one"
+  },
+  {
+    "category": "fictional_identifier",
+    "text": "the badge number in that show is never revealed"
+  },
+  {
+    "category": "code_fragment",
+    "text": "run npm install then npm run build"
+  },
+  {
+    "category": "code_fragment",
+    "text": "the function returns null when the list is empty"
+  },
+  {
+    "category": "code_fragment",
+    "text": "set the timeout to 30 seconds in the config"
+  },
+  {
+    "category": "code_fragment",
+    "text": "git checkout main and pull the latest changes"
+  },
+  {
+    "category": "network_reference",
+    "text": "the subnet mask is 255.255.255.0"
+  },
+  {
+    "category": "network_reference",
+    "text": "localhost is reachable on port 8080"
+  },
+  {
+    "category": "network_reference",
+    "text": "the dns lookup failed for that hostname"
+  },
+  {
+    "category": "domain_like",
+    "text": "search for the documentation on the official site"
+  },
+  {
+    "category": "domain_like",
+    "text": "the file extension should be dot csv not dot txt"
+  },
+  {
+    "category": "domain_like",
+    "text": "save it as report dot pdf in the shared folder"
+  },
+  {
+    "category": "domain_like",
+    "text": "the at symbol is above the two key"
+  },
+  {
+    "category": "measurement",
+    "text": "the shelf is 180 centimetres tall"
+  },
+  {
+    "category": "measurement",
+    "text": "the package weighs about 2 kilograms"
+  },
+  {
+    "category": "measurement",
+    "text": "keep the oven at 180 degrees for 40 minutes"
+  },
+  {
+    "category": "measurement",
+    "text": "the pool is 25 metres long"
+  },
+  {
+    "category": "quantity",
+    "text": "we sold 88 tickets before noon"
+  },
+  {
+    "category": "quantity",
+    "text": "there are 30 days in september"
+  },
+  {
+    "category": "generic_organisation",
+    "text": "the ministry announced new opening hours"
+  },
+  {
+    "category": "generic_organisation",
+    "text": "the university library extended its hours"
+  },
+  {
+    "category": "generic_organisation",
+    "text": "the bank is closed on friday morning"
+  },
+  {
+    "category": "generic_organisation",
+    "text": "call the help desk if the issue continues"
+  },
+  {
+    "category": "conversational_filler",
+    "text": "um okay so what was i saying"
+  },
+  {
+    "category": "conversational_filler",
+    "text": "right right that makes sense thanks"
+  },
+  {
+    "category": "conversational_filler",
+    "text": "hold on let me think about that"
+  },
+  {
+    "category": "partial_utterance",
+    "text": "can you just remind me to"
+  },
+  {
+    "category": "partial_utterance",
+    "text": "and then the other thing was"
+  },
+  {
+    "category": "assistant_command",
+    "text": "turn the living room lights off"
+  },
+  {
+    "category": "assistant_command",
+    "text": "play the next track"
+  },
+  {
+    "category": "assistant_command",
+    "text": "add milk to my shopping list"
+  },
+  {
+    "category": "assistant_command",
+    "text": "set the volume to forty percent"
+  },
+  {
+    "category": "assistant_command",
+    "text": "what is the capital of japan"
+  },
+  {
+    "category": "assistant_command",
+    "text": "how many teaspoons are in a tablespoon"
+  },
+  {
+    "category": "assistant_command",
+    "text": "remind me to water the plants tonight"
+  },
+  {
+    "category": "assistant_command",
+    "text": "cancel the timer please"
+  }
 ]

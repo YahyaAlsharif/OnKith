@@ -305,9 +305,21 @@ class SupplementalPIIMasker:
     result. Failing to release is the correct direction for a privacy layer.
     """
 
-    def __init__(self, masker, recognizer: SupplementalPIIRecognizer | None = None):
+    def __init__(
+        self,
+        masker,
+        recognizer: SupplementalPIIRecognizer | None = None,
+        mask_policy=None,
+    ):
         self.masker = masker
         self.recognizer = recognizer or SupplementalPIIRecognizer()
+        # This wrapper rebuilds masked_text through merge_pii_spans, so it has
+        # to apply the same policy the inner masker used. Otherwise a label the
+        # operator disabled would be re-masked here. Inheriting from the inner
+        # masker keeps every existing single-argument call site working.
+        self.mask_policy = (
+            mask_policy if mask_policy is not None else getattr(masker, "mask_policy", None)
+        )
 
     def mask_text(self, text: str):
         result = self.masker.mask_text(text)
@@ -340,7 +352,7 @@ class SupplementalPIIMasker:
                 model.append(candidate)
         structured.extend(span.as_candidate() for span in extra)
 
-        merged = merge_pii_spans(text, model, structured)
+        merged = merge_pii_spans(text, model, structured, mask_policy=self.mask_policy)
         added = sum(
             1
             for entity in merged.entities
@@ -351,5 +363,7 @@ class SupplementalPIIMasker:
         details = dict(result.raw_model_output or {})
         details["supplemental_spans_added"] = added
         details["supplemental_latency_seconds"] = merged.latency_seconds
+        details["mask_policy"] = merged.mask_policy
+        details["policy_exempt_span_count"] = merged.policy_exempt_span_count
         result.raw_model_output = details
         return result

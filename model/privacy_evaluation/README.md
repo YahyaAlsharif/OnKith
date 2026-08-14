@@ -85,3 +85,46 @@ Pi latency.
 `FullPipeline_V3` is imported read-only. The older Moonshine package is not the
 combined-production reference because the current runtime uses Canary 180M,
 immediate Stage 5, and the supplemental PII wrapper.
+
+## Evaluating a candidate model
+
+`adapters.py` is pinned to TinyBERT by design: it loads the tokenizer named in
+`live_config.json` and rejects any label map that is not exactly 67 entries.
+Model V2 uses a different tokenizer and 63 labels, so it cannot run through that
+path — and weakening the production contract to run an experiment would be the
+wrong trade.
+
+`model_v2_adapter.py` is the alternative. It reimplements only what must vary —
+tokenizer, label map, window size — and imports the rest of the decision logic
+from production unchanged: `consolidate_predictions_to_words` for whole-word
+promotion and `merge_pii_spans` for overlap resolution. Both are pure and
+already model-independent, so results reflect what the deployed pipeline would
+emit.
+
+```python
+from privacy_eval.model_v2_adapter import build_model_v2_masker
+
+masker = build_model_v2_masker(
+    "artifacts/model_v2/onnx_model/model_int8.onnx",
+    "artifacts/model_v2/tokenizer",
+    "config/model_v2_label_map.json",
+    include_structured=False,   # True adds the frozen regex layer
+)
+```
+
+`run.py` takes `--model-id` so result files are scoped per model. The default
+is `tinybert`, so every existing invocation produces byte-identical filenames.
+
+## Dataset-shaped evaluation
+
+`dataset_metrics.py` scores plain annotated records with the same metric
+definitions the fixture path uses, which is what makes the six Model V2
+evaluation views comparable. It also provides:
+
+- `restrict_to_labels` — for honest cross-ontology comparison. Model V2 removes
+  `WEIGHT` and adds `PASSWORD`, so an aggregate over the union of label spaces
+  would be meaningless; both sides are restricted to the shared 30 types first.
+- `password_analysis` — reports credential-disclosure recall separately from the
+  false-positive rate on password-related no-PII rows. A single F1 would hide
+  the distinction that actually matters.
+- `subset_by` — per-source or per-category breakdowns.

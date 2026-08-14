@@ -65,11 +65,13 @@ model/TinyBERT-4/artifacts/tinybert_pii/onnx_model/model_fp32.onnx
 # ---------------------------------------------------------------------------
 # Generated PII corpora (model/data)
 # ---------------------------------------------------------------------------
-# The unified OpenPII/Gretel/Nemotron build is a large local artifact that is
-# regenerated from pinned source revisions. The Saudi/MENA supplementary CSV is
-# team-created data and is deliberately NOT ignored here.
-model/data/unified_pii_dataset.csv
-model/data/unified_pii_dataset.csv.tmp
+# Every corpus produced under model/ is a large local artifact regenerated from
+# pinned sources plus committed metadata. Only the generators and their docs are
+# tracked, so a new generated filename cannot be committed by accident.
+model/data/*
+!model/data/*.ipynb
+!model/data/*.md
+!model/data/.gitignore
 
 # ---------------------------------------------------------------------------
 # Captured audio and transcripts — never commit recorded speech

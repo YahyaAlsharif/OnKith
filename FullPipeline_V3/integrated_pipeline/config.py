@@ -12,6 +12,11 @@ MAXIMUM_BUFFER_TOKENS = 256
 MAXIMUM_BUFFER_DURATION_SECONDS = 15.0
 PII_WORD_POLICY = "whole_word_union"
 ENABLE_STRUCTURED_PII = True
+
+#: Optional key under ``pii`` holding the per-label masking policy. Absent or
+#: empty means every detected label is masked, which is the historical
+#: behaviour and the safe default.
+MASK_POLICY_KEY = "mask_policy"
 LIVE_STAGE5_MODE = "immediate"
 SESSION_DATABASE_FILENAME = "session_transcript.db"
 
@@ -145,6 +150,27 @@ class PipelineConfig:
     @property
     def enable_structured_pii(self) -> bool:
         return bool(self.pii["structured_enabled"])
+
+    @property
+    def mask_policy(self) -> dict[str, Any]:
+        """Per-label masking policy; an absent key means "mask everything".
+
+        Deliberately not part of :meth:`validate`'s exact-match contract. The
+        policy is operator-tunable configuration rather than a pinned deployment
+        invariant, and ``MaskPolicy.from_config`` already fails closed on
+        anything malformed.
+        """
+
+        raw = self.pii.get(MASK_POLICY_KEY)
+        return raw if isinstance(raw, dict) else {}
+
+    @property
+    def unmasked_labels(self) -> tuple[str, ...]:
+        """Entity types the operator has explicitly chosen not to mask."""
+
+        return tuple(
+            sorted(label for label, enabled in self.mask_policy.items() if enabled is False)
+        )
 
     def validate(
         self,

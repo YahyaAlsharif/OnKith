@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import PII_WORD_POLICY, PipelineConfig
+from .mask_policy import MaskPolicy
 from .schemas import PIIResult
 from .span_merger import (
     SpanCandidate,
@@ -50,6 +51,9 @@ class PIIMaskerAdapter:
         self._session: Any | None = None
         self._id2label: dict[int, str] = {}
         self._structured = StructuredPIIRecognizer()
+        # Resolved once at construction. An absent or malformed policy masks
+        # everything, so existing deployments are unaffected.
+        self.mask_policy = MaskPolicy.from_pipeline_config(config)
         self.load_count = 0
 
     @property
@@ -296,7 +300,9 @@ class PIIMaskerAdapter:
             span.as_candidate() for span in self._structured.find_spans(text)
         ]
         structured_latency = time.perf_counter() - structured_started
-        merged = merge_pii_spans(text, tinybert_spans, structured_spans)
+        merged = merge_pii_spans(
+            text, tinybert_spans, structured_spans, mask_policy=self.mask_policy
+        )
         return PIIResult(
             original_text=text,
             masked_text=merged.masked_text,
@@ -309,6 +315,8 @@ class PIIMaskerAdapter:
                 "window_count": len(windows),
                 "word_policy": PII_WORD_POLICY,
                 "structured_enabled": True,
+                "mask_policy": merged.mask_policy,
+                "policy_exempt_span_count": merged.policy_exempt_span_count,
                 "tinybert_latency_seconds": tinybert_latency,
                 "structured_latency_seconds": structured_latency,
                 "span_merger_latency_seconds": merged.latency_seconds,

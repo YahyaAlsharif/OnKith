@@ -5,6 +5,11 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Sequence
 
+try:
+    from .mask_policy import resolve as resolve_mask_policy
+except ImportError:  # Direct execution without the package context.
+    from mask_policy import resolve as resolve_mask_policy
+
 
 @dataclass(frozen=True)
 class SpanCandidate:
@@ -32,6 +37,10 @@ class SpanMergeResult:
     chosen_spans: list[SpanCandidate]
     decisions: list[SpanDecision]
     latency_seconds: float
+    #: Description of the masking policy that produced ``masked_text``.
+    mask_policy: dict[str, Any] = field(default_factory=dict)
+    #: Spans detected and reported but left unmasked by explicit policy.
+    policy_exempt_span_count: int = 0
 
 
 @dataclass
@@ -238,8 +247,17 @@ def merge_pii_spans(
     text: str,
     tinybert_spans: Sequence[SpanCandidate],
     structured_spans: Sequence[SpanCandidate],
+    mask_policy: Any = None,
 ) -> SpanMergeResult:
-    """Prefer exact structured spans, then deterministically keep non-overlaps."""
+    """Prefer exact structured spans, then deterministically keep non-overlaps.
+
+    ``mask_policy`` is applied at the very last step: after overlap resolution
+    has chosen the authoritative spans, but before any of them is replaced in
+    ``masked_text``. A span whose entity type is disabled stays in ``entities``
+    with ``masked=False`` and no placeholder, so detection is fully reported
+    while the original text is preserved. Omitting the argument masks
+    everything, exactly as before.
+    """
 
     import time
 
@@ -281,19 +299,28 @@ def merge_pii_spans(
                     f"{conflict.source}:{conflict.start_char}-{conflict.end_char}",
                 )
             )
+    policy = resolve_mask_policy(mask_policy)
     chosen.sort(key=lambda span: (span.start_char, span.end_char, span.entity_type))
     parts: list[str] = []
     entities: list[dict[str, Any]] = []
     counts: dict[str, int] = {}
     cursor = 0
+    policy_exempt = 0
     decision_by_span = {id(decision.span): decision for decision in decisions}
     for span in chosen:
         if span.start_char < cursor:
             raise RuntimeError("Overlap resolution produced overlapping chosen spans.")
         parts.append(text[cursor : span.start_char])
-        counts[span.entity_type] = counts.get(span.entity_type, 0) + 1
-        placeholder = f"[{span.entity_type}_{counts[span.entity_type]}]"
-        parts.append(placeholder)
+        masked = policy.should_mask(span.entity_type)
+        if masked:
+            counts[span.entity_type] = counts.get(span.entity_type, 0) + 1
+            placeholder = f"[{span.entity_type}_{counts[span.entity_type]}]"
+            parts.append(placeholder)
+        else:
+            # Detected, reported, and deliberately left in the released text.
+            placeholder = None
+            parts.append(span.text)
+            policy_exempt += 1
         entity = {
             "start": span.start_char,
             "end": span.end_char,
@@ -303,9 +330,13 @@ def merge_pii_spans(
             "source": span.source,
             "confidence": span.confidence,
             "metadata": span.metadata,
+            "masked": masked,
         }
         entities.append(entity)
-        decision_by_span[id(span)].final_placeholder = placeholder
+        decision = decision_by_span[id(span)]
+        decision.final_placeholder = placeholder
+        if not masked:
+            decision.reason = f"{decision.reason};mask_policy_disabled"
         cursor = span.end_char
     parts.append(text[cursor:])
     return SpanMergeResult(
@@ -314,6 +345,8 @@ def merge_pii_spans(
         chosen_spans=chosen,
         decisions=decisions,
         latency_seconds=time.perf_counter() - started,
+        mask_policy=policy.as_dict(),
+        policy_exempt_span_count=policy_exempt,
     )
 
 
