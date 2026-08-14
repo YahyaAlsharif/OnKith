@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--fp32", type=Path, required=True)
     parser.add_argument("--int8", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expected-label-count", type=int, default=67)
     args = parser.parse_args()
 
     tokenizer = AutoTokenizer.from_pretrained(
@@ -56,7 +57,7 @@ def main() -> None:
                 "attention_mask": np.ones((1, length), dtype=np.int64),
             }
             output = session.run(["logits"], inputs)[0]
-            if tuple(output.shape) != (1, length, 67):
+            if tuple(output.shape) != (1, length, args.expected_label_count):
                 raise AssertionError(f"Unexpected {name} output shape {output.shape}")
         model_results[name] = {
             "loaded": True,
@@ -74,6 +75,7 @@ def main() -> None:
         "tokenizer_class": type(tokenizer).__name__,
         "tokenizer_is_fast": bool(tokenizer.is_fast),
         "tokenizer_config_normalized_for_4_53": True,
+        "expected_label_count": args.expected_label_count,
         "tokenizer_cases": tokenizer_cases,
         "models": model_results,
     }

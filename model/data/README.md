@@ -33,7 +33,7 @@ SimHash deduplication and the Saudi entity pools were all ported into
 
 ```powershell
 $env:PYTHONUTF8 = "1"
-$env:PII_OUTPUT_DIR = "$PWD"          # keep outputs beside the notebooks
+$env:PII_OUTPUT_DIR = "$PWD\model\data"  # optional; this is already the default
 $env:PII_RUN_MODE  = "smoke"          # structural test; "full" streams >1.8M rows
 ```
 
@@ -50,7 +50,8 @@ documented public fallback without it).
 The unified corpus is hundreds of megabytes and is regenerable from pinned
 source revisions. The Saudi corpus is smaller but is likewise regenerable, and
 keeping one policy for all generated data means a new output filename cannot be
-committed by accident — `.gitignore` allows only `*.ipynb` and `*.md` here.
+committed by accident. `.gitignore` allows the builders, documentation, and the
+compact Saudi hash/provenance manifest; corpora and summary workbooks stay ignored.
 
 What makes that safe is
 `model/DeBERTa-v3-xsmall/config/model_v2_data_manifest.json`, which records the

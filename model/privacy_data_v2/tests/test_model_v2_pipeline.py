@@ -7,6 +7,7 @@ ever a training row.
 
 from __future__ import annotations
 
+import csv
 import json
 import sys
 import tempfile
@@ -22,6 +23,7 @@ import ontology
 import pools
 import records
 import selection
+import sources
 from grouped_splits import (
     MODEL_V2_SPLIT_FACTORS,
     numeric_pattern_family_factors,
@@ -246,6 +248,56 @@ class ContaminationFirewallTests(unittest.TestCase):
         rows = [record("leak", "Call Ana today", [("GIVENNAME", "Ana")], partition="train")]
         with self.assertRaisesRegex(AssertionError, "ood_dev"):
             firewall.assert_clean(rows, label="train")
+
+
+class SaudiArtifactAuditTests(unittest.TestCase):
+    FIELDS = [
+        "id", "text", "spans", "labels_present", "source_dataset", "source_split",
+        "final_split", "is_saudi", "generation_type", "entity_source",
+    ]
+
+    def write_csv(self, directory: str, *, text: str, label: str, value: str) -> Path:
+        start = text.index(value)
+        row = {
+            "id": "saudi-mena:test", "text": text,
+            "spans": json.dumps([{"start": start, "end": start + len(value),
+                                   "label": label, "value": value}]),
+            "labels_present": json.dumps([label]),
+            "source_dataset": "Saudi/MENA augmentation", "source_split": "generated",
+            "final_split": "train", "is_saudi": "True", "generation_type": "synthetic",
+            "entity_source": "fictional test generator",
+        }
+        path = Path(directory) / "saudi.csv"
+        with path.open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=self.FIELDS)
+            writer.writeheader(); writer.writerow(row)
+        return path
+
+    def test_disclosed_password_artifact_is_audited(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.write_csv(
+                directory, text="The Wi-Fi password is kaust2026", label="PASSWORD", value="kaust2026"
+            )
+            audit = sources.audit_saudi_csv(path)
+            self.assertEqual(audit["rows"], 1)
+            self.assertEqual(audit["password_spans"], 1)
+            self.assertTrue(audit["provenance_present"])
+
+    def test_password_concept_without_a_disclosure_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.write_csv(
+                directory, text="I forgot my password", label="PASSWORD", value="password"
+            )
+            with self.assertRaisesRegex(ValueError, "non-disclosure PASSWORD"):
+                sources.audit_saudi_csv(path)
+
+    def test_removed_label_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.write_csv(
+                directory, text="The weight is 75 kg", label="WEIGHT", value="75 kg"
+            )
+            with self.assertRaisesRegex(ValueError, "unsupported label 'WEIGHT'"):
+                sources.audit_saudi_csv(path)
 
 
 class SelectionTests(unittest.TestCase):

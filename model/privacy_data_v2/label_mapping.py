@@ -6,8 +6,8 @@ Model V2 ontology. Two rules are absolute:
 
 * nothing is ever guessed - an unrecognised source label is dropped, not
   approximated;
-* no new entity label may enter through a source. ``ALLERGIES``, ``USERNAME``,
-  ``WEIGHT`` and ``HEIGHT`` are required deletions, and every other
+* no new entity label may enter through a source. ``ALLERGIES``, ``USERNAME``
+  and ``WEIGHT`` are required deletions, ``HEIGHT`` remains absent, and every other
   out-of-ontology concept is rejected with a reason.
 
 ``PASSWORD`` maps at *label* level but is admitted at *span* level only by
@@ -21,9 +21,9 @@ from dataclasses import dataclass
 from typing import Any, Iterable
 
 try:
-    from .ontology import ENTITIES, REMOVED_ENTITIES
+    from .ontology import ABSENT_ENTITIES, ENTITIES, REMOVED_ENTITIES
 except ImportError:  # Direct notebook/script execution from this directory.
-    from ontology import ENTITIES, REMOVED_ENTITIES
+    from ontology import ABSENT_ENTITIES, ENTITIES, REMOVED_ENTITIES
 
 CONFIDENCE_HIGH = "high"
 CONFIDENCE_MEDIUM = "medium"
@@ -37,7 +37,7 @@ SOURCES = ("ai4privacy", "gretel", "nemotron", "kiji", "saudi_mena")
 
 #: AI4Privacy/OpenPII publishes OnKith's own label names.
 AI4PRIVACY_MAP: dict[str, str | None] = {entity: entity for entity in ENTITIES}
-AI4PRIVACY_MAP.update({removed: None for removed in REMOVED_ENTITIES})
+AI4PRIVACY_MAP.update({label: None for label in (*REMOVED_ENTITIES, *ABSENT_ENTITIES)})
 
 #: Kiji uses its own vocabulary; ported verbatim from the audited builder table.
 KIJI_MAP: dict[str, str | None] = {
@@ -102,7 +102,7 @@ DROP_REASONS: dict[str, str] = {
     "username": "required deletion",
     "user_name": "required deletion",
     "allergies": "required deletion",
-    "height": "required deletion",
+    "height": "required absence (never part of the TinyBERT head)",
     "weight": "required deletion (removed from the Model V2 ontology)",
     "state": "no safe universal state/province label",
     "securitytoken": "credential/token has no universal label",
@@ -194,6 +194,10 @@ def mapping_decision(source: str, native_label: Any) -> MappingDecision:
     if upper in REMOVED_ENTITIES:
         return MappingDecision(
             None, STATUS_DROPPED, f"required deletion: {REMOVED_ENTITIES[upper]}", None
+        )
+    if upper in ABSENT_ENTITIES:
+        return MappingDecision(
+            None, STATUS_DROPPED, f"required absence: {ABSENT_ENTITIES[upper]}", None
         )
 
     key = native_key(raw)

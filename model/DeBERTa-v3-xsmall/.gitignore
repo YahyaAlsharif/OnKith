@@ -13,6 +13,10 @@ artifacts/model_v2/checkpoints/
 artifacts/model_v2/huggingface_model/
 artifacts/model_v2/onnx_model/
 artifacts/model_v2/cache/
+artifacts/model_v2/models/huggingface/
+artifacts/model_v2/models/fp32/
+artifacts/model_v2/models/int8/
+artifacts/model_v2/smoke/
 
 # Disposable production-pin compatibility environment.
 .venv-production/

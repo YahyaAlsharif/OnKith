@@ -108,7 +108,7 @@ def build_manifest(
         "environment": _environment(),
         "regeneration": {
             "entrypoint": "model/DeBERTa-v3-xsmall/model_v2_deberta_v3_xsmall.ipynb",
-            "sections": "Run sections 1-8 (Setup through Augmentation) to rebuild every corpus.",
+            "sections": "Run sections 1-11 (Environment through manifest) to rebuild every corpus.",
             "note": (
                 "Corpora are gitignored by design. Re-running the dataset sections "
                 "with this manifest's seeds and pinned revisions must reproduce "

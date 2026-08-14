@@ -38,6 +38,10 @@ REMOVED_ENTITIES: dict[str, str] = {
     "ALLERGIES": "3 spans in the pinned project-train split; no supported source.",
     "USERNAME": "16 spans in the pinned project-train split; not an OnKith product need.",
     "WEIGHT": "1 span in the pinned project-train split; no source maps to it.",
+}
+
+#: Concepts that remain absent but were never part of the 67-label TinyBERT contract.
+ABSENT_ENTITIES: dict[str, str] = {
     "HEIGHT": "Never present in the TinyBERT head; 1 span exists only in official validation.",
 }
 
@@ -147,6 +151,7 @@ def label_map_payload() -> dict[str, object]:
         "derivation": {
             "base": "TinyBERT-4 / DeBERTa-preflight 67-label head (33 entities)",
             "removed": dict(REMOVED_ENTITIES),
+            "absent": dict(ABSENT_ENTITIES),
             "added": dict(ADDED_ENTITIES),
             "note": (
                 "HEIGHT was never in the 67-label head, so removing "

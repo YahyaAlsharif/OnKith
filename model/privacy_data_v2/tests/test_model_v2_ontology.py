@@ -29,7 +29,9 @@ class OntologyTests(unittest.TestCase):
         self.assertEqual(set(ontology.ENTITIES), expected)
 
     def test_removed_labels_are_absent(self):
-        for label in ("ALLERGIES", "USERNAME", "WEIGHT", "HEIGHT"):
+        self.assertEqual(set(ontology.REMOVED_ENTITIES), {"ALLERGIES", "USERNAME", "WEIGHT"})
+        self.assertEqual(set(ontology.ABSENT_ENTITIES), {"HEIGHT"})
+        for label in (*ontology.REMOVED_ENTITIES, *ontology.ABSENT_ENTITIES):
             with self.subTest(label=label):
                 self.assertNotIn(label, ontology.ENTITIES)
                 self.assertNotIn(f"B-{label}", ontology.BIO_LABELS)

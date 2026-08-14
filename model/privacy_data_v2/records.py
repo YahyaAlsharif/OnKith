@@ -252,3 +252,35 @@ def load_jsonl(path: str | Path, *, validate: bool = True) -> list[dict[str, Any
         for record in records:
             validate_model_v2_record(record)
     return records
+
+
+def audit_jsonl(path: str | Path, *, validate: bool = True) -> dict[str, Any]:
+    """Return row/span/hash evidence for a materialized JSONL artifact."""
+
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    rows = spans = 0
+    with path.open("r", encoding="utf-8") as stream:
+        for line_number, line in enumerate(stream, start=1):
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+            except Exception as exc:
+                raise ValueError(f"Invalid JSONL line {line_number} in {path}") from exc
+            if validate:
+                validate_model_v2_record(record)
+            rows += 1
+            spans += len(record.get("privacy_mask", ()))
+    return {
+        "path": str(path),
+        "rows": rows,
+        "spans": spans,
+        "sha256": digest.hexdigest(),
+        "bytes": path.stat().st_size,
+    }

@@ -14,7 +14,7 @@ ai4privacy,DRIVERLICENSENUM,DRIVERLICENSENUM,mapped,high,explicit source mapping
 ai4privacy,EMAIL,EMAIL,mapped,high,explicit source mapping,
 ai4privacy,GENDER,GENDER,mapped,high,explicit source mapping,
 ai4privacy,GIVENNAME,GIVENNAME,mapped,high,explicit source mapping,
-ai4privacy,HEIGHT,,dropped,,required deletion,
+ai4privacy,HEIGHT,,dropped,,required absence (never part of the TinyBERT head),
 ai4privacy,IDCARDNUM,IDCARDNUM,mapped,high,explicit source mapping,
 ai4privacy,IPV4,IPV4,mapped,high,explicit source mapping,
 ai4privacy,ORGANISATION,ORGANISATION,mapped,high,explicit source mapping,

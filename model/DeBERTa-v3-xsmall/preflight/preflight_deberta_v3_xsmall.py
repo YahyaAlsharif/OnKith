@@ -52,8 +52,9 @@ BENCHMARK_WARMUPS = 3
 BENCHMARK_REPETITIONS = 10
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parents[1]
-ARTIFACT_ROOT = HERE / "artifacts" / "preflight"
+MODEL_DIR = HERE.parent                 # model/DeBERTa-v3-xsmall
+REPO_ROOT = MODEL_DIR.parents[1]
+ARTIFACT_ROOT = MODEL_DIR / "artifacts" / "preflight"
 CACHE_DIR = ARTIFACT_ROOT / "cache"
 TOKENIZER_DIR = ARTIFACT_ROOT / "tokenizer"
 CONFIG_DIR = ARTIFACT_ROOT / "config"
@@ -754,8 +755,8 @@ def run_preflight() -> dict[str, Any]:
         }
     results["stages"]["benchmark"] = {
         "status": "run separately after export work and other CPU workloads exit",
-        "command": "python benchmark_final.py",
-        "report": "metrics/final_benchmark.json",
+        "command": "python model/DeBERTa-v3-xsmall/preflight/benchmark_final.py",
+        "report": "artifacts/preflight/metrics/final_benchmark.json",
     }
     RESULTS_PATH.write_text(
         json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8"

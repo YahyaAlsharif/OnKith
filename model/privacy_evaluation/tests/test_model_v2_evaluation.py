@@ -255,6 +255,24 @@ class NotebookTests(unittest.TestCase):
     def test_frozen_final_is_gated_and_defaults_off(self):
         self.assertIn("RUN_FROZEN_FINAL = False", self.all_code)
         self.assertIn("if RUN_FROZEN_FINAL:", self.all_code)
+        gate_index = self.all_code.index("if RUN_FROZEN_FINAL:")
+        final_load_index = self.all_code.index('partition="ood_final"')
+        self.assertGreater(final_load_index, gate_index)
+
+    def test_smoke_mode_is_isolated_and_bounded(self):
+        self.assertIn('MODEL_V2_SMOKE_TEST', self.all_code)
+        self.assertIn('FINAL_ARTIFACTS / "smoke"', self.all_code)
+        self.assertIn("SMOKE_TRAIN_STEPS", self.all_code)
+        self.assertIn("optimizer_steps > 0", self.all_code)
+
+    def test_saudi_prerequisite_is_checked_early(self):
+        self.assertIn("sources.audit_saudi_csv(SAUDI_CSV)", self.all_code)
+        self.assertIn("Saudi CSV hash does not match its manifest", self.all_code)
+
+    def test_organized_deployment_paths_are_used(self):
+        self.assertIn('MODEL_DIR / "deployment" / "verify_production_runtime.py"', self.all_code)
+        self.assertIn('FP32_DIR / "model_fp32.onnx"', self.all_code)
+        self.assertIn('INT8_DIR / "model_int8.onnx"', self.all_code)
 
     def test_ontology_is_asserted(self):
         self.assertIn("len(ENTITIES) == 31", self.all_code)

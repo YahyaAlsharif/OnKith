@@ -17,11 +17,13 @@ Nothing here decides whether a row is *useful*; that is ``selection``.
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import math
 import re
 import unicodedata
 from collections import Counter
+from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping
 
 try:
@@ -300,9 +302,15 @@ def normalize_row(
 
     identity = uid or row.get("uid") or row.get("id")
     if identity in (None, ""):
-        import hashlib
-
         identity = hashlib.sha256(text.encode("utf-8")).hexdigest()[:24]
+    builder_metadata: dict[str, Any] = {}
+    if source == "saudi_mena":
+        builder_metadata = {
+            "generation_type": str(row.get("generation_type") or "original"),
+            "entity_source": str(row.get("entity_source") or "") or None,
+            "builder_final_split": str(row.get("final_split") or "") or None,
+            "is_saudi": str(row.get("is_saudi") or "").casefold() == "true",
+        }
     return make_record(
         uid=f"{source}:{identity}",
         source_text=text,
@@ -311,6 +319,7 @@ def normalize_row(
         partition=partition,
         source_split=str(row.get("__split__") or "") or None,
         region=str(row.get("region") or "") or None,
+        **builder_metadata,
     )
 
 
@@ -358,6 +367,132 @@ def iter_saudi_rows(csv_path: str) -> Iterator[dict[str, Any]]:
             item["__split__"] = "generated"
             item["spans"] = row.get("spans")
             yield item
+
+
+def audit_saudi_csv(csv_path: str | Path) -> dict[str, Any]:
+    """Validate the local Saudi builder artifact before expensive data work.
+
+    This is intentionally strict: every span must be source-aligned, every
+    label must belong to Model V2, every PASSWORD span must be a credential
+    disclosure, and row-level provenance must be present.
+    """
+
+    import csv as _csv
+
+    try:
+        from .password_rules import classify_password_span
+    except ImportError:
+        from password_rules import classify_password_span
+
+    path = Path(csv_path).resolve()
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Required Saudi dataset is missing: {path}. "
+            "Run model/data/saudi_PII_Builder.ipynb first."
+        )
+
+    required_columns = {
+        "id", "text", "spans", "labels_present", "source_dataset",
+        "source_split", "final_split", "is_saudi", "generation_type",
+        "entity_source",
+    }
+    digest = hashlib.sha256()
+    with path.open("rb") as raw_stream:
+        for chunk in iter(lambda: raw_stream.read(1 << 20), b""):
+            digest.update(chunk)
+
+    row_count = span_count = password_rows = password_spans = 0
+    labels: Counter[str] = Counter()
+    sources_seen: Counter[str] = Counter()
+    generation_types: Counter[str] = Counter()
+    seen_ids: set[str] = set()
+    seen_texts: set[str] = set()
+    columns: list[str] = []
+
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        reader = _csv.DictReader(stream)
+        columns = list(reader.fieldnames or ())
+        missing = sorted(required_columns - set(columns))
+        if missing:
+            raise ValueError(f"Saudi dataset is missing required columns: {missing}")
+        for line_number, row in enumerate(reader, start=2):
+            row_count += 1
+            uid = str(row["id"])
+            text = str(row["text"])
+            if not uid or uid in seen_ids:
+                raise ValueError(f"Saudi row {line_number} has a missing or duplicate id: {uid!r}")
+            seen_ids.add(uid)
+            normalized = re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text)).strip().casefold()
+            if not normalized or normalized in seen_texts:
+                raise ValueError(f"Saudi row {line_number} has empty or duplicate text")
+            seen_texts.add(normalized)
+            if not str(row["entity_source"]).strip():
+                raise ValueError(f"Saudi row {line_number} is missing entity_source provenance")
+
+            try:
+                spans = json.loads(row["spans"])
+            except Exception as exc:
+                raise ValueError(f"Saudi row {line_number} has invalid spans JSON") from exc
+            if not isinstance(spans, list) or not spans:
+                raise ValueError(f"Saudi row {line_number} must contain at least one span")
+
+            previous_end = -1
+            row_has_password = False
+            labels_in_spans: set[str] = set()
+            for span_index, span in enumerate(spans):
+                label = str(span.get("label") or "")
+                start, end = int(span["start"]), int(span["end"])
+                value = str(span.get("value") or "")
+                if label not in set(ENTITIES):
+                    raise ValueError(
+                        f"Saudi row {line_number} span {span_index} uses unsupported label {label!r}"
+                    )
+                if not (0 <= start < end <= len(text)) or text[start:end] != value:
+                    raise ValueError(
+                        f"Saudi row {line_number} span {span_index} is not source-aligned"
+                    )
+                if start < previous_end:
+                    raise ValueError(f"Saudi row {line_number} contains overlapping spans")
+                previous_end = end
+                labels[label] += 1
+                labels_in_spans.add(label)
+                span_count += 1
+                if label == "PASSWORD":
+                    decision = classify_password_span(text, start, end)
+                    if not decision.accept:
+                        raise ValueError(
+                            f"Saudi row {line_number} has a non-disclosure PASSWORD span: "
+                            f"{decision.category}: {decision.reason}"
+                        )
+                    password_spans += 1
+                    row_has_password = True
+
+            declared = set(json.loads(row["labels_present"]))
+            if declared != labels_in_spans:
+                raise ValueError(f"Saudi row {line_number} labels_present does not match spans")
+            password_rows += int(row_has_password)
+            sources_seen[str(row["source_dataset"])] += 1
+            generation_types[str(row["generation_type"])] += 1
+
+    if row_count == 0:
+        raise ValueError("Saudi dataset contains no rows")
+    if password_spans == 0:
+        raise ValueError("Saudi dataset contains no PASSWORD credential disclosures")
+
+    return {
+        "path": str(path),
+        "bytes": path.stat().st_size,
+        "sha256": digest.hexdigest(),
+        "rows": row_count,
+        "spans": span_count,
+        "columns": columns,
+        "labels": dict(sorted(labels.items())),
+        "password_rows": password_rows,
+        "password_spans": password_spans,
+        "rows_by_source_dataset": dict(sorted(sources_seen.items())),
+        "rows_by_generation_type": dict(sorted(generation_types.items())),
+        "provenance_present": True,
+    }
 
 
 def resolve_revision(source: str, *, hf_token: str | None = None) -> str | None:

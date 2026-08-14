@@ -1,0 +1,223 @@
+{
+  "artifacts": {
+    "dataset": {
+      "bytes": 21700096,
+      "file": "saudi_mena_pii_dataset.csv",
+      "rows": 40000,
+      "sha256": "811a28d99d3e7829bbf229712076a46359579fadd7f5e60bfa3fc8e1f158e54c"
+    },
+    "summary_csv": {
+      "bytes": 5263,
+      "file": "saudi_mena_pii_summary.csv",
+      "sha256": "ebd05d89b764b29e08ff94a83288d49ad735ec3b09c74e90b390f72f69a41b79"
+    },
+    "summary_xlsx": {
+      "bytes": 16624,
+      "file": "saudi_mena_pii_summary.xlsx",
+      "sha256": "3088db2a4d3fb3798fb9ea5c288181fc9d841212be9342be867acf7f58d56eca"
+    }
+  },
+  "configuration": {
+    "effective_targets": {
+      "ACCOUNTNUM": 5000,
+      "AGE": 0,
+      "AMOUNT": 0,
+      "BANKNAME": 5000,
+      "BUILDINGNUM": 5000,
+      "CITY": 10000,
+      "COUNTRY": 2000,
+      "CREDITCARDNUMBER": 0,
+      "CURRENCY": 3000,
+      "DATE": 0,
+      "DRIVERLICENSENUM": 0,
+      "EMAIL": 0,
+      "GENDER": 0,
+      "GIVENNAME": 15000,
+      "IDCARDNUM": 0,
+      "IPV4": 0,
+      "ORGANISATION": 8000,
+      "PASSPORTNUM": 0,
+      "PASSWORD": 2000,
+      "SALARY": 0,
+      "SEX": 0,
+      "SOCIALNUM": 0,
+      "STREET": 10000,
+      "SURNAME": 78,
+      "TAXNUM": 5000,
+      "TELEPHONENUM": 5000,
+      "TIME": 0,
+      "TIMEZONE": 1000,
+      "TITLE": 0,
+      "URL": 0,
+      "ZIPCODE": 5000
+    },
+    "national_address_api_enabled": false,
+    "row_target_max": 60000,
+    "row_target_min": 40000,
+    "run_mode": "full",
+    "seed": 20260812,
+    "smoke_scale": 0.002
+  },
+  "generator_version": "saudi_mena.2",
+  "ontology": {
+    "entities": [
+      "ACCOUNTNUM",
+      "AGE",
+      "AMOUNT",
+      "BANKNAME",
+      "BUILDINGNUM",
+      "CITY",
+      "COUNTRY",
+      "CREDITCARDNUMBER",
+      "CURRENCY",
+      "DATE",
+      "DRIVERLICENSENUM",
+      "EMAIL",
+      "GENDER",
+      "GIVENNAME",
+      "IDCARDNUM",
+      "IPV4",
+      "ORGANISATION",
+      "PASSPORTNUM",
+      "PASSWORD",
+      "SALARY",
+      "SEX",
+      "SOCIALNUM",
+      "STREET",
+      "SURNAME",
+      "TAXNUM",
+      "TELEPHONENUM",
+      "TIME",
+      "TIMEZONE",
+      "TITLE",
+      "URL",
+      "ZIPCODE"
+    ],
+    "num_bio_labels": 63,
+    "num_entities": 31
+  },
+  "quality_audit": {
+    "candidates": 46824,
+    "duplicate_rows_removed": 6824,
+    "invalid_rows_removed": 0,
+    "invalid_spans_removed": 0,
+    "non_latin_rows_removed": 0,
+    "rows_written": 40000
+  },
+  "reproducibility": {
+    "corpus_git_policy": "local and gitignored",
+    "notebook": "model/data/saudi_PII_Builder.ipynb",
+    "output_directory": "model/data"
+  },
+  "resource_audit": [
+    {
+      "accepted_entities": 13619,
+      "notes": "CC0 real Muslim given-name vocabulary",
+      "resource": "Muslim Names Dataset",
+      "status": "loaded",
+      "url": "https://huggingface.co/datasets/wpacademy/muslim-names-dataset"
+    },
+    {
+      "accepted_entities": 943,
+      "notes": "CC-BY-4.0 name-token lexicon; not used to infer surname/given-name class",
+      "resource": "Arabic Name Pairs",
+      "status": "cross-check only",
+      "url": "https://huggingface.co/datasets/Sayedyousef/arabic-name-pairs/resolve/main/dict_FINAL.json"
+    },
+    {
+      "accepted_entities": 78,
+      "notes": "No fictional combinations; use is capped to avoid manufacturing diversity",
+      "resource": "Saudi family names",
+      "status": "conservative curated pool",
+      "url": "curated from public Saudi institutional and biographical references"
+    },
+    {
+      "accepted_entities": 0,
+      "notes": "Person entities are full names; the published class does not identify surname boundaries reliably",
+      "resource": "ANETAC",
+      "status": "not used for surnames",
+      "url": "https://arxiv.org/abs/1907.03110"
+    },
+    {
+      "accepted_entities": 16,
+      "notes": "Official public English intersection export",
+      "resource": "RCRC Traffic Intersections",
+      "status": "loaded",
+      "url": "https://opendata.rcrc.gov.sa/api/explore/v2.1/catalog/datasets/traffic-intersections-by-main-street-and-cross-street-2024/exports/csv"
+    },
+    {
+      "accepted_entities": 32,
+      "notes": "Set NATIONAL_ADDRESS_API_KEY to enable the official lookup",
+      "resource": "National Address API - KSA Cities",
+      "status": "documented fallback",
+      "url": "https://api.address.gov.sa/cities"
+    },
+    {
+      "accepted_entities": 91,
+      "notes": "CC0 English labels filtered to country=Saudi Arabia",
+      "resource": "Wikidata Saudi city labels",
+      "status": "loaded",
+      "url": "https://query.wikidata.org/sparql"
+    },
+    {
+      "accepted_entities": 0,
+      "notes": "JSONDecodeError('Invalid control character at: line 2661 column 68 (char 65587)')",
+      "resource": "Wikidata Saudi organisation labels",
+      "status": "unavailable",
+      "url": "https://query.wikidata.org/sparql"
+    },
+    {
+      "accepted_entities": 40,
+      "notes": "Government bodies and Saudi universities; no invented organisations",
+      "resource": "Saudi official government and university nomenclature",
+      "status": "curated official English names",
+      "url": "https://www.boe.gov.sa/en/Translation/Pages/GovernmentLabels.aspx"
+    },
+    {
+      "accepted_entities": 12,
+      "notes": "Closed finite vocabulary",
+      "resource": "Saudi Central Bank Licensed Banks",
+      "status": "curated from official list",
+      "url": "https://www.sama.gov.sa/en-us/supervision/licenseentities/pages/licensedbanks.aspx"
+    },
+    {
+      "accepted_entities": 0,
+      "notes": "Machine-readable access and reuse licence were not established",
+      "resource": "LiStreet Saudi addresses",
+      "status": "not fetched",
+      "url": "https://listreet.com/pages/saudi-arabia"
+    }
+  ],
+  "rows_by_generation_type": {
+    "replacement": 14455,
+    "synthetic": 25545
+  },
+  "schema_version": 1,
+  "validation": {
+    "cross_split_entity_leakage": 0,
+    "label_counts": {
+      "ACCOUNTNUM": 7305,
+      "BANKNAME": 6160,
+      "BUILDINGNUM": 11177,
+      "CITY": 15833,
+      "COUNTRY": 3006,
+      "CURRENCY": 4946,
+      "GIVENNAME": 17050,
+      "ORGANISATION": 9736,
+      "PASSWORD": 2654,
+      "STREET": 11717,
+      "SURNAME": 78,
+      "TAXNUM": 5976,
+      "TELEPHONENUM": 5861,
+      "TIMEZONE": 1326,
+      "ZIPCODE": 6658
+    },
+    "password_spans": 2654,
+    "rows": 40000,
+    "split_counts": {
+      "test": 4000,
+      "train": 32000,
+      "validation": 4000
+    }
+  }
+}

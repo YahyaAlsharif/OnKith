@@ -236,7 +236,9 @@
     "removed": {
       "ALLERGIES": "3 spans in the pinned project-train split; no supported source.",
       "USERNAME": "16 spans in the pinned project-train split; not an OnKith product need.",
-      "WEIGHT": "1 span in the pinned project-train split; no source maps to it.",
+      "WEIGHT": "1 span in the pinned project-train split; no source maps to it."
+    },
+    "absent": {
       "HEIGHT": "Never present in the TinyBERT head; 1 span exists only in official validation."
     },
     "added": {

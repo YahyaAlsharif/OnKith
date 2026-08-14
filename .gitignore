@@ -72,6 +72,8 @@ model/data/*
 !model/data/*.ipynb
 !model/data/*.md
 !model/data/.gitignore
+!model/data/saudi_mena_pii_manifest.json
+model/data/.*_execution.ipynb
 
 # ---------------------------------------------------------------------------
 # Captured audio and transcripts — never commit recorded speech

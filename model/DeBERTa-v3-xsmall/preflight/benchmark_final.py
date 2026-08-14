@@ -23,8 +23,9 @@ REPETITIONS = 10
 DEFAULT_THREAD_REPETITIONS = 5
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parents[1]
-ARTIFACT_ROOT = HERE / "artifacts" / "preflight"
+MODEL_DIR = HERE.parent                 # model/DeBERTa-v3-xsmall
+REPO_ROOT = MODEL_DIR.parents[1]
+ARTIFACT_ROOT = MODEL_DIR / "artifacts" / "preflight"
 DEBERTA_FP32 = ARTIFACT_ROOT / "onnx_model" / "model_fp32.onnx"
 DEBERTA_INT8 = ARTIFACT_ROOT / "onnx_model" / "model_int8.onnx"
 DEBERTA_TOKENIZER = ARTIFACT_ROOT / "tokenizer"
