@@ -27,7 +27,18 @@ Other supplementary sources are streamed into the main notebook: Gretel and Kiji
 
 ## Run the model notebook
 
-Open the root notebook and use **Run All**. Keep `RUN_FROZEN_FINAL = False` until the trained checkpoint, validation results, quantization gate, and release decision are final. The notebook fingerprints the frozen-final texts for the contamination firewall but does not construct or score final cases before that gated cell.
+Open the root notebook and use **Run All**. It runs in release-evaluation order:
+
+```text
+train -> best checkpoint -> FP32/PyTorch validation -> OOD dev -> save artifacts
+      -> FP32 ONNX export -> parity -> INT8 quantization
+      -> INT8 validation and quality gate (test, val_original, val_supplementary,
+         combined validation, OOD dev)
+      -> frozen OOD final, only on an accepted INT8 candidate
+      -> deployment summary
+```
+
+Keep `RUN_FROZEN_FINAL = False` until the trained checkpoint, validation results, quantization gate, and release decision are final. The notebook fingerprints the frozen-final texts for the contamination firewall but does not construct or score final cases before that gated cell. When it is finally enabled, the frozen set is scored **once**, on the INT8 ONNX graph that cleared the quality gate - the artifact that would actually ship - and the cell refuses to run if that gate failed or if smoke mode is active.
 
 An isolated development smoke is available without changing production defaults:
 
@@ -49,7 +60,7 @@ Smoke output goes only under `artifacts/model_v2/smoke/` and must never be treat
 | saved Hugging Face model | `artifacts/model_v2/models/huggingface/` | ignored | recovery/export source |
 | tokenizer | `artifacts/model_v2/tokenizer/` | tracked after the accepted real run | required |
 | label map, source map, manifests, training config | `config/` | tracked | required metadata |
-| training/evaluation/parity reports | `artifacts/model_v2/metrics/` | tracked after the real run | release evidence |
+| training/evaluation/parity/gate reports | `artifacts/model_v2/metrics/` | tracked after the real run | release evidence |
 | FP32 ONNX | `artifacts/model_v2/models/fp32/model_fp32.onnx` | ignored; about 270 MiB, manual artifact storage or future Git LFS | parity/reference |
 | INT8 ONNX | `artifacts/model_v2/models/int8/model_int8.onnx` | ignored during training | production candidate |
 
