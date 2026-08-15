@@ -24,16 +24,28 @@ try:
 except ImportError:  # Direct notebook/script execution from this directory.
     from ontology import MODEL_V2_VERSION, label_map_payload
 
-MANIFEST_SCHEMA_VERSION = 2
+MANIFEST_SCHEMA_VERSION = 3
+
+#: The version of the data-building contract itself, independent of the manifest
+#: schema. Bump it whenever a change alters which rows end up in the final
+#: artifacts, so a cache built by an older pipeline cannot be reused in silence.
+#:
+#: 1. original Model V2 build
+#: 2. per-label masking policy and the 63-label ontology
+#: 3. cross-partition contamination filter before the final train/test split,
+#:    plus the narrowed ``email_domain`` and ``open_entity_value`` split keys
+DATA_PIPELINE_VERSION = 3
 
 #: Fields whose drift means the regenerated holdout is not the committed one.
 CRITICAL_FIELDS = (
+    "data_pipeline_version",
     "ontology.num_labels",
     "ontology.entities",
     "sources.base.revision",
     "split.supplementary.seed",
     "split.supplementary.holdout_fraction",
     "split.supplementary.factors",
+    "contamination_filter.version",
     "artifacts.val_supplementary.sha256",
     "artifacts.val_supplementary.rows",
 )
@@ -76,12 +88,14 @@ def build_manifest(
     disjointness: Mapping[str, Any],
     artifacts: Mapping[str, Any],
     config: Mapping[str, Any],
+    contamination_filter: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Assemble the manifest from the audits each stage already produced."""
 
     ontology = label_map_payload()
     return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
+        "data_pipeline_version": DATA_PIPELINE_VERSION,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "ontology_version": MODEL_V2_VERSION,
         "ontology": {
@@ -96,6 +110,7 @@ def build_manifest(
         "password": password_audit,
         "deduplication": dedup_audit,
         "contamination_firewall": firewall_audit,
+        "contamination_filter": dict(contamination_filter or {}),
         "split": {
             "supplementary": supplementary_split_audit,
             "training_side": training_split_audit,
@@ -129,6 +144,52 @@ def write_manifest(path: str | Path, manifest: Mapping[str, Any]) -> dict[str, A
 
 def read_manifest(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+class StaleCacheError(RuntimeError):
+    """A cached corpus was produced by an older data pipeline."""
+
+
+def cache_pipeline_version(manifest: Mapping[str, Any] | None) -> int:
+    """The pipeline version a cached manifest was built by.
+
+    Manifests written before the field existed report 0, which is exactly the
+    behaviour we want: unversioned means stale.
+    """
+
+    if not manifest:
+        return 0
+    try:
+        return int(manifest.get("data_pipeline_version", 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def cache_is_current(manifest: Mapping[str, Any] | None) -> bool:
+    return cache_pipeline_version(manifest) >= DATA_PIPELINE_VERSION
+
+
+def describe_stale_cache(manifest: Mapping[str, Any] | None, *, path: str | Path = "") -> str:
+    """Explain, in the terms of this fix, why a cache must be rebuilt."""
+
+    found = cache_pipeline_version(manifest)
+    location = f" ({path})" if path else ""
+    return (
+        f"Cached Model V2 data{location} was built by data pipeline version "
+        f"{found or 'unversioned (pre-3)'}, but this build is version "
+        f"{DATA_PIPELINE_VERSION}. Version 3 added the cross-partition "
+        "contamination filter and narrowed the email_domain and "
+        "open_entity_value split keys, so the cached train/test artifacts and "
+        "the supplementary holdout no longer match the code that would read "
+        "them. They are being rebuilt; nothing needs to be deleted by hand."
+    )
+
+
+def assert_cache_current(manifest: Mapping[str, Any] | None, *, path: str | Path = "") -> None:
+    """Refuse to reuse a corpus built before the current pipeline version."""
+
+    if not cache_is_current(manifest):
+        raise StaleCacheError(describe_stale_cache(manifest, path=path))
 
 
 def verify_manifest(

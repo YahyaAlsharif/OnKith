@@ -60,17 +60,67 @@ raw volume.
 | `sources.py` | Pinned source registry, offset repair, Gretel entity-string anchoring, script filtering |
 | `selection.py` | Targeted gap filling: volume for empty labels, novelty for OOD-weak labels |
 | `dedup.py` | Exact + structural + near-duplicate removal, and the contamination firewall |
-| `grouped_splits.py` | Leakage-aware splitting, one factor or many, label-aware |
-| `pools.py` | Partition assembly and the disjointness proof |
+| `grouped_splits.py` | Leakage-aware splitting, one factor or many, label-aware, with component diagnostics |
+| `pools.py` | Partition assembly, the contamination filter and the disjointness proof |
 | `augment_pipeline.py` | Training-only augmentation with caps, plus PASSWORD and hard-negative generation |
 | `manifest.py` | The committed reproducibility manifest and its verifier |
 | `data_audit.py`, `augmentation.py` | Unchanged from the previous phase, except for a widened mutation guard |
+
+## The contamination filter
+
+The firewall rejects supplementary rows as they are *selected*. That is not
+enough on its own, because the AI4Privacy component is a **pinned** split rather
+than a selected one: whatever upstream put in the official train split arrives
+unscreened.
+
+It does contain duplicates. AI4Privacy English ships zero-length `source_text`
+rows in both its official train and its official validation split - seven landed
+in the pinned project-train split, one in project-test, two are in
+`val_original` - so eight training-side rows were byte-identical to a protected
+validation row.
+
+`pools.filter_contamination` is the deterministic sweep that removes them,
+before the final split and again after augmentation, before anything is written.
+The resolution rule never varies:
+
+> The protected validation/OOD row is kept. The colliding training-side copy is
+> removed. Protected sets are never modified.
+
+`val_original` therefore stays at 40,909 rows and the frozen fixtures are never
+touched. Every removal names both sides and is recorded in the manifest under
+`contamination_filter`. `firewall.assert_clean` still runs afterwards - the
+filter is not a replacement for the assertion, and the assertion is not a
+warning.
+
+`manifest.DATA_PIPELINE_VERSION` guards the caches: a corpus built before this
+filter existed reports an older version and is rebuilt automatically rather than
+reused.
 
 ## Split policy
 
 The supplementary pool is split 80/20 by connected components over four
 *enforced* factors: `open_entity_value`, `email_domain`, `canonical_template`,
 `organisation_family`. Rows sharing any of them stay on the same side.
+
+Two of those keys are deliberately **narrow**, because a key that connects
+unrelated rows protects nothing and starves the holdout:
+
+- `email_domain` skips public mail providers and the RFC 2606 reserved
+  `example.*` names. Sharing `@gmail.com` (1,495 rows in the measured pool) says
+  nothing about two records; the whole address is still grouped by
+  `open_entity_value`, and 4,070 of the pool's 4,105 domains remain enforced.
+- `open_entity_value` skips `DATE` and `BUILDINGNUM`. One date value is shared
+  by 603 rows drawn from four independent generators, and `BUILDINGNUM:12` by
+  347. A calendar coordinate and a house number are public facts, exactly like
+  the closed vocabularies below. Date and identifier *formats* are still
+  measured by the `numeric_pattern_family` diagnostic.
+
+Names are **not** narrowed. `GIVENNAME:emily` recurring across 508 rows is the
+memorisation risk the split exists to control, so it stays enforced even though
+it is the single largest source of connectivity. `split_by_factors` reports
+`component_diagnostics` - each factor alone, each factor removed, and the
+highest-degree keys - so the cause of a large component is measured rather than
+guessed.
 
 Three factors are deliberately **not** enforced, because enforcing them destroys
 the split rather than protecting it:

@@ -70,19 +70,76 @@ CLOSED_VOCABULARY_LABELS: frozenset[str] = frozenset(
     {"BANKNAME", "COUNTRY", "CURRENCY", "TIMEZONE", "GENDER", "SEX", "TITLE"}
 )
 
+#: Labels whose *value* carries no linking information, so grouping on it
+#: connects unrelated records instead of protecting anything.
+#:
+#: ``DATE``
+#:     A calendar coordinate, not an identity. In the measured supplementary
+#:     pool a single value - ``2024-07-15`` - is shared by 603 rows drawn from
+#:     four independent generators. Holding that date out proves nothing about
+#:     memorisation and welds those 603 rows into one component. Date *format*
+#:     leakage is a real concern and is still measured, by the
+#:     ``numeric_pattern_family`` diagnostic.
+#: ``BUILDINGNUM``
+#:     A house number: ``12`` is shared by 347 rows. The identifying part of an
+#:     address is the ``STREET`` span, which stays enforced.
+#:
+#: This is the same reasoning as :data:`CLOSED_VOCABULARY_LABELS`, applied to
+#: values that are low-information rather than few. Names are deliberately not
+#: on this list: ``GIVENNAME:emily`` recurring across 508 rows *is* the
+#: memorisation risk the split exists to control, so it stays enforced even
+#: though it is the single largest source of connectivity.
+LOW_INFORMATION_VALUE_LABELS: frozenset[str] = frozenset({"DATE", "BUILDINGNUM"})
+
 
 def open_entity_value_factors(record: Mapping[str, object]) -> set[str]:
-    """Entity values excluding closed vocabularies. See the note above."""
+    """Entity values excluding closed vocabularies and low-information values."""
 
     validate_record(record)
+    skip = CLOSED_VOCABULARY_LABELS | LOW_INFORMATION_VALUE_LABELS
     return {
         f"{span['label']}:{_normalise_value(str(span['value']))}"
         for span in record["privacy_mask"]
-        if str(span["label"]) not in CLOSED_VOCABULARY_LABELS
+        if str(span["label"]) not in skip
     }
 
 
+#: Mail providers open to the general public, plus the RFC 2606 reserved names.
+#: Two rows both ending in ``@gmail.com`` share a mail provider, not a person
+#: and not a generator: the measured pool has 1,495 rows on ``gmail.com`` and
+#: 1,641 more across ``example.com/.net/.org``. The identifying part of an
+#: address is the whole value, which ``open_entity_value`` still enforces; the
+#: domain factor exists to catch *generator-specific* domains such as
+#: ``swiftflow-logistics.com``, and 4,070 of the pool's 4,105 domains still
+#: qualify.
+PUBLIC_EMAIL_DOMAINS: frozenset[str] = frozenset(
+    {
+        "gmail.com", "googlemail.com", "icloud.com", "me.com", "mac.com",
+        "outlook.com", "hotmail.com", "live.com", "msn.com", "yahoo.com",
+        "aol.com", "protonmail.com", "proton.me", "pm.me", "zoho.com",
+        "yandex.com", "mail.ru", "gmx.com", "gmx.net", "mailbox.org",
+        "tutanota.com", "fastmail.com", "duck.com", "posteo.net", "hey.com",
+        "hushmail.com", "mail.com", "email.com",
+    }
+)
+
+#: RFC 2606 / RFC 6761 reserved second-level names, matched under any TLD so
+#: ``example.com``, ``example.co.uk`` and ``example.ie`` are all covered.
+RESERVED_DOMAIN_PREFIXES: frozenset[str] = frozenset(
+    {"example", "test", "invalid", "localhost"}
+)
+
+
+def is_public_email_domain(domain: str) -> bool:
+    """Whether a domain is too widely shared to be a leakage signal."""
+
+    domain = domain.casefold().rstrip(".")
+    return domain in PUBLIC_EMAIL_DOMAINS or domain.split(".")[0] in RESERVED_DOMAIN_PREFIXES
+
+
 def email_domain_factors(record: Mapping[str, object]) -> set[str]:
+    """Group by mail domain, ignoring public providers. See the note above."""
+
     validate_record(record)
     factors = set()
     for span in record["privacy_mask"]:
@@ -90,7 +147,9 @@ def email_domain_factors(record: Mapping[str, object]) -> set[str]:
             continue
         _, separator, domain = str(span["value"]).rpartition("@")
         if separator and domain:
-            factors.add(domain.casefold().rstrip("."))
+            domain = domain.casefold().rstrip(".")
+            if not is_public_email_domain(domain):
+                factors.add(domain)
     return factors
 
 
@@ -288,6 +347,63 @@ def _multi_components(
     return [sorted(component) for component in grouped.values()]
 
 
+def component_diagnostics(
+    records: Sequence[Mapping[str, object]],
+    factors: Sequence[str],
+    *,
+    top_keys: int = 15,
+) -> dict[str, object]:
+    """Explain the component structure a grouped split is about to produce.
+
+    A single huge component silently starves the holdout, and the audit used to
+    report only its size - which says that something is wrong without saying
+    what. This answers the actual question: which factor causes it, what
+    happens if that factor is dropped, and which individual keys connect the
+    most rows. Cheap enough to run on every split, and the result is recorded in
+    the manifest so the answer survives the run.
+    """
+
+    if not records:
+        return {"pool_rows": 0, "per_factor": {}, "leave_one_out": {}, "top_connector_keys": {}}
+
+    def summarise(component_lists: list[list[int]]) -> dict[str, object]:
+        largest = max(map(len, component_lists), default=0)
+        return {
+            "component_count": len(component_lists),
+            "largest_component_rows": largest,
+            "largest_component_fraction": largest / len(records),
+        }
+
+    per_factor = {
+        factor: summarise(_components(records, FACTOR_EXTRACTORS[factor])) for factor in factors
+    }
+    leave_one_out = {
+        factor: summarise(_multi_components(records, [other for other in factors if other != factor]))
+        for factor in factors
+        if len(factors) > 1
+    }
+
+    key_rows: dict[str, int] = defaultdict(int)
+    for record in records:
+        for factor in factors:
+            for value in FACTOR_EXTRACTORS[factor](record):
+                key_rows[f"{factor}::{value}"] += 1
+    ranked = sorted(key_rows.items(), key=lambda item: (-item[1], item[0]))[:top_keys]
+
+    return {
+        "pool_rows": len(records),
+        "per_factor": per_factor,
+        "leave_one_out": leave_one_out,
+        "distinct_keys": len(key_rows),
+        "top_connector_keys": {key[:160]: count for key, count in ranked},
+        "note": (
+            "per_factor is that factor alone; leave_one_out is every other "
+            "factor together. A factor whose removal barely shrinks the largest "
+            "component is not the cause of it."
+        ),
+    }
+
+
 def _component_rank(component: Sequence[int], seed: int) -> str:
     return hashlib.sha256(f"{seed}|{tuple(component)}".encode("utf-8")).hexdigest()
 
@@ -339,6 +455,7 @@ def split_by_factors(
     holdout_fraction: float,
     seed: int,
     min_independent_groups: int = 10,
+    diagnose_components: bool = True,
 ) -> tuple[list[int], list[int], dict[str, object]]:
     """Split so that no declared factor crosses the boundary, label-aware.
 
@@ -470,6 +587,9 @@ def split_by_factors(
             (target - len(holdout)) / target if target else 0.0
         ),
         forced_smallest_component=forced_component is not None,
+        component_diagnostics=(
+            component_diagnostics(records, factors) if diagnose_components else {}
+        ),
     )
 
     # A grouped split of highly connected data can collapse: if every row shares

@@ -1,7 +1,17 @@
 # Home AI Python dependencies
-# Recommended Python version: 3.11
-# Install with:
-#   python -m pip install -r requirements.txt
+#
+# Required Python version: 3.11.9
+#
+# Install with the interpreter you will actually use, so packages land in the
+# environment your notebook kernel runs in:
+#   <path-to-python-3.11.9>\python.exe -m pip install -r requirements.txt
+#
+# Local OnKith modules (ontology, records, manifest, pools, dedup,
+# grouped_splits, selection, sources, augment_pipeline, label_mapping,
+# data_audit, password_rules, privacy_eval, integrated_pipeline) are NOT pip
+# packages. They live in model/privacy_data_v2, model/privacy_evaluation and
+# FullPipeline_V3, and the notebooks put those directories on sys.path. Never
+# pip install a similarly named package to satisfy one of them.
 
 torch
 pandas
@@ -14,3 +24,28 @@ seqeval
 onnx
 onnxruntime
 onnxscript
+
+# Reached indirectly but imported by name at runtime, so they must be present:
+#   huggingface_hub  - sources.py resolves pinned dataset revisions
+#   pyarrow          - data_audit.py reads the cached Arrow shards
+#   psutil           - the notebook's tokenization memory probe
+#   sentencepiece    - required to build the DeBERTa-v3 tokenizer
+#   protobuf         - required by the sentencepiece tokenizer conversion
+huggingface_hub
+pyarrow
+psutil
+sentencepiece
+protobuf
+
+# Running the notebooks (Run All from VS Code or nbconvert):
+ipykernel
+nbformat
+nbconvert
+
+# Validated on Python 3.11.9 with:
+#   torch 2.11.0+cu128        transformers 5.13.1     tokenizers 0.22.2
+#   datasets 5.0.0            huggingface_hub 1.22.0  numpy 2.4.6
+#   onnx 1.22.0               onnxruntime 1.27.0      onnxscript 0.7.1
+#   pandas 3.0.3              scikit-learn 1.9.0      seqeval 1.2.2
+#   sentencepiece 0.2.1       protobuf 7.35.1         pyarrow 24.0.0
+#   psutil 7.2.2              ipykernel 7.3.0         nbformat/nbconvert 7.17.1

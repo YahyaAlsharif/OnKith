@@ -1,0 +1,2411 @@
+{
+  "artifacts": {
+    "supplementary_training_side": {
+      "bytes": 42124590,
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/supplementary_training_side.jsonl",
+      "rows": 27630,
+      "sha256": "06c7210c2602f02882790492dd02ca22ee9f38cf936cc12cb0773a259a453b20",
+      "spans": 169646
+    },
+    "test": {
+      "bytes": 21781067,
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_test.jsonl",
+      "rows": 19136,
+      "sha256": "cb642bad19d079bfdac038aff96a62f57919eb22024b64767e69ce1b97225921",
+      "spans": 133238
+    },
+    "train": {
+      "bytes": 270120973,
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_train.jsonl",
+      "rows": 217667,
+      "sha256": "3a90f0028858774288300a193b7f6ecda3d6f575fd514e9d37ad48463b963171",
+      "spans": 1621186
+    },
+    "val_original": {
+      "note": "Reconstructible from the pinned upstream revision; not required in Git.",
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_val_original.jsonl",
+      "rows": 40909
+    },
+    "val_supplementary": {
+      "bytes": 7400635,
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_val_supplementary.jsonl",
+      "rows": 6907,
+      "sha256": "5ccac58b526738399c6e675083e9fd1bffbd51e052a2ce0ec999c529e1ccc79e",
+      "spans": 22442
+    }
+  },
+  "augmentation": {
+    "augmented_rows": 43533,
+    "distinct_parents_by_family": {
+      "case_lower": 13919,
+      "case_mixed": 1743,
+      "case_upper": 13917,
+      "entity_value": 13917
+    },
+    "families_below_parent_floor": [],
+    "parent_floor_satisfied": true,
+    "plan": {
+      "base_rows": 174134,
+      "families": [],
+      "max_augmented_rows": 43533,
+      "max_augmented_share": 0.25,
+      "max_family_share": 0.08,
+      "max_rows_per_family": 13930,
+      "min_parents_per_family": 50,
+      "seed": 42
+    },
+    "rows_by_family": {
+      "case_lower": 13930,
+      "case_mixed": 1743,
+      "case_upper": 13930,
+      "entity_value": 13930
+    },
+    "skipped_by_reason": {
+      "case_lower:no_change": 653,
+      "case_mixed:no_change": 62,
+      "case_upper:no_change": 997,
+      "conversational_frame:produced_nothing": 1,
+      "entity_value:not_applicable": 16,
+      "spoken_structured:produced_nothing": 1,
+      "stt_punctuation_free:produced_nothing": 1,
+      "stt_whitespace:produced_nothing": 1
+    }
+  },
+  "config": {
+    "base_model": "microsoft/deberta-v3-xsmall",
+    "base_model_revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+    "contamination_filter_version": 1,
+    "context_limit": 512,
+    "frozen_ood_final": {
+      "fingerprints": 318,
+      "loaded_for_scoring": false,
+      "path": "model/privacy_evaluation/fixtures/ood_final.jsonl",
+      "sha256": "2acdd4022adc0b74659d5823e93bf2b5a9e97e96eeb8ca772a6f7f1ab4f4e438"
+    },
+    "max_source_rows": null,
+    "overflow_stride": 128,
+    "seed": 42,
+    "smoke_test": false,
+    "split_factors": [
+      "open_entity_value",
+      "email_domain",
+      "canonical_template",
+      "organisation_family"
+    ],
+    "supplementary_holdout_fraction": 0.2,
+    "supplementary_sources": [
+      "gretel",
+      "nemotron",
+      "kiji",
+      "saudi_mena"
+    ],
+    "supplementary_test_fraction": 0.1
+  },
+  "contamination_filter": {
+    "ai4privacy_comparison_subset": {
+      "clean_rows": 16373,
+      "historical_rows": 16374,
+      "note": "The frozen TinyBERT aggregate was measured on all 16374 historical rows. The Model V2 comparison subset is the 16373 of those that are not also in a protected evaluation set, so the two row sets are not identical and the comparison is close but not exact.",
+      "removed_as_contaminated": 1
+    },
+    "remaining_protected_overlap": {
+      "test": 0,
+      "train": 0
+    },
+    "removed_rows_total": 8,
+    "stages": {
+      "pre_split": {
+        "candidate_rows_in": {
+          "ai4privacy_test": 16374,
+          "ai4privacy_train": 147366,
+          "supplementary_training_side": 27630
+        },
+        "candidate_rows_out": {
+          "ai4privacy_test": 16373,
+          "ai4privacy_train": 147359,
+          "supplementary_training_side": 27630
+        },
+        "collision_type": "exact_normalized_text",
+        "collisions_by_candidate_and_protected_set": {
+          "ai4privacy_test": {
+            "ood_dev": 0,
+            "ood_final": 0,
+            "val_original": 1,
+            "val_supplementary": 0
+          },
+          "ai4privacy_train": {
+            "ood_dev": 0,
+            "ood_final": 0,
+            "val_original": 7,
+            "val_supplementary": 0
+          },
+          "supplementary_training_side": {
+            "ood_dev": 0,
+            "ood_final": 0,
+            "val_original": 0,
+            "val_supplementary": 0
+          }
+        },
+        "collisions_by_source_dataset": {
+          "ai4privacy_test -> val_original [ai4privacy]": 1,
+          "ai4privacy_train -> val_original [ai4privacy]": 7
+        },
+        "normalisation": "NFKC, whitespace collapsed, casefolded, then blake2b-128 - the same fingerprint the firewall and the deduplicator use.",
+        "policy": "The protected validation/OOD row is kept and the colliding training-side copy is removed. Protected sets are never modified.",
+        "removals": [
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645970"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645983"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645985"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645989"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645978"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24791608"
+          },
+          {
+            "candidate_partition": "ai4privacy_train",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "train",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645987"
+          },
+          {
+            "candidate_partition": "ai4privacy_test",
+            "fingerprint": "cae66941d9efbd404e4d88758ea67670",
+            "protected_set": "val_original",
+            "protected_uid": "ai4privacy:24794024",
+            "source_dataset": "ai4privacy",
+            "source_split": "test",
+            "span_count": 0,
+            "text_length": 0,
+            "uid": "ai4privacy:24645941"
+          }
+        ],
+        "removals_truncated": false,
+        "removed_rows_by_pool": {
+          "ai4privacy_test": 1,
+          "ai4privacy_train": 7,
+          "supplementary_training_side": 0
+        },
+        "removed_rows_total": 8,
+        "stage": "pre_split",
+        "unique_protected_rows_hit": 1,
+        "version": 1
+      },
+      "pre_write": {
+        "candidate_rows_in": {
+          "test": 19136,
+          "train": 217667
+        },
+        "candidate_rows_out": {
+          "test": 19136,
+          "train": 217667
+        },
+        "collision_type": "exact_normalized_text",
+        "collisions_by_candidate_and_protected_set": {
+          "test": {
+            "ood_dev": 0,
+            "ood_final": 0,
+            "val_original": 0,
+            "val_supplementary": 0
+          },
+          "train": {
+            "ood_dev": 0,
+            "ood_final": 0,
+            "val_original": 0,
+            "val_supplementary": 0
+          }
+        },
+        "collisions_by_source_dataset": {},
+        "normalisation": "NFKC, whitespace collapsed, casefolded, then blake2b-128 - the same fingerprint the firewall and the deduplicator use.",
+        "policy": "The protected validation/OOD row is kept and the colliding training-side copy is removed. Protected sets are never modified.",
+        "removals": [],
+        "removals_truncated": false,
+        "removed_rows_by_pool": {
+          "test": 0,
+          "train": 0
+        },
+        "removed_rows_total": 0,
+        "stage": "pre_write",
+        "unique_protected_rows_hit": 0,
+        "version": 1
+      }
+    },
+    "version": 1
+  },
+  "contamination_firewall": {
+    "examples_by_protected_set": {},
+    "protected_fingerprints": 48426,
+    "rejected_by_protected_set": {},
+    "rejected_rows": 0
+  },
+  "created_at_utc": "2026-08-15T10:34:12.329864+00:00",
+  "data_pipeline_version": 3,
+  "deduplication": {
+    "accepted_rows": 34537,
+    "near_dedup_enabled": true,
+    "near_dup_hamming": 2,
+    "removed_by_reason": {
+      "near": 76,
+      "same_structure": 7311
+    },
+    "removed_rows": 7387
+  },
+  "disjointness": {
+    "distinct_texts_overall": 255233,
+    "is_disjoint": true,
+    "partitions": {
+      "ood_dev": {
+        "internal_duplicate_rows": 34,
+        "rows": 360,
+        "unique_texts": 326
+      },
+      "test": {
+        "internal_duplicate_rows": 0,
+        "rows": 19136,
+        "unique_texts": 19136
+      },
+      "train": {
+        "internal_duplicate_rows": 29711,
+        "rows": 217667,
+        "unique_texts": 187956
+      },
+      "val_original": {
+        "internal_duplicate_rows": 1,
+        "rows": 40909,
+        "unique_texts": 40908
+      },
+      "val_supplementary": {
+        "internal_duplicate_rows": 0,
+        "rows": 6907,
+        "unique_texts": 6907
+      }
+    }
+  },
+  "environment": {
+    "datasets": "5.0.0",
+    "numpy": "2.4.6",
+    "onnxruntime": "1.27.0",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9",
+    "tokenizers": "0.22.2",
+    "torch": "2.11.0+cu128",
+    "transformers": "5.13.1"
+  },
+  "label_mapping": {
+    "distinct_targets": 31,
+    "dropped": 74,
+    "mapped": 202,
+    "medium_confidence": 22,
+    "path": "c:\\Users\\yahya\\VSCodeProjects\\OnKith\\model\\DeBERTa-v3-xsmall\\config\\model_v2_source_mapping.csv",
+    "rows": 276
+  },
+  "ontology": {
+    "derivation": {
+      "absent": {
+        "HEIGHT": "Never present in the TinyBERT head; 1 span exists only in official validation."
+      },
+      "added": {
+        "PASSWORD": "Protects disclosed credentials in conversational text. Admitted only through the credential-disclosure rules in password_rules.py."
+      },
+      "base": "TinyBERT-4 / DeBERTa-preflight 67-label head (33 entities)",
+      "note": "HEIGHT was never in the 67-label head, so removing ALLERGIES, USERNAME and WEIGHT nets 33 - 3 = 30 entities; adding PASSWORD gives 31 entities and 63 BIO labels.",
+      "removed": {
+        "ALLERGIES": "3 spans in the pinned project-train split; no supported source.",
+        "USERNAME": "16 spans in the pinned project-train split; not an OnKith product need.",
+        "WEIGHT": "1 span in the pinned project-train split; no source maps to it."
+      }
+    },
+    "entities": [
+      "ACCOUNTNUM",
+      "AGE",
+      "AMOUNT",
+      "BANKNAME",
+      "BUILDINGNUM",
+      "CITY",
+      "COUNTRY",
+      "CREDITCARDNUMBER",
+      "CURRENCY",
+      "DATE",
+      "DRIVERLICENSENUM",
+      "EMAIL",
+      "GENDER",
+      "GIVENNAME",
+      "IDCARDNUM",
+      "IPV4",
+      "ORGANISATION",
+      "PASSPORTNUM",
+      "PASSWORD",
+      "SALARY",
+      "SEX",
+      "SOCIALNUM",
+      "STREET",
+      "SURNAME",
+      "TAXNUM",
+      "TELEPHONENUM",
+      "TIME",
+      "TIMEZONE",
+      "TITLE",
+      "URL",
+      "ZIPCODE"
+    ],
+    "num_entities": 31,
+    "num_labels": 63
+  },
+  "ontology_version": "model_v2.ontology.1",
+  "password": {
+    "acceptance_rate": 0.1647860119955271,
+    "accepted_spans": 3242,
+    "by_accepted_cue": {
+      "bare_disclosure": 109,
+      "change_to_disclosure": 519,
+      "field_disclosure": 58,
+      "possessive_disclosure": 676,
+      "qualified_field_disclosure": 4,
+      "use_value_to_login": 404,
+      "value_is_the_password": 2,
+      "value_named_as_password": 1470
+    },
+    "by_category": {
+      "disclosure": 3242,
+      "no_disclosure_cue": 3626,
+      "policy_or_help": 414,
+      "structured_document": 12347,
+      "value_is_not_a_secret": 45
+    },
+    "candidate_spans": 19674,
+    "rejected_spans": 16432
+  },
+  "regeneration": {
+    "entrypoint": "model/DeBERTa-v3-xsmall/model_v2_deberta_v3_xsmall.ipynb",
+    "note": "Corpora are gitignored by design. Re-running the dataset sections with this manifest's seeds and pinned revisions must reproduce artifacts.val_supplementary.sha256 exactly.",
+    "sections": "Run sections 1-11 (Environment through manifest) to rebuild every corpus.",
+    "verify": "privacy_data_v2.manifest.verify_manifest(committed, regenerated)"
+  },
+  "schema_version": 3,
+  "selection": {
+    "accepted_rows": 41924,
+    "accepted_rows_by_source": {
+      "gretel": 9620,
+      "kiji": 5212,
+      "nemotron": 19528,
+      "saudi_mena": 7564
+    },
+    "carried_spans_by_label": {
+      "ACCOUNTNUM": 2570,
+      "AGE": 1122,
+      "BANKNAME": 4092,
+      "BUILDINGNUM": 3598,
+      "CITY": 12408,
+      "COUNTRY": 7966,
+      "CREDITCARDNUMBER": 3483,
+      "CURRENCY": 2898,
+      "DATE": 19592,
+      "EMAIL": 11475,
+      "GENDER": 567,
+      "GIVENNAME": 22306,
+      "IDCARDNUM": 892,
+      "IPV4": 1263,
+      "ORGANISATION": 14750,
+      "PASSPORTNUM": 503,
+      "PASSWORD": 11,
+      "SOCIALNUM": 5097,
+      "STREET": 10614,
+      "SURNAME": 14367,
+      "TAXNUM": 1217,
+      "TELEPHONENUM": 7610,
+      "TIME": 3736,
+      "TITLE": 5,
+      "URL": 7610,
+      "ZIPCODE": 3105
+    },
+    "config": {
+      "diversity_labels": [
+        "DATE",
+        "DRIVERLICENSENUM",
+        "IDCARDNUM",
+        "ORGANISATION",
+        "TAXNUM",
+        "ZIPCODE"
+      ],
+      "diversity_row_target": 6000,
+      "max_source_share": 0.6,
+      "span_targets": {
+        "ACCOUNTNUM": 10000,
+        "AMOUNT": 12000,
+        "BANKNAME": 10000,
+        "COUNTRY": 10000,
+        "CURRENCY": 12000,
+        "IPV4": 10000,
+        "ORGANISATION": 12000,
+        "PASSWORD": 6000,
+        "SALARY": 10000,
+        "TIMEZONE": 10000,
+        "URL": 10000
+      }
+    },
+    "diversity_groups_by_label": {
+      "DATE": 12550,
+      "DRIVERLICENSENUM": 1751,
+      "IDCARDNUM": 11922,
+      "ORGANISATION": 9991,
+      "TAXNUM": 9795,
+      "ZIPCODE": 11286
+    },
+    "diversity_rows_by_label": {
+      "DATE": 6000,
+      "DRIVERLICENSENUM": 1108,
+      "IDCARDNUM": 6000,
+      "ORGANISATION": 6000,
+      "TAXNUM": 6000,
+      "ZIPCODE": 6000
+    },
+    "note": "carried_spans_by_label counts correctly mapped spans kept because their row was selected for a different label. Unmet targets are reported as measured evidence; data is never fabricated to close a shortfall.",
+    "rejected_rows_by_reason": {
+      "no_supported_spans": 436,
+      "no_target_need": 261445
+    },
+    "selected_spans_by_label": {
+      "ACCOUNTNUM": 10000,
+      "AGE": 1122,
+      "BANKNAME": 4292,
+      "BUILDINGNUM": 3598,
+      "CITY": 12408,
+      "COUNTRY": 10078,
+      "CREDITCARDNUMBER": 3483,
+      "CURRENCY": 3098,
+      "DATE": 26473,
+      "DRIVERLICENSENUM": 1118,
+      "EMAIL": 11475,
+      "GENDER": 567,
+      "GIVENNAME": 22306,
+      "IDCARDNUM": 7280,
+      "IPV4": 3428,
+      "ORGANISATION": 24634,
+      "PASSPORTNUM": 503,
+      "PASSWORD": 943,
+      "SOCIALNUM": 5097,
+      "STREET": 10614,
+      "SURNAME": 14367,
+      "TAXNUM": 7493,
+      "TELEPHONENUM": 7610,
+      "TIME": 3736,
+      "TIMEZONE": 200,
+      "TITLE": 5,
+      "URL": 9847,
+      "ZIPCODE": 10099
+    },
+    "selected_spans_by_label_and_source": {
+      "ACCOUNTNUM": {
+        "gretel": 311,
+        "kiji": 1034,
+        "nemotron": 2927,
+        "saudi_mena": 5728
+      },
+      "AGE": {
+        "kiji": 410,
+        "nemotron": 712
+      },
+      "BANKNAME": {
+        "saudi_mena": 4292
+      },
+      "BUILDINGNUM": {
+        "kiji": 3598
+      },
+      "CITY": {
+        "gretel": 665,
+        "kiji": 4169,
+        "nemotron": 7438,
+        "saudi_mena": 136
+      },
+      "COUNTRY": {
+        "gretel": 368,
+        "kiji": 1436,
+        "nemotron": 8274
+      },
+      "CREDITCARDNUMBER": {
+        "gretel": 1231,
+        "kiji": 274,
+        "nemotron": 1978
+      },
+      "CURRENCY": {
+        "saudi_mena": 3098
+      },
+      "DATE": {
+        "gretel": 8923,
+        "kiji": 584,
+        "nemotron": 16966
+      },
+      "DRIVERLICENSENUM": {
+        "kiji": 1118
+      },
+      "EMAIL": {
+        "gretel": 1691,
+        "kiji": 1055,
+        "nemotron": 8729
+      },
+      "GENDER": {
+        "nemotron": 567
+      },
+      "GIVENNAME": {
+        "gretel": 1885,
+        "kiji": 5562,
+        "nemotron": 10479,
+        "saudi_mena": 4380
+      },
+      "IDCARDNUM": {
+        "gretel": 515,
+        "kiji": 892,
+        "nemotron": 5873
+      },
+      "IPV4": {
+        "gretel": 1310,
+        "nemotron": 2118
+      },
+      "ORGANISATION": {
+        "gretel": 2312,
+        "kiji": 1276,
+        "nemotron": 20344,
+        "saudi_mena": 702
+      },
+      "PASSPORTNUM": {
+        "kiji": 503
+      },
+      "PASSWORD": {
+        "gretel": 15,
+        "kiji": 166,
+        "nemotron": 196,
+        "saudi_mena": 566
+      },
+      "SOCIALNUM": {
+        "gretel": 3408,
+        "kiji": 449,
+        "nemotron": 1240
+      },
+      "STREET": {
+        "gretel": 1364,
+        "kiji": 3647,
+        "nemotron": 5603
+      },
+      "SURNAME": {
+        "gretel": 1733,
+        "kiji": 4379,
+        "nemotron": 8255
+      },
+      "TAXNUM": {
+        "gretel": 357,
+        "kiji": 1038,
+        "nemotron": 3865,
+        "saudi_mena": 2233
+      },
+      "TELEPHONENUM": {
+        "gretel": 1080,
+        "kiji": 968,
+        "nemotron": 4512,
+        "saudi_mena": 1050
+      },
+      "TIME": {
+        "gretel": 243,
+        "nemotron": 3493
+      },
+      "TIMEZONE": {
+        "saudi_mena": 200
+      },
+      "TITLE": {
+        "kiji": 5
+      },
+      "URL": {
+        "gretel": 211,
+        "kiji": 1720,
+        "nemotron": 7916
+      },
+      "ZIPCODE": {
+        "gretel": 1151,
+        "kiji": 2708,
+        "nemotron": 6240
+      }
+    },
+    "unmet_targets": {
+      "AMOUNT": {
+        "selected_spans": 0,
+        "shortfall": 12000,
+        "target_spans": 12000
+      },
+      "BANKNAME": {
+        "selected_spans": 4292,
+        "shortfall": 5708,
+        "target_spans": 10000
+      },
+      "CURRENCY": {
+        "selected_spans": 3098,
+        "shortfall": 8902,
+        "target_spans": 12000
+      },
+      "IPV4": {
+        "selected_spans": 3428,
+        "shortfall": 6572,
+        "target_spans": 10000
+      },
+      "PASSWORD": {
+        "selected_spans": 943,
+        "shortfall": 5057,
+        "target_spans": 6000
+      },
+      "SALARY": {
+        "selected_spans": 0,
+        "shortfall": 10000,
+        "target_spans": 10000
+      },
+      "TIMEZONE": {
+        "selected_spans": 200,
+        "shortfall": 9800,
+        "target_spans": 10000
+      },
+      "URL": {
+        "selected_spans": 9847,
+        "shortfall": 153,
+        "target_spans": 10000
+      }
+    }
+  },
+  "sources": {
+    "base": {
+      "annotation_field": "privacy_mask",
+      "language_field": "language",
+      "licence": "CC-BY-4.0",
+      "name": "ai4privacy/pii-masking-openpii-1.5m",
+      "revision": "a785eb528e28be2693c3718a27e066970de5dadb",
+      "role": "base",
+      "splits": [
+        "train",
+        "validation"
+      ],
+      "text_field": "source_text"
+    },
+    "ontology_note": "All annotations are mapped into the 31 Model V2 entity types; unmapped source labels become O and are counted in the mapping audit.",
+    "status": {
+      "gretel": {
+        "revision": "e06eb1499ca8d54470f085021cd8e54f9efac7fd",
+        "selected_rows": 9562,
+        "status": "ok"
+      },
+      "kiji": {
+        "revision": "0275550f0b1f1b8f2dc9356fd31ac1c788b8228b",
+        "selected_rows": 5036,
+        "status": "ok"
+      },
+      "nemotron": {
+        "revision": "b70ffaf5ff39e079776134c5bf4381f00a9fd1ed",
+        "selected_rows": 19506,
+        "status": "ok"
+      },
+      "saudi_mena": {
+        "artifact": {
+          "bytes": 21700096,
+          "columns": [
+            "id",
+            "text",
+            "spans",
+            "labels_present",
+            "source_dataset",
+            "source_split",
+            "final_split",
+            "is_saudi",
+            "generation_type",
+            "entity_source"
+          ],
+          "labels": {
+            "ACCOUNTNUM": 7305,
+            "BANKNAME": 6160,
+            "BUILDINGNUM": 11177,
+            "CITY": 15833,
+            "COUNTRY": 3006,
+            "CURRENCY": 4946,
+            "GIVENNAME": 17050,
+            "ORGANISATION": 9736,
+            "PASSWORD": 2654,
+            "STREET": 11717,
+            "SURNAME": 78,
+            "TAXNUM": 5976,
+            "TELEPHONENUM": 5861,
+            "TIMEZONE": 1326,
+            "ZIPCODE": 6658
+          },
+          "password_rows": 2654,
+          "password_spans": 2654,
+          "path": "model/data/saudi_mena_pii_dataset.csv",
+          "provenance_present": true,
+          "rows": 40000,
+          "rows_by_generation_type": {
+            "replacement": 14455,
+            "synthetic": 25545
+          },
+          "rows_by_source_dataset": {
+            "Saudi/MENA augmentation": 40000
+          },
+          "sha256": "811a28d99d3e7829bbf229712076a46359579fadd7f5e60bfa3fc8e1f158e54c",
+          "spans": 109483
+        },
+        "revision": null,
+        "selected_rows": 433,
+        "status": "ok"
+      }
+    },
+    "supplementary": {
+      "gretel": {
+        "annotation_field": "entities",
+        "annotation_style": "entity_strings",
+        "language_field": null,
+        "licence": "Apache-2.0",
+        "name": "gretelai/gretel-pii-masking-en-v1",
+        "revision": null,
+        "role": "supplementary",
+        "splits": [
+          "train",
+          "validation",
+          "test"
+        ],
+        "text_field": "text"
+      },
+      "kiji": {
+        "annotation_field": "privacy_mask",
+        "annotation_style": "offsets",
+        "language_field": "language",
+        "licence": "Apache-2.0",
+        "name": "DataikuNLP/kiji-pii-training-data",
+        "revision": null,
+        "role": "supplementary",
+        "splits": [
+          "train",
+          "test"
+        ],
+        "text_field": "text"
+      },
+      "nemotron": {
+        "annotation_field": "spans",
+        "annotation_style": "offsets",
+        "language_field": null,
+        "licence": "CC-BY-4.0",
+        "name": "nvidia/Nemotron-PII",
+        "note": "May be gated. If unavailable the build continues without it and records the failure.",
+        "optional": true,
+        "revision": null,
+        "role": "supplementary",
+        "splits": [
+          "train",
+          "test"
+        ],
+        "text_field": "text"
+      },
+      "saudi_mena": {
+        "annotation_field": "spans",
+        "annotation_style": "builder_csv",
+        "language_field": null,
+        "licence": "team-generated; see saudi_PII_Builder.ipynb resource_audit",
+        "local": true,
+        "name": "model/data/saudi_mena_pii_dataset.csv",
+        "revision": null,
+        "role": "supplementary",
+        "splits": [
+          "generated"
+        ],
+        "text_field": "text"
+      }
+    }
+  },
+  "split": {
+    "supplementary": {
+      "component_count": 10578,
+      "component_diagnostics": {
+        "distinct_keys": 123975,
+        "leave_one_out": {
+          "canonical_template": {
+            "component_count": 10707,
+            "largest_component_fraction": 0.6718302110779744,
+            "largest_component_rows": 23203
+          },
+          "email_domain": {
+            "component_count": 10602,
+            "largest_component_fraction": 0.6709615774386889,
+            "largest_component_rows": 23173
+          },
+          "open_entity_value": {
+            "component_count": 24733,
+            "largest_component_fraction": 0.04548744824391233,
+            "largest_component_rows": 1571
+          },
+          "organisation_family": {
+            "component_count": 12656,
+            "largest_component_fraction": 0.6140371196108522,
+            "largest_component_rows": 21207
+          }
+        },
+        "note": "per_factor is that factor alone; leave_one_out is every other factor together. A factor whose removal barely shrinks the largest component is not the cause of it.",
+        "per_factor": {
+          "canonical_template": {
+            "component_count": 34398,
+            "largest_component_fraction": 0.00289544546428468,
+            "largest_component_rows": 100
+          },
+          "email_domain": {
+            "component_count": 34213,
+            "largest_component_fraction": 0.0008396791846425573,
+            "largest_component_rows": 29
+          },
+          "open_entity_value": {
+            "component_count": 12815,
+            "largest_component_fraction": 0.6129368503344239,
+            "largest_component_rows": 21169
+          },
+          "organisation_family": {
+            "component_count": 25118,
+            "largest_component_fraction": 0.04438717896748415,
+            "largest_component_rows": 1533
+          }
+        },
+        "pool_rows": 34537,
+        "top_connector_keys": {
+          "open_entity_value::CITY:wellington": 214,
+          "open_entity_value::GIVENNAME:emily": 508,
+          "open_entity_value::GIVENNAME:emma": 235,
+          "open_entity_value::GIVENNAME:james": 318,
+          "open_entity_value::GIVENNAME:john": 364,
+          "open_entity_value::GIVENNAME:liam": 398,
+          "open_entity_value::GIVENNAME:michael": 223,
+          "open_entity_value::GIVENNAME:ravi": 284,
+          "open_entity_value::GIVENNAME:sarah": 342,
+          "open_entity_value::SURNAME:patel": 322,
+          "open_entity_value::SURNAME:smith": 255,
+          "open_entity_value::SURNAME:thompson": 482,
+          "open_entity_value::TAXNUM:123-45-6789": 586,
+          "organisation_family::ORGANISATION:harper": 243,
+          "organisation_family::ORGANISATION:hartford": 317
+        }
+      },
+      "diagnostic_factors": [
+        "formatting_family",
+        "numeric_pattern_family",
+        "entity_value"
+      ],
+      "diagnostic_note": "Diagnostic factors are measured, not enforced. Overlap here means train and holdout share a surface format, which is expected when a label has only one realistic format.",
+      "factors": [
+        "open_entity_value",
+        "email_domain",
+        "canonical_template",
+        "organisation_family"
+      ],
+      "forced_smallest_component": false,
+      "holdout_fraction": 0.2,
+      "holdout_label_spans": {
+        "ACCOUNTNUM": 566,
+        "BANKNAME": 33,
+        "CITY": 519,
+        "COUNTRY": 827,
+        "CREDITCARDNUMBER": 827,
+        "CURRENCY": 1,
+        "DATE": 5800,
+        "DRIVERLICENSENUM": 1,
+        "EMAIL": 1816,
+        "GENDER": 50,
+        "GIVENNAME": 300,
+        "IDCARDNUM": 1009,
+        "IPV4": 1507,
+        "ORGANISATION": 2323,
+        "PASSWORD": 175,
+        "SOCIALNUM": 1534,
+        "STREET": 965,
+        "SURNAME": 206,
+        "TAXNUM": 678,
+        "TELEPHONENUM": 930,
+        "TIME": 216,
+        "TIMEZONE": 17,
+        "URL": 1338,
+        "ZIPCODE": 804
+      },
+      "holdout_row_fraction": 0.19998841821814287,
+      "holdout_rows": 6907,
+      "holdout_shortfall_ratio": 0.0,
+      "is_disjoint": true,
+      "label_reservation": {
+        "ACCOUNTNUM": {
+          "independent_components": 796,
+          "required_holdout_components": 159,
+          "reserved_holdout_components": 159,
+          "sufficient": true
+        },
+        "AGE": {
+          "independent_components": 3,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "BANKNAME": {
+          "independent_components": 51,
+          "required_holdout_components": 10,
+          "reserved_holdout_components": 10,
+          "sufficient": true
+        },
+        "BUILDINGNUM": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "CITY": {
+          "independent_components": 694,
+          "required_holdout_components": 139,
+          "reserved_holdout_components": 139,
+          "sufficient": true
+        },
+        "COUNTRY": {
+          "independent_components": 964,
+          "required_holdout_components": 193,
+          "reserved_holdout_components": 193,
+          "sufficient": true
+        },
+        "CREDITCARDNUMBER": {
+          "independent_components": 1259,
+          "required_holdout_components": 252,
+          "reserved_holdout_components": 252,
+          "sufficient": true
+        },
+        "CURRENCY": {
+          "independent_components": 3,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "DATE": {
+          "independent_components": 7452,
+          "required_holdout_components": 1490,
+          "reserved_holdout_components": 1490,
+          "sufficient": true
+        },
+        "DRIVERLICENSENUM": {
+          "independent_components": 2,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "EMAIL": {
+          "independent_components": 2313,
+          "required_holdout_components": 463,
+          "reserved_holdout_components": 463,
+          "sufficient": true
+        },
+        "GENDER": {
+          "independent_components": 44,
+          "required_holdout_components": 9,
+          "reserved_holdout_components": 9,
+          "sufficient": true
+        },
+        "GIVENNAME": {
+          "independent_components": 328,
+          "required_holdout_components": 66,
+          "reserved_holdout_components": 66,
+          "sufficient": true
+        },
+        "IDCARDNUM": {
+          "independent_components": 1496,
+          "required_holdout_components": 299,
+          "reserved_holdout_components": 299,
+          "sufficient": true
+        },
+        "IPV4": {
+          "independent_components": 1996,
+          "required_holdout_components": 399,
+          "reserved_holdout_components": 399,
+          "sufficient": true
+        },
+        "ORGANISATION": {
+          "independent_components": 1534,
+          "required_holdout_components": 307,
+          "reserved_holdout_components": 307,
+          "sufficient": true
+        },
+        "PASSPORTNUM": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "PASSWORD": {
+          "independent_components": 90,
+          "required_holdout_components": 18,
+          "reserved_holdout_components": 18,
+          "sufficient": true
+        },
+        "SOCIALNUM": {
+          "independent_components": 2111,
+          "required_holdout_components": 422,
+          "reserved_holdout_components": 422,
+          "sufficient": true
+        },
+        "STREET": {
+          "independent_components": 1373,
+          "required_holdout_components": 275,
+          "reserved_holdout_components": 275,
+          "sufficient": true
+        },
+        "SURNAME": {
+          "independent_components": 238,
+          "required_holdout_components": 48,
+          "reserved_holdout_components": 48,
+          "sufficient": true
+        },
+        "TAXNUM": {
+          "independent_components": 940,
+          "required_holdout_components": 188,
+          "reserved_holdout_components": 188,
+          "sufficient": true
+        },
+        "TELEPHONENUM": {
+          "independent_components": 1192,
+          "required_holdout_components": 238,
+          "reserved_holdout_components": 238,
+          "sufficient": true
+        },
+        "TIME": {
+          "independent_components": 280,
+          "required_holdout_components": 56,
+          "reserved_holdout_components": 56,
+          "sufficient": true
+        },
+        "TIMEZONE": {
+          "independent_components": 50,
+          "required_holdout_components": 10,
+          "reserved_holdout_components": 10,
+          "sufficient": true
+        },
+        "TITLE": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "URL": {
+          "independent_components": 1759,
+          "required_holdout_components": 352,
+          "reserved_holdout_components": 352,
+          "sufficient": true
+        },
+        "ZIPCODE": {
+          "independent_components": 1149,
+          "required_holdout_components": 230,
+          "reserved_holdout_components": 230,
+          "sufficient": true
+        }
+      },
+      "labels_without_independent_groups": [
+        "AGE",
+        "BUILDINGNUM",
+        "CURRENCY",
+        "DRIVERLICENSENUM",
+        "PASSPORTNUM",
+        "TITLE"
+      ],
+      "largest_component_fraction": 0.6718302110779744,
+      "largest_component_rows": 23203,
+      "min_independent_groups": 10,
+      "per_diagnostic_factor": {
+        "entity_value": {
+          "factor": "entity_value",
+          "holdout_factor_count": 18460,
+          "holdout_rows": 6907,
+          "is_disjoint": false,
+          "overlap_count": 885,
+          "overlap_examples": [
+            "BANKNAME:al rajhi bank",
+            "BANKNAME:alinma bank",
+            "BANKNAME:arab national bank",
+            "BANKNAME:bank albilad",
+            "BANKNAME:bank aljazira",
+            "BANKNAME:banque saudi fransi",
+            "BANKNAME:d360 bank",
+            "BANKNAME:gulf international bank saudi arabia",
+            "BANKNAME:riyad bank",
+            "BANKNAME:saudi awwal bank",
+            "BANKNAME:saudi investment bank",
+            "BANKNAME:saudi national bank",
+            "COUNTRY:afghanistan",
+            "COUNTRY:algeria",
+            "COUNTRY:american",
+            "COUNTRY:american samoa",
+            "COUNTRY:angola",
+            "COUNTRY:antarctica (the territory south of 60 deg s)",
+            "COUNTRY:antigua and barbuda",
+            "COUNTRY:argentina"
+          ],
+          "train_factor_count": 76819,
+          "train_rows": 27630
+        },
+        "formatting_family": {
+          "factor": "formatting_family",
+          "holdout_factor_count": 911,
+          "holdout_rows": 6907,
+          "is_disjoint": false,
+          "overlap_count": 598,
+          "overlap_examples": [
+            "ACCOUNTNUM:9",
+            "ACCOUNTNUM:9-9",
+            "ACCOUNTNUM:9-9-9",
+            "ACCOUNTNUM:9-9-9-9",
+            "ACCOUNTNUM:A-9",
+            "ACCOUNTNUM:A9",
+            "ACCOUNTNUM:A9 9 9 9 9",
+            "ACCOUNTNUM:A9 9 9 9 9 9",
+            "ACCOUNTNUM:A9 9 9 9 9 9 9",
+            "ACCOUNTNUM:A9 9 9 A9 9 9 9",
+            "ACCOUNTNUM:A9 A 9 9 9",
+            "ACCOUNTNUM:A9 A 9 9 9 9",
+            "ACCOUNTNUM:A9-9-9-9-9",
+            "ACCOUNTNUM:A9-9-9-9-9-9",
+            "ACCOUNTNUM:A9-9-9-9-9-9-9",
+            "ACCOUNTNUM:A9A9",
+            "BANKNAME:A A",
+            "BANKNAME:A A A",
+            "BANKNAME:A A A A A",
+            "BANKNAME:A9 A"
+          ],
+          "train_factor_count": 2656,
+          "train_rows": 27630
+        },
+        "numeric_pattern_family": {
+          "factor": "numeric_pattern_family",
+          "holdout_factor_count": 500,
+          "holdout_rows": 6907,
+          "is_disjoint": false,
+          "overlap_count": 416,
+          "overlap_examples": [
+            "ACCOUNTNUM:D10",
+            "ACCOUNTNUM:D11",
+            "ACCOUNTNUM:D12",
+            "ACCOUNTNUM:D3-D10",
+            "ACCOUNTNUM:D3-D2-D4",
+            "ACCOUNTNUM:D3-D3-D3",
+            "ACCOUNTNUM:D3-D3-D3-D3",
+            "ACCOUNTNUM:D3-D3-D3-D4",
+            "ACCOUNTNUM:D3-D3-D4",
+            "ACCOUNTNUM:D3-D3-D4-D4",
+            "ACCOUNTNUM:D3-D3-D8",
+            "ACCOUNTNUM:D3-D8",
+            "ACCOUNTNUM:D3-D9",
+            "ACCOUNTNUM:D4",
+            "ACCOUNTNUM:D4-D10",
+            "ACCOUNTNUM:D4-D4-D4",
+            "ACCOUNTNUM:D4-D4-D4-D4",
+            "ACCOUNTNUM:D4-D8",
+            "ACCOUNTNUM:D6-D4",
+            "ACCOUNTNUM:D6-D6"
+          ],
+          "train_factor_count": 1563,
+          "train_rows": 27630
+        }
+      },
+      "per_factor": {
+        "canonical_template": {
+          "factor": "canonical_template",
+          "holdout_factor_count": 6778,
+          "holdout_rows": 6907,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 27620,
+          "train_rows": 27630
+        },
+        "email_domain": {
+          "factor": "email_domain",
+          "holdout_factor_count": 447,
+          "holdout_rows": 6907,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 3630,
+          "train_rows": 27630
+        },
+        "open_entity_value": {
+          "factor": "open_entity_value",
+          "holdout_factor_count": 13701,
+          "holdout_rows": 6907,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 67347,
+          "train_rows": 27630
+        },
+        "organisation_family": {
+          "factor": "organisation_family",
+          "holdout_factor_count": 1077,
+          "holdout_rows": 6907,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 3375,
+          "train_rows": 27630
+        }
+      },
+      "seed": 20260814,
+      "target_holdout_rows": 6907,
+      "train_label_spans": {
+        "ACCOUNTNUM": 3821,
+        "AGE": 1122,
+        "BANKNAME": 21,
+        "BUILDINGNUM": 3493,
+        "CITY": 11598,
+        "COUNTRY": 9213,
+        "CREDITCARDNUMBER": 2654,
+        "CURRENCY": 2,
+        "DATE": 20503,
+        "DRIVERLICENSENUM": 1117,
+        "EMAIL": 9479,
+        "GENDER": 517,
+        "GIVENNAME": 17407,
+        "IDCARDNUM": 6245,
+        "IPV4": 1921,
+        "ORGANISATION": 21498,
+        "PASSPORTNUM": 503,
+        "PASSWORD": 313,
+        "SOCIALNUM": 3542,
+        "STREET": 9540,
+        "SURNAME": 13932,
+        "TAXNUM": 4680,
+        "TELEPHONENUM": 5467,
+        "TIME": 3518,
+        "TIMEZONE": 33,
+        "TITLE": 5,
+        "URL": 8323,
+        "ZIPCODE": 9179
+      },
+      "train_rows": 27630
+    },
+    "training_side": {
+      "ai4privacy_test_note": "The AI4Privacy test rows are the pinned historical project-validation vectors, so TinyBERT and DeBERTa are measured on identical rows.",
+      "ai4privacy_test_rows": 16373,
+      "ai4privacy_train_rows": 147359,
+      "component_count": 4428,
+      "component_diagnostics": {
+        "distinct_keys": 101972,
+        "leave_one_out": {
+          "canonical_template": {
+            "component_count": 4428,
+            "largest_component_fraction": 0.8397756062251176,
+            "largest_component_rows": 23203
+          },
+          "email_domain": {
+            "component_count": 4450,
+            "largest_component_fraction": 0.8386898298950416,
+            "largest_component_rows": 23173
+          },
+          "open_entity_value": {
+            "component_count": 18374,
+            "largest_component_fraction": 0.056858487151646764,
+            "largest_component_rows": 1571
+          },
+          "organisation_family": {
+            "component_count": 6164,
+            "largest_component_fraction": 0.7675352877307274,
+            "largest_component_rows": 21207
+          }
+        },
+        "note": "per_factor is that factor alone; leave_one_out is every other factor together. A factor whose removal barely shrinks the largest component is not the cause of it.",
+        "per_factor": {
+          "canonical_template": {
+            "component_count": 27620,
+            "largest_component_fraction": 0.00014477017734346723,
+            "largest_component_rows": 4
+          },
+          "email_domain": {
+            "component_count": 27310,
+            "largest_component_fraction": 0.0010495837857401374,
+            "largest_component_rows": 29
+          },
+          "open_entity_value": {
+            "component_count": 6192,
+            "largest_component_fraction": 0.7661599710459646,
+            "largest_component_rows": 21169
+          },
+          "organisation_family": {
+            "component_count": 18628,
+            "largest_component_fraction": 0.05548317046688382,
+            "largest_component_rows": 1533
+          }
+        },
+        "pool_rows": 27630,
+        "top_connector_keys": {
+          "open_entity_value::CITY:wellington": 214,
+          "open_entity_value::GIVENNAME:emily": 508,
+          "open_entity_value::GIVENNAME:emma": 235,
+          "open_entity_value::GIVENNAME:james": 318,
+          "open_entity_value::GIVENNAME:john": 364,
+          "open_entity_value::GIVENNAME:liam": 398,
+          "open_entity_value::GIVENNAME:michael": 223,
+          "open_entity_value::GIVENNAME:ravi": 284,
+          "open_entity_value::GIVENNAME:sarah": 342,
+          "open_entity_value::SURNAME:patel": 322,
+          "open_entity_value::SURNAME:smith": 255,
+          "open_entity_value::SURNAME:thompson": 482,
+          "open_entity_value::TAXNUM:123-45-6789": 586,
+          "organisation_family::ORGANISATION:harper": 243,
+          "organisation_family::ORGANISATION:hartford": 317
+        }
+      },
+      "diagnostic_factors": [
+        "formatting_family",
+        "numeric_pattern_family",
+        "entity_value"
+      ],
+      "diagnostic_note": "Diagnostic factors are measured, not enforced. Overlap here means train and holdout share a surface format, which is expected when a label has only one realistic format.",
+      "factors": [
+        "open_entity_value",
+        "email_domain",
+        "canonical_template",
+        "organisation_family"
+      ],
+      "forced_smallest_component": false,
+      "holdout_fraction": 0.1,
+      "holdout_label_spans": {
+        "ACCOUNTNUM": 223,
+        "AGE": 2,
+        "BANKNAME": 7,
+        "CITY": 268,
+        "COUNTRY": 363,
+        "CREDITCARDNUMBER": 369,
+        "DATE": 2302,
+        "EMAIL": 686,
+        "GENDER": 19,
+        "GIVENNAME": 85,
+        "IDCARDNUM": 389,
+        "IPV4": 585,
+        "ORGANISATION": 622,
+        "PASSWORD": 18,
+        "SOCIALNUM": 612,
+        "STREET": 381,
+        "SURNAME": 65,
+        "TAXNUM": 255,
+        "TELEPHONENUM": 347,
+        "TIME": 83,
+        "TIMEZONE": 21,
+        "URL": 459,
+        "ZIPCODE": 375
+      },
+      "holdout_row_fraction": 0.1,
+      "holdout_rows": 2763,
+      "holdout_shortfall_ratio": 0.0,
+      "is_disjoint": true,
+      "label_reservation": {
+        "ACCOUNTNUM": {
+          "independent_components": 324,
+          "required_holdout_components": 32,
+          "reserved_holdout_components": 32,
+          "sufficient": true
+        },
+        "AGE": {
+          "independent_components": 3,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "BANKNAME": {
+          "independent_components": 18,
+          "required_holdout_components": 2,
+          "reserved_holdout_components": 2,
+          "sufficient": true
+        },
+        "BUILDINGNUM": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "CITY": {
+          "independent_components": 302,
+          "required_holdout_components": 30,
+          "reserved_holdout_components": 30,
+          "sufficient": true
+        },
+        "COUNTRY": {
+          "independent_components": 378,
+          "required_holdout_components": 38,
+          "reserved_holdout_components": 38,
+          "sufficient": true
+        },
+        "CREDITCARDNUMBER": {
+          "independent_components": 540,
+          "required_holdout_components": 54,
+          "reserved_holdout_components": 54,
+          "sufficient": true
+        },
+        "CURRENCY": {
+          "independent_components": 2,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "DATE": {
+          "independent_components": 3077,
+          "required_holdout_components": 308,
+          "reserved_holdout_components": 308,
+          "sufficient": true
+        },
+        "DRIVERLICENSENUM": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "EMAIL": {
+          "independent_components": 906,
+          "required_holdout_components": 91,
+          "reserved_holdout_components": 91,
+          "sufficient": true
+        },
+        "GENDER": {
+          "independent_components": 22,
+          "required_holdout_components": 2,
+          "reserved_holdout_components": 2,
+          "sufficient": true
+        },
+        "GIVENNAME": {
+          "independent_components": 124,
+          "required_holdout_components": 12,
+          "reserved_holdout_components": 12,
+          "sufficient": true
+        },
+        "IDCARDNUM": {
+          "independent_components": 613,
+          "required_holdout_components": 61,
+          "reserved_holdout_components": 61,
+          "sufficient": true
+        },
+        "IPV4": {
+          "independent_components": 805,
+          "required_holdout_components": 80,
+          "reserved_holdout_components": 80,
+          "sufficient": true
+        },
+        "ORGANISATION": {
+          "independent_components": 548,
+          "required_holdout_components": 55,
+          "reserved_holdout_components": 55,
+          "sufficient": true
+        },
+        "PASSPORTNUM": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "PASSWORD": {
+          "independent_components": 31,
+          "required_holdout_components": 3,
+          "reserved_holdout_components": 3,
+          "sufficient": true
+        },
+        "SOCIALNUM": {
+          "independent_components": 866,
+          "required_holdout_components": 87,
+          "reserved_holdout_components": 87,
+          "sufficient": true
+        },
+        "STREET": {
+          "independent_components": 549,
+          "required_holdout_components": 55,
+          "reserved_holdout_components": 55,
+          "sufficient": true
+        },
+        "SURNAME": {
+          "independent_components": 86,
+          "required_holdout_components": 9,
+          "reserved_holdout_components": 9,
+          "sufficient": true
+        },
+        "TAXNUM": {
+          "independent_components": 376,
+          "required_holdout_components": 38,
+          "reserved_holdout_components": 38,
+          "sufficient": true
+        },
+        "TELEPHONENUM": {
+          "independent_components": 461,
+          "required_holdout_components": 46,
+          "reserved_holdout_components": 46,
+          "sufficient": true
+        },
+        "TIME": {
+          "independent_components": 109,
+          "required_holdout_components": 11,
+          "reserved_holdout_components": 11,
+          "sufficient": true
+        },
+        "TIMEZONE": {
+          "independent_components": 33,
+          "required_holdout_components": 3,
+          "reserved_holdout_components": 3,
+          "sufficient": true
+        },
+        "TITLE": {
+          "independent_components": 1,
+          "required_holdout_components": 0,
+          "reserved_holdout_components": 0,
+          "sufficient": false
+        },
+        "URL": {
+          "independent_components": 683,
+          "required_holdout_components": 68,
+          "reserved_holdout_components": 68,
+          "sufficient": true
+        },
+        "ZIPCODE": {
+          "independent_components": 481,
+          "required_holdout_components": 48,
+          "reserved_holdout_components": 48,
+          "sufficient": true
+        }
+      },
+      "labels_without_independent_groups": [
+        "AGE",
+        "BUILDINGNUM",
+        "CURRENCY",
+        "DRIVERLICENSENUM",
+        "PASSPORTNUM",
+        "TITLE"
+      ],
+      "largest_component_fraction": 0.8397756062251176,
+      "largest_component_rows": 23203,
+      "min_independent_groups": 10,
+      "per_diagnostic_factor": {
+        "entity_value": {
+          "factor": "entity_value",
+          "holdout_factor_count": 7257,
+          "holdout_rows": 2763,
+          "is_disjoint": false,
+          "overlap_count": 421,
+          "overlap_examples": [
+            "BANKNAME:al rajhi bank",
+            "BANKNAME:arab national bank",
+            "BANKNAME:bank aljazira",
+            "BANKNAME:riyad bank",
+            "BANKNAME:saudi awwal bank",
+            "COUNTRY:afghanistan",
+            "COUNTRY:algeria",
+            "COUNTRY:american samoa",
+            "COUNTRY:armenia",
+            "COUNTRY:bahamas",
+            "COUNTRY:bahrain",
+            "COUNTRY:belarus",
+            "COUNTRY:belgium",
+            "COUNTRY:brazil",
+            "COUNTRY:bulgaria",
+            "COUNTRY:cambodia",
+            "COUNTRY:colombia",
+            "COUNTRY:cook islands",
+            "COUNTRY:costa rica",
+            "COUNTRY:country of origin"
+          ],
+          "train_factor_count": 69983,
+          "train_rows": 24867
+        },
+        "formatting_family": {
+          "factor": "formatting_family",
+          "holdout_factor_count": 502,
+          "holdout_rows": 2763,
+          "is_disjoint": false,
+          "overlap_count": 378,
+          "overlap_examples": [
+            "ACCOUNTNUM:9",
+            "ACCOUNTNUM:9-9",
+            "ACCOUNTNUM:9-9-9",
+            "ACCOUNTNUM:9-9-9-9",
+            "ACCOUNTNUM:A-9",
+            "ACCOUNTNUM:A9",
+            "ACCOUNTNUM:A9 9 9 9 9 9",
+            "ACCOUNTNUM:A9-9-9-9",
+            "ACCOUNTNUM:A9-9-9-9-9",
+            "ACCOUNTNUM:A9-9-9-9-9-9",
+            "AGE:9",
+            "BANKNAME:A A",
+            "BANKNAME:A A A",
+            "CITY:A",
+            "CITY:A A",
+            "CITY:A A A",
+            "CITY:A. A",
+            "COUNTRY:A",
+            "COUNTRY:A A",
+            "COUNTRY:A A A"
+          ],
+          "train_factor_count": 2532,
+          "train_rows": 24867
+        },
+        "numeric_pattern_family": {
+          "factor": "numeric_pattern_family",
+          "holdout_factor_count": 328,
+          "holdout_rows": 2763,
+          "is_disjoint": false,
+          "overlap_count": 281,
+          "overlap_examples": [
+            "ACCOUNTNUM:D10",
+            "ACCOUNTNUM:D11",
+            "ACCOUNTNUM:D12",
+            "ACCOUNTNUM:D3-D10",
+            "ACCOUNTNUM:D3-D3-D3-D3",
+            "ACCOUNTNUM:D3-D3-D4",
+            "ACCOUNTNUM:D3-D6",
+            "ACCOUNTNUM:D3-D9",
+            "ACCOUNTNUM:D4-D4-D4",
+            "ACCOUNTNUM:D4-D8",
+            "ACCOUNTNUM:D6-D6",
+            "ACCOUNTNUM:D6-D8",
+            "ACCOUNTNUM:D8",
+            "ACCOUNTNUM:D9",
+            "ACCOUNTNUM:L1D10",
+            "ACCOUNTNUM:L1D11",
+            "ACCOUNTNUM:L1D8",
+            "ACCOUNTNUM:L1D9",
+            "ACCOUNTNUM:L2D10",
+            "ACCOUNTNUM:L2D2 D4 D4 D4 D4 D2"
+          ],
+          "train_factor_count": 1516,
+          "train_rows": 24867
+        }
+      },
+      "per_factor": {
+        "canonical_template": {
+          "factor": "canonical_template",
+          "holdout_factor_count": 2763,
+          "holdout_rows": 2763,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 24857,
+          "train_rows": 24867
+        },
+        "email_domain": {
+          "factor": "email_domain",
+          "holdout_factor_count": 166,
+          "holdout_rows": 2763,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 3464,
+          "train_rows": 24867
+        },
+        "open_entity_value": {
+          "factor": "open_entity_value",
+          "holdout_factor_count": 5168,
+          "holdout_rows": 2763,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 62179,
+          "train_rows": 24867
+        },
+        "organisation_family": {
+          "factor": "organisation_family",
+          "holdout_factor_count": 331,
+          "holdout_rows": 2763,
+          "is_disjoint": true,
+          "overlap_count": 0,
+          "overlap_examples": [],
+          "train_factor_count": 3044,
+          "train_rows": 24867
+        }
+      },
+      "seed": 20260815,
+      "supplementary_test_rows": 2763,
+      "supplementary_train_rows": 24867,
+      "target_holdout_rows": 2763,
+      "total_test_rows": 19136,
+      "total_train_rows": 172226,
+      "train_label_spans": {
+        "ACCOUNTNUM": 3598,
+        "AGE": 1120,
+        "BANKNAME": 14,
+        "BUILDINGNUM": 3493,
+        "CITY": 11330,
+        "COUNTRY": 8850,
+        "CREDITCARDNUMBER": 2285,
+        "CURRENCY": 2,
+        "DATE": 18201,
+        "DRIVERLICENSENUM": 1117,
+        "EMAIL": 8793,
+        "GENDER": 498,
+        "GIVENNAME": 17322,
+        "IDCARDNUM": 5856,
+        "IPV4": 1336,
+        "ORGANISATION": 20876,
+        "PASSPORTNUM": 503,
+        "PASSWORD": 295,
+        "SOCIALNUM": 2930,
+        "STREET": 9159,
+        "SURNAME": 13867,
+        "TAXNUM": 4425,
+        "TELEPHONENUM": 5120,
+        "TIME": 3435,
+        "TIMEZONE": 12,
+        "TITLE": 5,
+        "URL": 7864,
+        "ZIPCODE": 8804
+      },
+      "train_rows": 24867
+    }
+  },
+  "statistics": {
+    "ood_dev": {
+      "empty_mask_fraction": 0.2,
+      "empty_mask_rows": 72,
+      "rows": 360,
+      "rows_by_augmentation_family": {},
+      "rows_by_generation_type": {
+        "original": 360
+      },
+      "rows_by_label": {
+        "ACCOUNTNUM": 18,
+        "BUILDINGNUM": 24,
+        "CITY": 40,
+        "CREDITCARDNUMBER": 12,
+        "DATE": 32,
+        "DRIVERLICENSENUM": 6,
+        "EMAIL": 66,
+        "GIVENNAME": 78,
+        "IDCARDNUM": 12,
+        "ORGANISATION": 38,
+        "PASSPORTNUM": 6,
+        "STREET": 32,
+        "SURNAME": 72,
+        "TAXNUM": 6,
+        "TELEPHONENUM": 24,
+        "ZIPCODE": 6
+      },
+      "rows_by_source": {
+        "onkith_ood_fixture": 360
+      },
+      "spans_by_label": {
+        "ACCOUNTNUM": 18,
+        "BUILDINGNUM": 24,
+        "CITY": 40,
+        "CREDITCARDNUMBER": 12,
+        "DATE": 32,
+        "DRIVERLICENSENUM": 6,
+        "EMAIL": 66,
+        "GIVENNAME": 78,
+        "IDCARDNUM": 12,
+        "ORGANISATION": 38,
+        "PASSPORTNUM": 6,
+        "STREET": 32,
+        "SURNAME": 72,
+        "TAXNUM": 6,
+        "TELEPHONENUM": 24,
+        "ZIPCODE": 6
+      },
+      "top_email_domains": {
+        "alpine-solutions.travel": 3,
+        "cedar-house.museum": 3,
+        "cobalt-research.science": 3,
+        "deepfield.engineering": 3,
+        "heliograph.aero": 6,
+        "mail.riverstone.technology": 3,
+        "mail.saffron.agency": 3,
+        "northstar.coop": 3,
+        "quantum-labs.dev": 3,
+        "relay.cobalt-research.science": 1,
+        "relay.deepfield.engineering": 1,
+        "relay.quantum-labs.dev": 1,
+        "relay.sub.orbit.example.net": 1,
+        "secure.harbor.services": 3,
+        "sub.orbit.example.net": 3
+      },
+      "total_spans": 472,
+      "unique_email_domains": 21,
+      "unique_values_by_label": {
+        "ACCOUNTNUM": 15,
+        "BUILDINGNUM": 8,
+        "CITY": 8,
+        "CREDITCARDNUMBER": 10,
+        "DATE": 8,
+        "DRIVERLICENSENUM": 5,
+        "EMAIL": 41,
+        "GIVENNAME": 25,
+        "IDCARDNUM": 10,
+        "ORGANISATION": 9,
+        "PASSPORTNUM": 4,
+        "STREET": 8,
+        "SURNAME": 12,
+        "TAXNUM": 5,
+        "TELEPHONENUM": 16,
+        "ZIPCODE": 5
+      }
+    },
+    "test": {
+      "empty_mask_fraction": 0.00020903010033444816,
+      "empty_mask_rows": 4,
+      "rows": 19136,
+      "rows_by_augmentation_family": {},
+      "rows_by_generation_type": {
+        "original": 19037,
+        "replacement": 95,
+        "synthetic": 4
+      },
+      "rows_by_label": {
+        "ACCOUNTNUM": 194,
+        "AGE": 5629,
+        "AMOUNT": 1,
+        "BANKNAME": 7,
+        "BUILDINGNUM": 5771,
+        "CITY": 8246,
+        "COUNTRY": 246,
+        "CREDITCARDNUMBER": 3880,
+        "CURRENCY": 1,
+        "DATE": 13377,
+        "DRIVERLICENSENUM": 3450,
+        "EMAIL": 9224,
+        "GENDER": 3326,
+        "GIVENNAME": 11827,
+        "IDCARDNUM": 4433,
+        "IPV4": 495,
+        "ORGANISATION": 329,
+        "PASSPORTNUM": 2519,
+        "PASSWORD": 18,
+        "SEX": 2347,
+        "SOCIALNUM": 3243,
+        "STREET": 6366,
+        "SURNAME": 10713,
+        "TAXNUM": 3321,
+        "TELEPHONENUM": 6709,
+        "TIME": 131,
+        "TIMEZONE": 21,
+        "TITLE": 7690,
+        "URL": 421,
+        "ZIPCODE": 5519
+      },
+      "rows_by_source": {
+        "ai4privacy": 16373,
+        "gretel": 1774,
+        "nemotron": 890,
+        "saudi_mena": 99
+      },
+      "spans_by_label": {
+        "ACCOUNTNUM": 223,
+        "AGE": 6047,
+        "AMOUNT": 3,
+        "BANKNAME": 7,
+        "BUILDINGNUM": 5854,
+        "CITY": 8842,
+        "COUNTRY": 364,
+        "CREDITCARDNUMBER": 4152,
+        "CURRENCY": 3,
+        "DATE": 17316,
+        "DRIVERLICENSENUM": 3468,
+        "EMAIL": 9865,
+        "GENDER": 3386,
+        "GIVENNAME": 15180,
+        "IDCARDNUM": 4465,
+        "IPV4": 585,
+        "ORGANISATION": 624,
+        "PASSPORTNUM": 2524,
+        "PASSWORD": 18,
+        "SEX": 2395,
+        "SOCIALNUM": 3337,
+        "STREET": 6513,
+        "SURNAME": 12853,
+        "TAXNUM": 3345,
+        "TELEPHONENUM": 7024,
+        "TIME": 272,
+        "TIMEZONE": 21,
+        "TITLE": 8470,
+        "URL": 459,
+        "ZIPCODE": 5623
+      },
+      "top_email_domains": {
+        "aol.com": 1311,
+        "example.com": 98,
+        "example.net": 108,
+        "example.org": 92,
+        "gmail.com": 1388,
+        "hotmail.com": 1357,
+        "icloud.com": 45,
+        "nordgov.no": 3,
+        "outlook.com": 1348,
+        "pakvistagoods.com": 3,
+        "protonmail.com": 1218,
+        "transitcostarica.co.cr": 3,
+        "tutanota.com": 1334,
+        "vividretail.co.uk": 5,
+        "yahoo.com": 1357
+      },
+      "total_spans": 133238,
+      "unique_email_domains": 178,
+      "unique_values_by_label": {
+        "ACCOUNTNUM": 207,
+        "AGE": 91,
+        "AMOUNT": 3,
+        "BANKNAME": 7,
+        "BUILDINGNUM": 2680,
+        "CITY": 4490,
+        "COUNTRY": 103,
+        "CREDITCARDNUMBER": 4098,
+        "CURRENCY": 3,
+        "DATE": 14349,
+        "DRIVERLICENSENUM": 3438,
+        "EMAIL": 7509,
+        "GENDER": 11,
+        "GIVENNAME": 13568,
+        "IDCARDNUM": 4405,
+        "IPV4": 542,
+        "ORGANISATION": 333,
+        "PASSPORTNUM": 2500,
+        "PASSWORD": 18,
+        "SEX": 6,
+        "SOCIALNUM": 3305,
+        "STREET": 3801,
+        "SURNAME": 12146,
+        "TAXNUM": 3305,
+        "TELEPHONENUM": 6843,
+        "TIME": 265,
+        "TIMEZONE": 2,
+        "TITLE": 58,
+        "URL": 429,
+        "ZIPCODE": 3813
+      }
+    },
+    "train": {
+      "empty_mask_fraction": 0.00081776291307364,
+      "empty_mask_rows": 178,
+      "rows": 217667,
+      "rows_by_augmentation_family": {
+        "case_lower": 13930,
+        "case_mixed": 1743,
+        "case_upper": 13930,
+        "entity_value": 13930,
+        "hard_negative": 146,
+        "password_assistant_request": 18,
+        "password_change_to": 72,
+        "password_login_with": 36,
+        "password_multi_entity": 1240,
+        "password_passcode": 54,
+        "password_possessive": 54,
+        "password_qualified": 198,
+        "password_self_correction": 18,
+        "password_uncertain_recall": 18,
+        "password_use_to_login": 54
+      },
+      "rows_by_generation_type": {
+        "augmented": 43533,
+        "original": 172162,
+        "replacement": 50,
+        "synthetic": 1922
+      },
+      "rows_by_label": {
+        "ACCOUNTNUM": 4299,
+        "AGE": 65237,
+        "AMOUNT": 18,
+        "BANKNAME": 34,
+        "BUILDINGNUM": 69450,
+        "CITY": 102475,
+        "COUNTRY": 8409,
+        "CREDITCARDNUMBER": 42714,
+        "CURRENCY": 16,
+        "DATE": 144949,
+        "DRIVERLICENSENUM": 40349,
+        "EMAIL": 109321,
+        "GENDER": 38190,
+        "GIVENNAME": 148499,
+        "IDCARDNUM": 52776,
+        "IPV4": 1382,
+        "ORGANISATION": 14619,
+        "PASSPORTNUM": 28824,
+        "PASSWORD": 2509,
+        "SALARY": 2,
+        "SEX": 26798,
+        "SOCIALNUM": 34026,
+        "STREET": 78455,
+        "SURNAME": 133576,
+        "TAXNUM": 39904,
+        "TELEPHONENUM": 78464,
+        "TIME": 3791,
+        "TIMEZONE": 14,
+        "TITLE": 87600,
+        "URL": 9051,
+        "ZIPCODE": 69229
+      },
+      "rows_by_source": {
+        "ai4privacy": 184510,
+        "gretel": 4246,
+        "kiji": 6274,
+        "nemotron": 20265,
+        "onkith_hard_negative_v1": 146,
+        "onkith_password_disclosure_v1": 2145,
+        "saudi_mena": 81
+      },
+      "spans_by_label": {
+        "ACCOUNTNUM": 4594,
+        "AGE": 70233,
+        "AMOUNT": 21,
+        "BANKNAME": 34,
+        "BUILDINGNUM": 71256,
+        "CITY": 111952,
+        "COUNTRY": 11037,
+        "CREDITCARDNUMBER": 45440,
+        "CURRENCY": 23,
+        "DATE": 192228,
+        "DRIVERLICENSENUM": 40567,
+        "EMAIL": 116597,
+        "GENDER": 39009,
+        "GIVENNAME": 192738,
+        "IDCARDNUM": 53275,
+        "IPV4": 1571,
+        "ORGANISATION": 26123,
+        "PASSPORTNUM": 28895,
+        "PASSWORD": 2510,
+        "SALARY": 2,
+        "SEX": 27229,
+        "SOCIALNUM": 34429,
+        "STREET": 81286,
+        "SURNAME": 163702,
+        "TAXNUM": 40213,
+        "TELEPHONENUM": 82327,
+        "TIME": 6556,
+        "TIMEZONE": 14,
+        "TITLE": 96497,
+        "URL": 9916,
+        "ZIPCODE": 70912
+      },
+      "top_email_domains": {
+        "alerts.lab.example": 888,
+        "alumni.example.edu": 881,
+        "aol.com": 13855,
+        "example.com": 1164,
+        "example.org": 1182,
+        "example.travel": 898,
+        "gmail.com": 15784,
+        "hotmail.com": 14296,
+        "icloud.com": 1070,
+        "outlook.com": 14348,
+        "protonmail.com": 13930,
+        "service.example.photography": 881,
+        "subunit.example.cloud": 892,
+        "tutanota.com": 13820,
+        "yahoo.com": 14360
+      },
+      "total_spans": 1621186,
+      "unique_email_domains": 3501,
+      "unique_values_by_label": {
+        "ACCOUNTNUM": 2305,
+        "AGE": 95,
+        "AMOUNT": 16,
+        "BANKNAME": 14,
+        "BUILDINGNUM": 6677,
+        "CITY": 14706,
+        "COUNTRY": 226,
+        "CREDITCARDNUMBER": 32431,
+        "CURRENCY": 11,
+        "DATE": 64106,
+        "DRIVERLICENSENUM": 28905,
+        "EMAIL": 50780,
+        "GENDER": 17,
+        "GIVENNAME": 67126,
+        "IDCARDNUM": 37581,
+        "IPV4": 1183,
+        "ORGANISATION": 6420,
+        "PASSPORTNUM": 21293,
+        "PASSWORD": 252,
+        "SALARY": 2,
+        "SEX": 6,
+        "SOCIALNUM": 25172,
+        "STREET": 14456,
+        "SURNAME": 77001,
+        "TAXNUM": 28237,
+        "TELEPHONENUM": 54092,
+        "TIME": 2326,
+        "TIMEZONE": 3,
+        "TITLE": 65,
+        "URL": 6151,
+        "ZIPCODE": 16904
+      }
+    },
+    "val_original": {
+      "empty_mask_fraction": 0.0002200004888899753,
+      "empty_mask_rows": 9,
+      "rows": 40909,
+      "rows_by_augmentation_family": {},
+      "rows_by_generation_type": {
+        "original": 40909
+      },
+      "rows_by_label": {
+        "ACCOUNTNUM": 1,
+        "AGE": 14037,
+        "AMOUNT": 2,
+        "BANKNAME": 1,
+        "BUILDINGNUM": 14402,
+        "CITY": 20105,
+        "COUNTRY": 2,
+        "CREDITCARDNUMBER": 8705,
+        "CURRENCY": 2,
+        "DATE": 28471,
+        "DRIVERLICENSENUM": 8605,
+        "EMAIL": 21724,
+        "GENDER": 8432,
+        "GIVENNAME": 29362,
+        "IDCARDNUM": 10238,
+        "ORGANISATION": 4,
+        "PASSPORTNUM": 6256,
+        "SEX": 5897,
+        "SOCIALNUM": 6665,
+        "STREET": 15047,
+        "SURNAME": 26582,
+        "TAXNUM": 7628,
+        "TELEPHONENUM": 16208,
+        "TIME": 153,
+        "TITLE": 19199,
+        "URL": 5,
+        "ZIPCODE": 12996
+      },
+      "rows_by_source": {
+        "ai4privacy": 40909
+      },
+      "spans_by_label": {
+        "ACCOUNTNUM": 1,
+        "AGE": 15189,
+        "AMOUNT": 2,
+        "BANKNAME": 1,
+        "BUILDINGNUM": 14594,
+        "CITY": 21496,
+        "COUNTRY": 2,
+        "CREDITCARDNUMBER": 9259,
+        "CURRENCY": 2,
+        "DATE": 37412,
+        "DRIVERLICENSENUM": 8640,
+        "EMAIL": 22891,
+        "GENDER": 8578,
+        "GIVENNAME": 37702,
+        "IDCARDNUM": 10273,
+        "ORGANISATION": 4,
+        "PASSPORTNUM": 6276,
+        "SEX": 6014,
+        "SOCIALNUM": 6681,
+        "STREET": 15297,
+        "SURNAME": 32068,
+        "TAXNUM": 7644,
+        "TELEPHONENUM": 16823,
+        "TIME": 454,
+        "TITLE": 21077,
+        "URL": 5,
+        "ZIPCODE": 13084
+      },
+      "top_email_domains": {
+        "aol.com": 3168,
+        "gmail.com": 3325,
+        "hotmail.com": 3395,
+        "outlook.com": 3273,
+        "protonmail.com": 3186,
+        "tutanota.com": 3233,
+        "yahoo.com": 3311
+      },
+      "total_spans": 311469,
+      "unique_email_domains": 7,
+      "unique_values_by_label": {
+        "ACCOUNTNUM": 1,
+        "AGE": 90,
+        "AMOUNT": 2,
+        "BANKNAME": 1,
+        "BUILDINGNUM": 4284,
+        "CITY": 7315,
+        "COUNTRY": 1,
+        "CREDITCARDNUMBER": 8996,
+        "CURRENCY": 1,
+        "DATE": 25935,
+        "DRIVERLICENSENUM": 8391,
+        "EMAIL": 15513,
+        "GENDER": 11,
+        "GIVENNAME": 29350,
+        "IDCARDNUM": 9935,
+        "ORGANISATION": 4,
+        "PASSPORTNUM": 6133,
+        "SEX": 6,
+        "SOCIALNUM": 6521,
+        "STREET": 5670,
+        "SURNAME": 27896,
+        "TAXNUM": 7461,
+        "TELEPHONENUM": 16001,
+        "TIME": 436,
+        "TITLE": 58,
+        "URL": 5,
+        "ZIPCODE": 6417
+      }
+    },
+    "val_supplementary": {
+      "empty_mask_fraction": 0.0,
+      "empty_mask_rows": 0,
+      "rows": 6907,
+      "rows_by_augmentation_family": {},
+      "rows_by_generation_type": {
+        "original": 6637,
+        "replacement": 258,
+        "synthetic": 12
+      },
+      "rows_by_label": {
+        "ACCOUNTNUM": 511,
+        "BANKNAME": 33,
+        "CITY": 427,
+        "COUNTRY": 619,
+        "CREDITCARDNUMBER": 731,
+        "CURRENCY": 1,
+        "DATE": 4620,
+        "DRIVERLICENSENUM": 1,
+        "EMAIL": 1484,
+        "GENDER": 22,
+        "GIVENNAME": 237,
+        "IDCARDNUM": 927,
+        "IPV4": 1253,
+        "ORGANISATION": 1423,
+        "PASSWORD": 174,
+        "SOCIALNUM": 1324,
+        "STREET": 842,
+        "SURNAME": 174,
+        "TAXNUM": 619,
+        "TELEPHONENUM": 749,
+        "TIME": 175,
+        "TIMEZONE": 17,
+        "URL": 1195,
+        "ZIPCODE": 715
+      },
+      "rows_by_source": {
+        "gretel": 4262,
+        "kiji": 6,
+        "nemotron": 2369,
+        "saudi_mena": 270
+      },
+      "spans_by_label": {
+        "ACCOUNTNUM": 566,
+        "BANKNAME": 33,
+        "CITY": 519,
+        "COUNTRY": 827,
+        "CREDITCARDNUMBER": 827,
+        "CURRENCY": 1,
+        "DATE": 5800,
+        "DRIVERLICENSENUM": 1,
+        "EMAIL": 1816,
+        "GENDER": 50,
+        "GIVENNAME": 300,
+        "IDCARDNUM": 1009,
+        "IPV4": 1507,
+        "ORGANISATION": 2323,
+        "PASSWORD": 175,
+        "SOCIALNUM": 1534,
+        "STREET": 965,
+        "SURNAME": 206,
+        "TAXNUM": 678,
+        "TELEPHONENUM": 930,
+        "TIME": 216,
+        "TIMEZONE": 17,
+        "URL": 1338,
+        "ZIPCODE": 804
+      },
+      "top_email_domains": {
+        "andinavivo.com.bo": 4,
+        "example.com": 279,
+        "example.net": 266,
+        "example.org": 267,
+        "farmaceuticalombarda.it": 4,
+        "gmail.com": 208,
+        "groupe-servia.fr": 5,
+        "hotmail.com": 38,
+        "icloud.com": 123,
+        "miragemarketing.ae": 4,
+        "netconnecta.nl": 5,
+        "nomadicpathways.mn": 6,
+        "outlook.com": 35,
+        "protonmail.com": 12,
+        "yahoo.com": 33
+      },
+      "total_spans": 22442,
+      "unique_email_domains": 459,
+      "unique_values_by_label": {
+        "ACCOUNTNUM": 513,
+        "BANKNAME": 12,
+        "CITY": 440,
+        "COUNTRY": 179,
+        "CREDITCARDNUMBER": 814,
+        "CURRENCY": 1,
+        "DATE": 4561,
+        "DRIVERLICENSENUM": 1,
+        "EMAIL": 1611,
+        "GENDER": 4,
+        "GIVENNAME": 215,
+        "IDCARDNUM": 953,
+        "IPV4": 1374,
+        "ORGANISATION": 1419,
+        "PASSWORD": 158,
+        "SOCIALNUM": 1526,
+        "STREET": 928,
+        "SURNAME": 176,
+        "TAXNUM": 646,
+        "TELEPHONENUM": 825,
+        "TIME": 203,
+        "TIMEZONE": 2,
+        "URL": 1153,
+        "ZIPCODE": 746
+      }
+    }
+  }
+}

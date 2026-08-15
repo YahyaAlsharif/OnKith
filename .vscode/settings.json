@@ -1,0 +1,20 @@
+{
+  // The Model V2 notebook adds these three directories to sys.path in its first
+  // code cell, so `import ontology`, `import manifest`, `import pools` and the
+  // rest resolve at runtime. Pylance does not execute that cell, so without
+  // these entries it reports unresolved imports for local OnKith modules that
+  // are in fact fine. Keep this list in step with the sys.path setup in
+  // model/DeBERTa-v3-xsmall/model_v2_deberta_v3_xsmall.ipynb.
+  "python.analysis.extraPaths": [
+    "./model/privacy_data_v2",
+    "./model/privacy_evaluation",
+    "./FullPipeline_V3"
+  ],
+  "python.autoComplete.extraPaths": [
+    "./model/privacy_data_v2",
+    "./model/privacy_evaluation",
+    "./FullPipeline_V3"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "jupyter.notebookFileRoot": "${fileDirname}"
+}

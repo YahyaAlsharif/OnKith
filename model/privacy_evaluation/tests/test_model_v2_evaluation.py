@@ -388,6 +388,34 @@ class NotebookTests(unittest.TestCase):
         self.assertIn("firewall.assert_clean", self.all_code)
         self.assertIn("len(val_original) == 40_909", self.all_code)
 
+    def test_the_contamination_filter_runs_before_the_final_split_and_the_write(self):
+        """Filtering must precede materialisation, and never replace the assertion."""
+        filter_index = self.all_code.index('stage="pre_split"')
+        split_index = self.all_code.index("pools.split_training_side(")
+        write_index = self.all_code.index("write_jsonl(TRAIN_PATH")
+        self.assertLess(filter_index, split_index)
+        self.assertLess(self.all_code.index('stage="pre_write"'), write_index)
+        self.assertIn("pools.filter_contamination(", self.all_code)
+        self.assertIn("assert_no_protected_overlap", self.all_code)
+        # The hard assertions survive the fix rather than becoming warnings.
+        self.assertIn('firewall.assert_clean(train_rows, label="train")', self.all_code)
+        self.assertIn('firewall.assert_clean(test_rows, label="test")', self.all_code)
+
+    def test_the_holdout_joins_the_firewall_once_it_exists(self):
+        """A firewall that never sees val_supplementary cannot protect it."""
+        self.assertIn('add_protected_records("val_supplementary", val_supplementary)',
+                      self.all_code)
+
+    def test_stale_caches_cannot_be_reused_in_silence(self):
+        self.assertIn("cache_is_current", self.all_code)
+        self.assertIn("assert_cache_current", self.all_code)
+        self.assertIn("REBUILD_SUPPLEMENTARY", self.all_code)
+
+    def test_the_tinybert_comparison_states_when_the_row_set_changed(self):
+        self.assertIn("AI4_TEST_HISTORICAL_ROWS", self.all_code)
+        self.assertIn("AI4_TEST_ROWS_REMOVED", self.all_code)
+        self.assertIn("NOT exactly like-for-like", self.all_code)
+
     def test_validation_sets_are_never_augmented(self):
         self.assertIn("augment_training_rows", self.all_code)
         # Augmentation is applied to the training pool only.

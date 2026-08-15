@@ -13,6 +13,19 @@ The second notebook is separated for one reason: the frozen OOD final set can be
 
 Model V2 removes `ALLERGIES`, `USERNAME`, and `WEIGHT`; `HEIGHT` remains absent; `PASSWORD` is the only addition. The deployed TinyBERT contract remains 67 labels until a separate production migration.
 
+## Environment
+
+**Python 3.11.9.** Select the repository virtual environment as the notebook kernel; it is already Python 3.11.9:
+
+```powershell
+.\.venv\Scripts\python.exe --version    # Python 3.11.9
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Always install with the interpreter-specific form above rather than a bare `pip install`, so packages land in the environment the kernel actually uses.
+
+The notebook imports local OnKith modules by bare name - `ontology`, `records`, `manifest`, `pools`, `dedup`, `grouped_splits`, `selection`, `sources`, `augment_pipeline`, `label_mapping`, `data_audit`, `password_rules`, `privacy_eval`. These are **files in this repository**, not PyPI packages: the first code cell walks up to the repository root and puts `model/privacy_data_v2`, `model/privacy_evaluation` and `FullPipeline_V3` on `sys.path`. That runs before any of them is imported, so a fresh kernel started from any directory inside the repository resolves them. Never `pip install` a similarly named package to silence one of these imports. `.vscode/settings.json` mirrors the same three paths into `python.analysis.extraPaths` so Pylance agrees with the runtime.
+
 ## Required first step
 
 Run [`../data/saudi_PII_Builder.ipynb`](../data/saudi_PII_Builder.ipynb) with **Run All** before opening the Model V2 notebook. It writes:
@@ -52,6 +65,16 @@ The last step writes `artifacts/model_v2/metrics/accepted_int8_candidate.json`: 
 `accepted: true` appears **only** when a real run clears the gate. If INT8 fails, the manifest records `accepted: false` and the benchmark notebook refuses it. A smoke run writes the same shape under `artifacts/model_v2/smoke/metrics/` with `smoke_test: true` and `accepted: false`, so smoke evidence cannot be mistaken for a release candidate.
 
 Section 6 still fingerprints the frozen-final texts for the contamination firewall - hashes and normalised text only. The main notebook never constructs a frozen case and never reads a frozen annotation.
+
+### Contamination filter (section 9)
+
+The firewall screens supplementary rows as they are *selected*, but the AI4Privacy component is a **pinned** split rather than a selected one, so whatever upstream placed in the official train split arrives unscreened. AI4Privacy English ships zero-length `source_text` rows in both its official train and its official validation split, which made eight pinned training-side rows byte-identical to a `val_original` row.
+
+Section 9 therefore sweeps every training-side pool - AI4Privacy train, AI4Privacy test and the supplementary training side - against every protected set before anything is split or written, and section 11 repeats the sweep on the augmented rows before the artifacts are materialised. The rule is fixed: **the protected evaluation row is kept and the colliding training-side copy is removed.** `val_original` stays at its full 40,909 rows and the frozen OOD fixtures are never modified. Every removal is recorded in `contamination_filter` in the data manifest, and `firewall.assert_clean` still runs afterwards as a hard assertion.
+
+One consequence is stated rather than hidden: if the sweep removes a row from the pinned 16,374-row historical test set, the TinyBERT comparison subset is smaller than the row set the frozen TinyBERT aggregate was measured on. Section 20 prints both counts and says so. Preserving a round number by keeping a contaminated row is not an option.
+
+Artifacts built by an older pipeline cannot be reused in silence. `manifest.DATA_PIPELINE_VERSION` is recorded in the data manifest, and section 2 rebuilds any cached corpus written by an earlier version, printing the reason. Nothing has to be deleted by hand.
 
 An isolated development smoke is available without changing production defaults:
 

@@ -14,6 +14,12 @@ Two independent mechanisms, deliberately kept separate:
     is the single most important safety gate in the Model V2 pipeline: it is
     built from the original AI4Privacy validation, the supplementary holdout and
     both OOD fixtures *before* any training row is written.
+
+    Rejecting a candidate at selection time is not enough on its own: the
+    AI4Privacy base split is pinned rather than selected, so it can carry an
+    upstream train/validation duplicate straight into the training pool.
+    ``filter_records`` is the deterministic sweep that removes those, and
+    ``assert_clean`` is the proof that the sweep worked.
 """
 
 from __future__ import annotations
@@ -144,23 +150,38 @@ class ContaminationFirewall:
     """
 
     def __init__(self) -> None:
-        self._fingerprints: dict[str, str] = {}
+        # fingerprint -> (protected set name, uid of the protected row or None)
+        self._fingerprints: dict[str, tuple[str, str | None]] = {}
         self.counts: Counter[str] = Counter()
         self.examples: dict[str, list[str]] = defaultdict(list)
 
-    def add_protected(self, name: str, texts: Iterable[str]) -> int:
-        """Register one evaluation set. Returns the number of fingerprints held."""
+    def add_protected(
+        self, name: str, texts: Iterable[str], *, uids: Iterable[str | None] | None = None
+    ) -> int:
+        """Register one evaluation set. Returns the number of fingerprints held.
+
+        ``uids`` is optional provenance: when supplied it lets a later removal
+        name the exact protected row a training candidate collided with, which
+        is what turns "contamination happened" into an auditable finding.
+        """
 
         added = 0
+        uid_stream = iter(uids) if uids is not None else None
         for text in texts:
+            uid = next(uid_stream, None) if uid_stream is not None else None
             fingerprint = text_fingerprint(text)
             # First registration wins so the reported source stays stable.
-            if self._fingerprints.setdefault(fingerprint, name) == name:
+            if self._fingerprints.setdefault(fingerprint, (name, uid))[0] == name:
                 added += 1
         return added
 
     def add_protected_records(self, name: str, records: Iterable[Mapping[str, Any]]) -> int:
-        return self.add_protected(name, (str(record["source_text"]) for record in records))
+        rows = list(records)
+        return self.add_protected(
+            name,
+            (str(record["source_text"]) for record in rows),
+            uids=(str(record.get("uid")) if record.get("uid") is not None else None for record in rows),
+        )
 
     @property
     def size(self) -> int:
@@ -168,6 +189,12 @@ class ContaminationFirewall:
 
     def check(self, text: str) -> str | None:
         """Return the name of the evaluation set that already holds ``text``."""
+
+        found = self._fingerprints.get(text_fingerprint(text))
+        return found[0] if found is not None else None
+
+    def locate(self, text: str) -> tuple[str, str | None] | None:
+        """Return ``(protected set, protected uid)`` for a colliding text."""
 
         return self._fingerprints.get(text_fingerprint(text))
 
@@ -181,6 +208,46 @@ class ContaminationFirewall:
         if len(self.examples[source]) < 5:
             self.examples[source].append(str(text)[:120])
         return False
+
+    def filter_records(
+        self, records: Iterable[Mapping[str, Any]], *, label: str
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Drop every candidate already held by a protected set.
+
+        Returns ``(clean rows, removals)``. Survivors keep their input order and
+        removals are recorded in encounter order, so the same input always
+        produces the same output - the filter is part of the reproducible build,
+        not a repair step someone runs by hand.
+
+        The protected row is never touched. When a training row and an
+        evaluation row are the same text, the evaluation row is the one that
+        must survive, because a validation set that quietly loses rows stops
+        measuring what it claims to measure.
+        """
+
+        clean: list[dict[str, Any]] = []
+        removals: list[dict[str, Any]] = []
+        for record in records:
+            text = str(record["source_text"])
+            found = self.locate(text)
+            if found is None:
+                clean.append(dict(record))
+                continue
+            protected_set, protected_uid = found
+            removals.append(
+                {
+                    "candidate_partition": label,
+                    "uid": record.get("uid"),
+                    "source_dataset": record.get("source_dataset"),
+                    "source_split": record.get("source_split"),
+                    "protected_set": protected_set,
+                    "protected_uid": protected_uid,
+                    "fingerprint": text_fingerprint(text),
+                    "text_length": len(text),
+                    "span_count": len(record.get("privacy_mask", ())),
+                }
+            )
+        return clean, removals
 
     def audit(self) -> dict[str, Any]:
         return {

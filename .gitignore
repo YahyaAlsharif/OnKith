@@ -92,7 +92,14 @@ transcripts/
 # ---------------------------------------------------------------------------
 # Editor and OS files
 # ---------------------------------------------------------------------------
-.vscode/
+# Contents, not the directory itself: git does not descend into an ignored
+# directory, so `.vscode/` would make the negation below unreachable.
+.vscode/*
+# Except the shared path configuration: the notebooks import local OnKith
+# modules by bare name after adding three directories to sys.path, and Pylance
+# needs the same three paths to agree with the runtime. That is project setup,
+# not a personal editor preference.
+!.vscode/settings.json
 .idea/
 *.swp
 *~
