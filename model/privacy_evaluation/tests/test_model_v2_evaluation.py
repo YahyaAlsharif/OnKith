@@ -339,8 +339,10 @@ class NotebookTests(unittest.TestCase):
             for cell in cls.notebook["cells"]
             if cell["cell_type"] == "markdown"
         )
-        cls.frozen_final_cell = next(
-            source for source in cls.code_cells if 'partition="ood_final"' in source
+        cls.candidate_cell = next(
+            source
+            for source in cls.code_cells
+            if "accepted_candidate.build_candidate_manifest(" in source
         )
 
     def test_every_code_cell_parses(self):
@@ -354,12 +356,13 @@ class NotebookTests(unittest.TestCase):
                 self.assertEqual(cell["outputs"], [])
                 self.assertIsNone(cell["execution_count"])
 
-    def test_frozen_final_is_gated_and_defaults_off(self):
-        self.assertIn("RUN_FROZEN_FINAL = False", self.all_code)
-        self.assertIn("if RUN_FROZEN_FINAL:", self.all_code)
-        gate_index = self.all_code.index("if RUN_FROZEN_FINAL:")
-        final_load_index = self.all_code.index('partition="ood_final"')
-        self.assertGreater(final_load_index, gate_index)
+    def test_the_frozen_final_lives_in_a_separate_notebook(self):
+        """Run All must never be able to spend the final holdout."""
+        for removed in ("RUN_FROZEN_FINAL", 'partition="ood_final"',
+                        "evaluation_ood_final_int8"):
+            with self.subTest(removed=removed):
+                self.assertNotIn(removed, self.all_code)
+        self.assertIn("model_v2_frozen_ood_final.ipynb", self.all_code)
 
     def test_smoke_mode_is_isolated_and_bounded(self):
         self.assertIn('MODEL_V2_SMOKE_TEST', self.all_code)
@@ -408,34 +411,39 @@ class NotebookTests(unittest.TestCase):
                       self.all_code)
         self.assertIn("for name in INT8_GATE_VIEWS:", self.all_code)
 
-    def test_frozen_final_runs_after_the_int8_gate(self):
-        """The frozen set is spent on the accepted deployment candidate."""
+    def test_the_accepted_candidate_is_recorded_after_the_int8_gate(self):
+        """The manifest proves which artifact cleared the gate, in that order."""
         gate_index = self.all_code.index("INT8_ACCEPTED = bool(gate)")
-        frozen_index = self.all_code.index("if RUN_FROZEN_FINAL:")
+        candidate_index = self.all_code.index("accepted_candidate.build_candidate_manifest(")
         export_index = self.all_code.index("onnx_program = torch.onnx.export")
         quantize_index = self.all_code.index("quantize_dynamic(")
         self.assertLess(export_index, gate_index)
         self.assertLess(quantize_index, gate_index)
-        self.assertLess(gate_index, frozen_index)
+        self.assertLess(gate_index, candidate_index)
 
-    def test_frozen_final_requires_an_accepted_int8_candidate(self):
-        self.assertIn("assert INT8_ACCEPTED", self.frozen_final_cell)
-        self.assertIn("assert not SMOKE_TEST", self.frozen_final_cell)
-        self.assertLess(
-            self.frozen_final_cell.index("assert INT8_ACCEPTED"),
-            self.frozen_final_cell.index('partition="ood_final"'),
-        )
-
-    def test_frozen_final_scores_the_int8_runtime_only(self):
-        """One runtime, once: never PyTorch first and INT8 afterwards."""
-        self.assertIn("onnx_predict(ood_final, int8_masker)", self.frozen_final_cell)
-        self.assertNotIn("predict_spans(ood_final", self.frozen_final_cell)
-        self.assertNotIn("evaluate_partition(\"ood_final\"", self.frozen_final_cell)
-        for provenance in ('"runtime": "onnx_int8"', "checkpoint_source",
-                           "ontology.MODEL_V2_VERSION", "tokenizer",
-                           "timestamp_utc", "frozen_final_fixture"):
+    def test_the_candidate_manifest_carries_the_release_identity(self):
+        for provenance in ("int8_onnx=INT8_ONNX", "tokenizer_dir=TOKENIZER_DIR",
+                           "label_map_path=LABEL_MAP_PATH",
+                           "training_config_path=TRAINING_CONFIG_PATH",
+                           "ontology_version=ontology.MODEL_V2_VERSION",
+                           "num_labels=NUM_LABELS", "run_signature=run_signature",
+                           "best_epoch=best_epoch", "gate=gate",
+                           "frozen_fixture=FROZEN_FIXTURE_FINGERPRINT",
+                           "timestamp_utc="):
             with self.subTest(provenance=provenance):
-                self.assertIn(provenance, self.frozen_final_cell)
+                self.assertIn(provenance, self.candidate_cell)
+
+    def test_a_smoke_candidate_can_never_be_accepted(self):
+        self.assertIn("int8_accepted=INT8_ACCEPTED, smoke_test=SMOKE_TEST",
+                      self.candidate_cell)
+        self.assertIn('assert not (SMOKE_TEST and candidate_manifest["accepted"])',
+                      self.candidate_cell)
+
+    def test_the_frozen_fixture_is_fingerprinted_but_never_scored(self):
+        """Section 6 protects the frozen texts; it must not build cases from them."""
+        self.assertIn('firewall.add_protected("ood_final"', self.all_code)
+        self.assertIn("FROZEN_FIXTURE_FINGERPRINT", self.all_code)
+        self.assertNotIn("load_cases(OOD_FINAL_PATH)", self.all_code)
 
     def test_export_does_not_move_the_trained_model(self):
         """Exporting on CPU must not strand later CUDA evaluation cells."""
