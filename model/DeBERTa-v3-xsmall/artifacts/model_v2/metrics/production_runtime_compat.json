@@ -1,0 +1,48 @@
+{
+  "versions": {
+    "transformers": "4.53.3",
+    "tokenizers": "0.21.4",
+    "onnxruntime": "1.22.1",
+    "sentencepiece": "0.2.1"
+  },
+  "tokenizer_class": "DebertaV2TokenizerFast",
+  "tokenizer_is_fast": true,
+  "tokenizer_config_normalized_for_4_53": true,
+  "expected_label_count": 63,
+  "tokenizer_cases": [
+    {
+      "text": "Anne-Marie O'Neill uses dev+alerts@sub.example.co.uk.",
+      "exact_match": true
+    },
+    {
+      "text": "account id AB-0049/XY",
+      "exact_match": true
+    },
+    {
+      "text": "lowercase punctuation free transcript",
+      "exact_match": true
+    }
+  ],
+  "models": {
+    "fp32": {
+      "loaded": true,
+      "provider": "CPUExecutionProvider",
+      "lengths_passed": [
+        75,
+        221,
+        289,
+        512
+      ]
+    },
+    "int8": {
+      "loaded": true,
+      "provider": "CPUExecutionProvider",
+      "lengths_passed": [
+        75,
+        221,
+        289,
+        512
+      ]
+    }
+  }
+}

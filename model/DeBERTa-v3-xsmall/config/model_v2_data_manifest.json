@@ -2,7 +2,7 @@
   "artifacts": {
     "supplementary_training_side": {
       "bytes": 42124590,
-      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/supplementary_training_side.jsonl",
+      "path": "model/DeBERTa-v3-xsmall/model/DeBERTa-v3-xsmall/model/DeBERTa-v3-xsmall/artifacts/model_v2/data/supplementary_training_side.jsonl",
       "rows": 27630,
       "sha256": "06c7210c2602f02882790492dd02ca22ee9f38cf936cc12cb0773a259a453b20",
       "spans": 169646
@@ -15,10 +15,10 @@
       "spans": 133238
     },
     "train": {
-      "bytes": 270120973,
+      "bytes": 270121562,
       "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_train.jsonl",
       "rows": 217667,
-      "sha256": "3a90f0028858774288300a193b7f6ecda3d6f575fd514e9d37ad48463b963171",
+      "sha256": "2425f29f3fd52b0836c75be28ff77870eb39825b3014717862aad7697e4a5704",
       "spans": 1621186
     },
     "val_original": {
@@ -28,7 +28,7 @@
     },
     "val_supplementary": {
       "bytes": 7400635,
-      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_val_supplementary.jsonl",
+      "path": "model/DeBERTa-v3-xsmall/model/DeBERTa-v3-xsmall/model/DeBERTa-v3-xsmall/artifacts/model_v2/data/model_v2_val_supplementary.jsonl",
       "rows": 6907,
       "sha256": "5ccac58b526738399c6e675083e9fd1bffbd51e052a2ce0ec999c529e1ccc79e",
       "spans": 22442
@@ -300,7 +300,7 @@
     "rejected_by_protected_set": {},
     "rejected_rows": 0
   },
-  "created_at_utc": "2026-08-15T10:34:12.329864+00:00",
+  "created_at_utc": "2026-08-16T13:07:21.197065+00:00",
   "data_pipeline_version": 3,
   "deduplication": {
     "accepted_rows": 34537,
@@ -313,7 +313,7 @@
     "removed_rows": 7387
   },
   "disjointness": {
-    "distinct_texts_overall": 255233,
+    "distinct_texts_overall": 255231,
     "is_disjoint": true,
     "partitions": {
       "ood_dev": {
@@ -327,9 +327,9 @@
         "unique_texts": 19136
       },
       "train": {
-        "internal_duplicate_rows": 29711,
+        "internal_duplicate_rows": 29713,
         "rows": 217667,
-        "unique_texts": 187956
+        "unique_texts": 187954
       },
       "val_original": {
         "internal_duplicate_rows": 1,
@@ -2131,20 +2131,20 @@
         "ZIPCODE": 70912
       },
       "top_email_domains": {
-        "alerts.lab.example": 888,
-        "alumni.example.edu": 881,
+        "alumni.example.edu": 899,
         "aol.com": 13855,
-        "example.com": 1164,
-        "example.org": 1182,
-        "example.travel": 898,
+        "example.com": 1121,
+        "example.org": 1137,
+        "example.travel": 938,
         "gmail.com": 15784,
         "hotmail.com": 14296,
         "icloud.com": 1070,
         "outlook.com": 14348,
         "protonmail.com": 13930,
-        "service.example.photography": 881,
-        "subunit.example.cloud": 892,
+        "service.example.photography": 886,
+        "subunit.example.cloud": 881,
         "tutanota.com": 13820,
+        "xn--bcher-kva.example": 894,
         "yahoo.com": 14360
       },
       "total_spans": 1621186,
@@ -2153,7 +2153,7 @@
         "ACCOUNTNUM": 2305,
         "AGE": 95,
         "AMOUNT": 16,
-        "BANKNAME": 14,
+        "BANKNAME": 15,
         "BUILDINGNUM": 6677,
         "CITY": 14706,
         "COUNTRY": 226,

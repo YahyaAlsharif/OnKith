@@ -106,3 +106,6 @@ transcripts/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Some extras
+/historic/

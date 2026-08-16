@@ -51,16 +51,87 @@ class WordConsolidationResult:
     partial_word_boundary_count: int
 
 
-def _alphanumeric_word_bounds(text: str, start: int, end: int) -> tuple[int, int]:
-    """Expand an aligned token only across the containing alphanumeric word."""
+#: Punctuation that sits *inside* one entity - the ``@`` and ``.`` of an email,
+#: the ``://`` and ``/`` of a URL, the dots of an IPv4 address, the dashes of a
+#: phone number or a date. A run of these characters joins the words on either
+#: side of it rather than separating them.
+_TIGHT_CONNECTORS = frozenset("@./:-+_#&=?%~'\\")
+
+#: Longest connector that can still sit inside a single entity ("://").
+_MAX_CONNECTOR_LENGTH = 3
+
+
+def _trim_whitespace_bounds(text: str, start: int, end: int) -> tuple[int, int]:
+    """Shrink an offset onto its first and last non-whitespace character.
+
+    SentencePiece tokenizers (DeBERTa-v2/v3 among them) report the whitespace
+    that precedes a token as part of that token's offset. WordPiece does not.
+    Trimming first means the rest of this module sees the same thing from both.
+    """
 
     start = max(0, min(int(start), len(text)))
     end = max(start, min(int(end), len(text)))
+    while start < end and text[start].isspace():
+        start += 1
+    while end > start and text[end - 1].isspace():
+        end -= 1
+    return start, end
+
+
+def _holds_alphanumeric(text: str, start: int, end: int) -> bool:
+    return any(text[position].isalnum() for position in range(start, end))
+
+
+def _alphanumeric_word_bounds(text: str, start: int, end: int) -> tuple[int, int]:
+    """Expand an aligned token only across the containing alphanumeric word.
+
+    Two tokenizer realities are handled before any expansion happens.
+
+    A SentencePiece offset that starts on the space before its word must be
+    trimmed, because expanding outwards from that space walks straight into the
+    previous word: an ``AGE`` token offset covering ``" 9"`` would otherwise
+    grow left across ``"by"`` and yield ``"by 9"``.
+
+    A token that holds no alphanumeric character - the ``@`` in an email, the
+    ``.`` in an IPv4 address - belongs to no word at all. Expanding it reaches
+    into the words on *both* sides and invents a group that spans the
+    punctuation, which is where duplicate overlapping spans come from. Such a
+    token is returned exactly as it sits.
+    """
+
+    start, end = _trim_whitespace_bounds(text, start, end)
+    if start == end or not _holds_alphanumeric(text, start, end):
+        return start, end
     while start > 0 and text[start - 1].isalnum():
         start -= 1
     while end < len(text) and text[end].isalnum():
         end += 1
     return start, end
+
+
+def _connector_kind(gap: str) -> str | None:
+    """Classify the text between two consecutive same-type words.
+
+    Returns ``None`` when the gap is too long or too wordy to sit inside a
+    single entity, otherwise one of:
+
+    ``"contiguous"``  nothing separates them.
+    ``"whitespace"``  whitespace only - the historical merge rule.
+    ``"tight"``       punctuation with no whitespace, as in ``a@b.com``.
+    ``"loose"``       punctuation including whitespace, as in ``"13th, 2023"``.
+    """
+
+    if not gap:
+        return "contiguous"
+    if gap.isspace():
+        return "whitespace"
+    if len(gap) > _MAX_CONNECTOR_LENGTH or any(character.isalnum() for character in gap):
+        return None
+    if any(character.isspace() for character in gap):
+        return "loose"
+    if all(character in _TIGHT_CONNECTORS for character in gap):
+        return "tight"
+    return None
 
 
 def derive_word_ids(text: str, offsets: Sequence[tuple[int, int]]) -> list[int | None]:
@@ -74,8 +145,11 @@ def derive_word_ids(text: str, offsets: Sequence[tuple[int, int]]) -> list[int |
             continue
         bounds = _alphanumeric_word_bounds(text, start, end)
         if bounds[0] == bounds[1]:
-            # Punctuation remains its own non-expandable group.
-            bounds = (int(start), int(end))
+            # Nothing but whitespace: the token belongs to no word and must not
+            # seed a group of its own. Punctuation keeps its own non-expandable
+            # group, which `_alphanumeric_word_bounds` now returns untouched.
+            result.append(None)
+            continue
         if bounds not in key_to_id:
             key_to_id[bounds] = len(key_to_id)
         result.append(key_to_id[bounds])
@@ -95,8 +169,13 @@ def consolidate_predictions_to_words(
     For every original word, each non-O entity type receives a
     character-length-weighted mean of its chosen-label confidences. The highest
     score wins; ties are resolved alphabetically by entity type. A sensitive
-    word is expanded only to its complete alphanumeric boundaries. Adjacent
-    same-type words separated only by whitespace become one entity span.
+    word is expanded only to its complete alphanumeric boundaries.
+
+    Adjacent same-type words become one entity span when nothing but
+    whitespace, or a short run of intra-entity punctuation, separates them.
+    Punctuation-only gaps that also contain whitespace additionally require the
+    tagger to have marked the second word as a continuation. See
+    ``_connector_kind``.
     """
 
     if not (len(offsets) == len(labels) == len(confidences)):
@@ -107,6 +186,10 @@ def consolidate_predictions_to_words(
     groups: dict[Any, list[int]] = {}
     for index, (offset, word_id) in enumerate(zip(offsets, word_ids)):
         if offset[0] == offset[1]:
+            continue
+        trimmed_start, trimmed_end = _trim_whitespace_bounds(text, *offset)
+        if trimmed_start == trimmed_end:
+            # A whitespace-only offset carries no characters to mask.
             continue
         group_key: Any = ("tokenizer", word_id) if word_id is not None else (
             "derived",
@@ -122,7 +205,9 @@ def consolidate_predictions_to_words(
         group_start, group_end = min(starts), max(ends)
         word_start, word_end = _alphanumeric_word_bounds(text, group_start, group_end)
         if word_start == word_end:
-            word_start, word_end = group_start, group_end
+            # Fall back to the trimmed group, never to the raw offset: the raw
+            # one can begin on the whitespace a SentencePiece token absorbed.
+            word_start, word_end = _trim_whitespace_bounds(text, group_start, group_end)
         evidence: dict[str, list[tuple[float, int]]] = {}
         for index in indices:
             label = str(labels[index])
@@ -152,6 +237,12 @@ def consolidate_predictions_to_words(
         else:
             winning_type = None
             winning_score = 0.0
+        # Does this word open a new entity or continue the one before it? The
+        # tagger already answers that with the B-/I- prefix on its first token,
+        # and that answer is what keeps two adjacent same-type entities apart
+        # when only punctuation separates them.
+        leading_index = min(indices, key=lambda index: tuple(offsets[index]))
+        leading_label = str(labels[leading_index])
         word_rows.append(
             {
                 "indices": indices,
@@ -159,6 +250,10 @@ def consolidate_predictions_to_words(
                 "end": word_end,
                 "entity_type": winning_type,
                 "confidence": float(winning_score),
+                "continues": (
+                    winning_type is not None
+                    and leading_label == f"I-{winning_type}"
+                ),
             }
         )
 
@@ -170,13 +265,29 @@ def consolidate_predictions_to_words(
     for row in word_rows:
         entity_type = row["entity_type"]
         if entity_type is None:
+            if _connector_kind(text[row["start"] : row["end"]]) in ("tight", "loose"):
+                # Punctuation the tagger left as O still sits inside whatever
+                # entity surrounds it. Stay transparent so the words on either
+                # side can still find each other.
+                continue
             active = None
             previous_sensitive_word = None
             continue
+        connector = (
+            _connector_kind(text[previous_sensitive_word["end"] : row["start"]])
+            if previous_sensitive_word is not None
+            else None
+        )
         compatible_previous = (
             previous_sensitive_word is not None
             and previous_sensitive_word["entity_type"] == entity_type
-            and text[previous_sensitive_word["end"] : row["start"]].isspace()
+            and connector is not None
+            # Whitespace and tight punctuation join unconditionally, which keeps
+            # the historical whole-word behaviour and repairs emails, URLs, IPv4
+            # addresses and phone numbers. A looser gap such as the ", " in
+            # "May 13th, 2023" also has to be confirmed by an I- continuation,
+            # so that a list like "London, Paris" stays two entities.
+            and (connector != "loose" or row["continues"])
         )
         for position, token_index in enumerate(row["indices"]):
             prefix = "I" if compatible_previous or position > 0 else "B"

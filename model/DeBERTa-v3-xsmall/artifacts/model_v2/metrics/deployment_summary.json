@@ -1,0 +1,128 @@
+{
+  "ontology": {
+    "entities": 31,
+    "labels": 63,
+    "added": [
+      "PASSWORD"
+    ],
+    "removed": [
+      "ALLERGIES",
+      "USERNAME",
+      "WEIGHT"
+    ],
+    "absent": [
+      "HEIGHT"
+    ]
+  },
+  "artifacts": {
+    "fp32_onnx": {
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/models/fp32/model_fp32.onnx",
+      "bytes": 282974651,
+      "sha256": "276c5b3b88b555f12977becc3a8d35675684919c7f9e4ee1e9475a062b3d844a"
+    },
+    "int8_onnx": {
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/models/int8/model_int8.onnx",
+      "bytes": 82278782,
+      "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8"
+    },
+    "tokenizer": {
+      "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/tokenizer/tokenizer.json",
+      "bytes": 8339976,
+      "sha256": "8196ef6e837c3ed355ae78bf29a244a33f4dc4179a7c364aedeb0cd6433e9948"
+    }
+  },
+  "int8_accepted": false,
+  "int8_gate": {
+    "test": {
+      "typed_f1_drop": 0.18551285617327123,
+      "leakage_rise": 0.04740503834313414,
+      "passes": false
+    },
+    "val_original": {
+      "typed_f1_drop": 0.20083811702302018,
+      "leakage_rise": 0.0505391502696908,
+      "passes": false
+    },
+    "val_supplementary": {
+      "typed_f1_drop": 0.04850341243477845,
+      "leakage_rise": 0.023328916498884356,
+      "passes": false
+    },
+    "combined_validation": {
+      "typed_f1_drop": 0.18443460150633206,
+      "leakage_rise": 0.04789724993824984,
+      "passes": false
+    },
+    "ood_dev": {
+      "typed_f1_drop": 0.07592399573906473,
+      "leakage_rise": 0.041009463722397554,
+      "passes": false
+    }
+  },
+  "accepted_candidate": {
+    "manifest": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json",
+    "accepted": false,
+    "smoke_test": false,
+    "int8_sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+    "run_signature": "700f90cd49c0493055718a2d4f2778d1f7744af8dba73bde3ebf9d75b36b453f"
+  },
+  "frozen_ood_final": {
+    "status": "not run in this notebook",
+    "notebook": "model/DeBERTa-v3-xsmall/model_v2_frozen_ood_final.ipynb",
+    "fixture": {
+      "path": "model/privacy_evaluation/fixtures/ood_final.jsonl",
+      "manifest": "model/privacy_evaluation/fixtures/ood_final.manifest.json",
+      "sha256": "2acdd4022adc0b74659d5823e93bf2b5a9e97e96eeb8ca772a6f7f1ab4f4e438",
+      "case_count": 360,
+      "generator_version": "1.0.0",
+      "policy": "Frozen final set must not guide training, augmentation, thresholding, or model selection."
+    },
+    "policy": "Scored exactly once, on the accepted INT8 candidate, in that notebook."
+  },
+  "headline_metrics": {
+    "test": {
+      "typed_entity_f1": 0.23941929529212866,
+      "private_character_leakage": 0.0016236232633917158,
+      "hard_negative_false_positive_rate": 0.25
+    },
+    "val_original": {
+      "typed_entity_f1": 0.2574151105753408,
+      "private_character_leakage": 0.0007062632597842899,
+      "hard_negative_false_positive_rate": 0.0
+    },
+    "val_supplementary": {
+      "typed_entity_f1": 0.07451430785409864,
+      "private_character_leakage": 0.013348017873839102,
+      "hard_negative_false_positive_rate": 0.0
+    },
+    "combined_validation": {
+      "typed_entity_f1": 0.23860553377907717,
+      "private_character_leakage": 0.0019336785031145443,
+      "hard_negative_false_positive_rate": 0.0
+    },
+    "ood_dev": {
+      "typed_entity_f1": 0.14591524683267804,
+      "private_character_leakage": 0.14760778128286012,
+      "hard_negative_false_positive_rate": 0.2222222222222222
+    }
+  },
+  "production_migration": {
+    "status": "NOT PERFORMED - separate reviewed release step",
+    "required_changes": [
+      "EXPECTED_LABEL_COUNT 67 -> 63 in integrated_pipeline/pii_adapter.py",
+      "pii.label_count 67 -> 63 in integrated_pipeline/config.py and config/live_config.json",
+      "ship the DeBERTa tokenizer under FullPipeline_V3/models/",
+      "swap the INT8 ONNX artifact",
+      "re-run FullPipeline_V3/tests/test_pii_regression.py"
+    ],
+    "note": "The per-label masking policy is already live and is model-independent."
+  },
+  "raspberry_pi_checklist": [
+    "Copy the INT8 graph and tokenizer to the Pi 5 (4 GB).",
+    "Measure median and p95 latency at 75, 221, 289 and 512 tokens, 1 and 4 threads.",
+    "Record RSS during inference, and peak RSS with Canary 180M resident.",
+    "Run a thermal soak; report sustained rather than burst latency.",
+    "Compare against the ~1 s target at the p95 length of 221 tokens.",
+    "Only after these numbers exist may any Pi performance claim be made."
+  ]
+}
