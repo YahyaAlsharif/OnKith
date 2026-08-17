@@ -183,18 +183,6 @@ class ModelV2OnnxMasker:
         ]
         return full, windows
 
-    def _word_ids(self, encoding: Any, text: str, offsets: list[tuple[int, int]]) -> list[int | None]:
-        try:
-            ids = list(encoding.word_ids())
-        except (AttributeError, TypeError, ValueError):
-            ids = self._api.derive_word_ids(text, offsets)
-        if len(ids) != len(offsets):
-            ids = self._api.derive_word_ids(text, offsets)
-        return [
-            word_id if start != end else None
-            for word_id, (start, end) in zip(ids, offsets)
-        ]
-
     @staticmethod
     def _argmax_with_confidence(logits: Any) -> tuple[Any, Any]:
         import numpy as np
@@ -229,13 +217,7 @@ class ModelV2OnnxMasker:
 
         full, windows = self._windows(text)
         all_offsets = [tuple(map(int, item)) for item in full["offset_mapping"]]
-        all_word_ids = self._word_ids(full, text, all_offsets)
         offsets = [item for item in all_offsets if item[0] != item[1]]
-        word_ids = [
-            word_id
-            for word_id, item in zip(all_word_ids, all_offsets)
-            if item[0] != item[1]
-        ]
         if not offsets:
             raise RuntimeError("Tokenizer produced no source-aligned text tokens")
 
@@ -283,8 +265,19 @@ class ModelV2OnnxMasker:
             [self.id2label[prediction_by_offset[offset][0]] for offset in offsets]
         )
         confidences = [prediction_by_offset[offset][1] for offset in offsets]
+        # No ``word_ids`` argument: the decoder derives word groups from the
+        # offsets itself. Model V2 is SentencePiece, whose pre-tokenizer splits
+        # on whitespace only, so the tokenizer calls ``Walusiak,`` and
+        # ``23G@tutanota.com.`` one word each. Because a sensitive word is
+        # expanded to its full group bounds, handing those ids over appended the
+        # trailing comma or period to nearly every entity - a superset of the
+        # gold span, which leaves character recall untouched while destroying
+        # exact-boundary typed F1. Deriving is also exactly what the
+        # training-side ``predict_spans`` does, so both paths now decode
+        # identically. ``pii_adapter`` keeps its own tokenizer word ids:
+        # WordPiece pre-tokenizes on punctuation, where they are correct.
         consolidated = self._api.consolidate_predictions_to_words(
-            text, offsets, labels, confidences, word_ids=word_ids
+            text, offsets, labels, confidences
         )
         structured_spans = []
         if self._structured is not None:

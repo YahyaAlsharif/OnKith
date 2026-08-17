@@ -34,28 +34,28 @@
   "int8_accepted": false,
   "int8_gate": {
     "test": {
-      "typed_f1_drop": 0.18551285617327123,
-      "leakage_rise": 0.04740503834313414,
+      "typed_f1_drop": 0.36713993051873495,
+      "leakage_rise": -1.2602509159576059e-05,
       "passes": false
     },
     "val_original": {
-      "typed_f1_drop": 0.20083811702302018,
-      "leakage_rise": 0.0505391502696908,
+      "typed_f1_drop": 0.35825124482031057,
+      "leakage_rise": 4.410290224854396e-05,
       "passes": false
     },
     "val_supplementary": {
-      "typed_f1_drop": 0.04850341243477845,
-      "leakage_rise": 0.023328916498884356,
+      "typed_f1_drop": 0.4870364340738664,
+      "leakage_rise": 0.00025812668857883025,
       "passes": false
     },
     "combined_validation": {
-      "typed_f1_drop": 0.18443460150633206,
-      "leakage_rise": 0.04789724993824984,
+      "typed_f1_drop": 0.36737573292542713,
+      "leakage_rise": 6.488293364426134e-05,
       "passes": false
     },
     "ood_dev": {
-      "typed_f1_drop": 0.07592399573906473,
-      "leakage_rise": 0.041009463722397554,
+      "typed_f1_drop": 0.25142947770849494,
+      "leakage_rise": -0.03969505783385907,
       "passes": false
     }
   },
@@ -81,28 +81,28 @@
   },
   "headline_metrics": {
     "test": {
-      "typed_entity_f1": 0.23941929529212866,
-      "private_character_leakage": 0.0016236232633917158,
+      "typed_entity_f1": 0.9548867417622752,
+      "private_character_leakage": 0.002633224274953161,
       "hard_negative_false_positive_rate": 0.25
     },
     "val_original": {
-      "typed_entity_f1": 0.2574151105753408,
-      "private_character_leakage": 0.0007062632597842899,
+      "typed_entity_f1": 0.9610224256953408,
+      "private_character_leakage": 0.0016771439330598437,
       "hard_negative_false_positive_rate": 0.0
     },
     "val_supplementary": {
-      "typed_entity_f1": 0.07451430785409864,
-      "private_character_leakage": 0.013348017873839102,
+      "typed_entity_f1": 0.8877567925778661,
+      "private_character_leakage": 0.01418549557456128,
       "hard_negative_false_positive_rate": 0.0
     },
     "combined_validation": {
-      "typed_entity_f1": 0.23860553377907717,
-      "private_character_leakage": 0.0019336785031145443,
+      "typed_entity_f1": 0.9557570065917255,
+      "private_character_leakage": 0.002891606793827939,
       "hard_negative_false_positive_rate": 0.0
     },
     "ood_dev": {
-      "typed_entity_f1": 0.14591524683267804,
-      "private_character_leakage": 0.14760778128286012,
+      "typed_entity_f1": 0.7078189300411522,
+      "private_character_leakage": 0.1665352260778128,
       "hard_negative_false_positive_rate": 0.2222222222222222
     }
   },
