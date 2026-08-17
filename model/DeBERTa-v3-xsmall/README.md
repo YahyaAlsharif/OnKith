@@ -1,11 +1,12 @@
 # DeBERTa-v3-xsmall Model V2
 
-There are two notebooks, and the split between them is deliberate.
+There are three notebooks, and the split between them is deliberate.
 
 | Notebook | Purpose | Safe to **Run All**? |
 |---|---|---|
 | [`model_v2_deberta_v3_xsmall.ipynb`](model_v2_deberta_v3_xsmall.ipynb) | **Build the candidate.** Data, training, validation, OOD dev, FP32 export, INT8 quantization, INT8 acceptance. | Yes, always |
 | [`model_v2_frozen_ood_final.ipynb`](model_v2_frozen_ood_final.ipynb) | **Final exam.** Score the already-accepted INT8 candidate on the frozen OOD final benchmark, once. | No - it spends the holdout |
+| [`deberta_vs_tinybert_int8_validation.ipynb`](deberta_vs_tinybert_int8_validation.ipynb) | **Compare the two deployment models.** Score the previous TinyBERT INT8 and the new DeBERTa INT8 against the same held-out AI4Privacy English validation split. | Yes, once its inputs are staged - see below |
 
 The teammate entry point is the first one. It builds, trains, evaluates, and exports the 31-entity / 63-BIO-label Model V2 model. Normal notebook defaults are the real run: up to 10 epochs with early stopping. No full Model V2 training has been run yet.
 
@@ -107,6 +108,39 @@ Reruns are refused. If `evaluation_ood_final_int8.json` already exists for this 
 Once this benchmark's results influence any future model change, it is no longer pristine for the next model-generation cycle; that cycle needs a newly built frozen fixture.
 
 The structure and every guard above are covered by `../privacy_evaluation/tests/test_frozen_ood_final.py`, which uses synthetic manifests and synthetic fixtures. No test ever reads the real frozen set.
+
+## Comparison notebook - TinyBERT INT8 against DeBERTa INT8
+
+[`deberta_vs_tinybert_int8_validation.ipynb`](deberta_vs_tinybert_int8_validation.ipynb)
+is the clean model-*evaluation* artifact, separate from the large notebook above,
+which stays the model-*development* artifact. It answers one question: on the
+original held-out AI4Privacy English validation split, how much better is the new
+DeBERTa-v3-xsmall INT8 deployment model than the previous TinyBERT INT8 one.
+
+It trains nothing, exports nothing and quantizes nothing. It loads two existing
+INT8 ONNX graphs, decodes both through the same production span-decoding rule -
+WordPiece word ids for TinyBERT, offset-derived word groups for DeBERTa's
+SentencePiece - and scores both with the same metric definitions. It touches
+neither the supplementary validation set, nor OOD dev, nor the frozen OOD final
+fixture.
+
+It is deliberately **self-contained and public-facing**: it imports no OnKith
+module, reads only paths relative to itself, and is written to be copied into the
+public repository as a standalone artifact. That is also why it does not read the
+private artifact tree directly. Stage its five inputs beside it before running,
+and remove them afterwards:
+
+```text
+tinybert_int8.onnx              <- model/TinyBERT-4/artifacts/tinybert_pii/onnx_model/model_int8.onnx
+deberta_int8.onnx               <- artifacts/model_v2/models/int8/model_int8.onnx
+tinybert_tokenizer/             <- model/TinyBERT-4/artifacts/tinybert_pii/tokenizer/
+deberta_tokenizer/              <- artifacts/model_v2/tokenizer/
+ai4privacy_validation_en.jsonl  <- artifacts/model_v2/data/model_v2_val_original.jsonl,
+                                   projected onto {source_text, privacy_mask{label,start,end}}
+```
+
+Copy the inputs rather than moving them, or move them back afterwards and check
+the SHA-256s; the INT8 graphs must never be modified, re-exported or re-quantized.
 
 ## Artifact locations and policy
 
