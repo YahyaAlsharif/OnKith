@@ -87,7 +87,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Silero-segmented utterances through Canary 180M Flash and "
-            "TinyBERT private terminal text"
+            "DeBERTa private terminal text"
         )
     )
     parser.add_argument("--list-devices", action="store_true")
@@ -352,7 +352,7 @@ def main(argv: list[str] | None = None) -> int:
             },
             config={
                 "stt": "NVIDIA Canary 180M Flash, NeMo CPU FP32 beam=2",
-                "privacy": "TinyBERT-4 INT8 + structured PII",
+                "privacy": "DeBERTa-v3-xsmall INT8 (Model V2) + structured PII",
                 "sample rate": "16000 Hz stream required (native capture unverified)",
                 "max unique segment": "8.512s",
                 "silence": "2.496s",
@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
             "capture=16000Hz-requested, chunk=0.100s, "
             "silence_endpoint=2.496s, unique_segment_max=8.512s, "
             "Stage5=immediate, SQLite=WAL/NORMAL, "
-            "PII=TinyBERT-4 INT8+structured whole_word_union",
+            "PII=DeBERTa-v3-xsmall INT8+structured whole_word_union",
         )
 
     canary = CanaryAdapter(config)
@@ -420,9 +420,9 @@ def main(argv: list[str] | None = None) -> int:
         if live_ui is None:
             ui.line(
                 "MODEL",
-                "TinyBERT INT8 loaded with CPUExecutionProvider "
+                "DeBERTa-v3-xsmall INT8 loaded with CPUExecutionProvider "
                 f"(resource loads={pii_adapter.load_count}, "
-                f"path={config.tinybert_model_path})",
+                f"path={config.pii_model_path})",
             )
 
         audio = LiveAudioRuntime(

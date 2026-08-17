@@ -16,7 +16,7 @@ from integrated_pipeline.mask_policy import MASK_EVERYTHING, MaskPolicy, resolve
 from integrated_pipeline.span_merger import SpanCandidate, merge_pii_spans
 
 TEXT = "what time is it in Riyadh and email ana@example.com"
-CITY_SPAN = SpanCandidate("CITY", 19, 25, "Riyadh", "tinybert_whole_word", 0.9)
+CITY_SPAN = SpanCandidate("CITY", 19, 25, "Riyadh", "model_whole_word", 0.9)
 EMAIL_SPAN = SpanCandidate("EMAIL", 36, 51, "ana@example.com", "structured:email", 1.0)
 FULLY_MASKED = "what time is it in [CITY_1] and email [EMAIL_1]"
 
@@ -77,8 +77,8 @@ class DisabledLabelTests(unittest.TestCase):
     def test_placeholder_numbering_only_counts_masked_spans(self):
         text = "Riyadh and Jeddah and ana@example.com"
         cities = [
-            SpanCandidate("CITY", 0, 6, "Riyadh", "tinybert_whole_word", 0.9),
-            SpanCandidate("CITY", 11, 17, "Jeddah", "tinybert_whole_word", 0.9),
+            SpanCandidate("CITY", 0, 6, "Riyadh", "model_whole_word", 0.9),
+            SpanCandidate("CITY", 11, 17, "Jeddah", "model_whole_word", 0.9),
         ]
         email = [SpanCandidate("EMAIL", 22, 37, "ana@example.com", "structured:email", 1.0)]
         self.assertEqual(
@@ -137,7 +137,7 @@ class FailClosedTests(unittest.TestCase):
 
 
 class ModelIndependenceTests(unittest.TestCase):
-    """The mechanism must survive the future TinyBERT to DeBERTa migration."""
+    """The mechanism survived the Model V1 (TinyBERT) to Model V2 (DeBERTa) swap."""
 
     def test_policy_operates_on_labels_not_model_internals(self):
         merged = merge_pii_spans(

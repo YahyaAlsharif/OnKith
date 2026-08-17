@@ -350,7 +350,7 @@ class TerminalUI:
             stt_total / audio_duration if audio_duration else float("nan")
         )
         details = pii.raw_model_output
-        tinybert_seconds = float(details.get("tinybert_latency_seconds", 0.0))
+        pii_model_seconds = float(details.get("pii_model_latency_seconds", 0.0))
         structured_seconds = float(details.get("structured_latency_seconds", 0.0))
         if self.json_output:
             payload: dict[str, Any] = {
@@ -377,7 +377,7 @@ class TerminalUI:
                     "mask_queue_wait_seconds": (
                         result.mask_queue_wait_seconds
                     ),
-                    "tinybert_seconds": tinybert_seconds,
+                    "pii_model_seconds": pii_model_seconds,
                     "structured_seconds": structured_seconds,
                     "pii_seconds": pii.latency_seconds,
                     "endpoint_to_display_seconds": result.total_seconds,
@@ -429,7 +429,7 @@ class TerminalUI:
                 f"RTF={aggregate_rtf:.3f}, "
                 f"Stage5_wait=0.000s, "
                 f"mask_queue_wait={result.mask_queue_wait_seconds:.3f}s, "
-                f"TinyBERT={tinybert_seconds:.3f}s, "
+                f"DeBERTa={pii_model_seconds:.3f}s, "
                 f"structured={structured_seconds:.3f}s, "
                 f"PII_total={pii.latency_seconds:.3f}s, "
                 f"endpoint_to_display={result.total_seconds:.3f}s, "

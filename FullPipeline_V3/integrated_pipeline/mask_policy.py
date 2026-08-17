@@ -22,9 +22,9 @@ Safety rules, in priority order:
    in :attr:`MaskPolicy.errors` so a typo surfaces in the span trace instead of
    quietly becoming a privacy hole.
 
-The policy is entity-type keyed and contains no label-specific logic, so it
-keeps working unchanged when production migrates from the TinyBERT 67-label
-contract to the Model V2 63-label contract.
+The policy is entity-type keyed and contains no label-specific logic, which is
+why it survived production moving from the 67-label Model V1 contract to the
+63-label Model V2 (DeBERTa-v3-xsmall) ontology without a single change here.
 """
 
 from __future__ import annotations

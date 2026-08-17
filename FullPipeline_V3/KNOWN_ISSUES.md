@@ -25,18 +25,21 @@ before : released verbatim, 10 digits in plaintext
 after  : bank id is [IDCARDNUM_1]
 ```
 
-Both were structured-recognizer misses that TinyBERT did **not** cover; the
-entity list came back empty in each case.
+Both were structured-recognizer misses that the token classifier did **not**
+cover either; the entity list came back empty in each case. (Measured against
+Model V1, TinyBERT-4. These are regex-layer gaps, so the supplemental layer is
+still required under Model V2.)
 
 Still open, by design:
 
 - **Cue coverage is a list, not an understanding.** Spellings outside
   `_CUES`/`_FROZEN_CUE_RESCAN` ("my digits are ...", "the long number is ...")
-  still depend on TinyBERT alone.
+  still depend on the token classifier alone.
 - **The filler allowlist is seven words.** A different disfluency inside a
   sequence ("phone number is zero five, sorry, five one one") still breaks it.
 - **The cue-less floor is nine digits.** A 7- or 8-digit identifier with no
-  recognised cue is not protected by the floor and falls back to TinyBERT.
+  recognised cue is not protected by the floor and falls back to the token
+  classifier.
   The threshold is a deliberate trade against masking ordinary speech; lowering
   it would start eating room numbers and counts.
 - **`NUMERICID` is a new entity type.** Anything downstream that enumerates

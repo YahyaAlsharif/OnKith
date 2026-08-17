@@ -28,21 +28,25 @@ command -v python3.11 >/dev/null || {
 }
 python3.11 -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) else 1)'
 
-TINYBERT="${ROOT_DIR}/models/tinybert_pii/model_int8.onnx"
+PII_MODEL="${ROOT_DIR}/models/deberta_pii/model_int8.onnx"
 SILERO="${ROOT_DIR}/models/silero/silero_vad.onnx"
-[[ -s "${TINYBERT}" ]] || { echo "Missing TinyBERT model: ${TINYBERT}" >&2; exit 1; }
+[[ -s "${PII_MODEL}" ]] || { echo "Missing DeBERTa PII model: ${PII_MODEL}" >&2; exit 1; }
 [[ -s "${SILERO}" ]] || { echo "Missing Silero model: ${SILERO}" >&2; exit 1; }
-if head -c 64 "${TINYBERT}" | grep -q "git-lfs.github.com"; then
-  echo "TinyBERT artifact is a Git LFS pointer, not the model." >&2
+if head -c 64 "${PII_MODEL}" | grep -q "git-lfs.github.com"; then
+  echo "DeBERTa PII artifact is a Git LFS pointer, not the model." >&2
   exit 1
 fi
+echo "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8  ${PII_MODEL}" | sha256sum --check --status || {
+  echo "DeBERTa PII artifact hash mismatch; this is not the validated INT8 model." >&2
+  exit 1
+}
 echo "597d30b3ec076608d059477bb14cfeffdf951bf5cae370d38f65d33bbfe82004  ${SILERO}" | sha256sum --check --status || {
   echo "Silero artifact hash mismatch." >&2
   exit 1
 }
 
 if [[ "${CHECK_ONLY}" -eq 1 ]]; then
-  echo "[OK] Architecture, Python, TinyBERT, and Silero static checks passed."
+  echo "[OK] Architecture, Python, DeBERTa PII, and Silero static checks passed."
   exit 0
 fi
 
@@ -113,16 +117,16 @@ root = Path.cwd()
 if "CPUExecutionProvider" not in ort.get_available_providers():
     raise SystemExit("CPUExecutionProvider is unavailable")
 AutoTokenizer.from_pretrained(
-    root / "models" / "tinybert_pii" / "tokenizer",
+    root / "models" / "deberta_pii" / "tokenizer",
     local_files_only=True,
     use_fast=True,
 )
 for relative in (
-    "models/tinybert_pii/model_int8.onnx",
+    "models/deberta_pii/model_int8.onnx",
     "models/silero/silero_vad.onnx",
 ):
     ort.InferenceSession(str(root / relative), providers=["CPUExecutionProvider"])
-print("[OK] TinyBERT and Silero load fully offline on CPUExecutionProvider")
+print("[OK] DeBERTa PII and Silero load fully offline on CPUExecutionProvider")
 PY
 
 "${ROOT_DIR}/check_pi.sh"

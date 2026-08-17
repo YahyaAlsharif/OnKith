@@ -37,7 +37,7 @@ for extra in (ROOT, REPO_ROOT / "FullPipeline_V3"):
         sys.path.insert(0, str(extra))
 
 from privacy_eval.dataset_metrics import evaluate_spans  # noqa: E402
-from privacy_eval.model_v2_adapter import ModelV2OnnxMasker  # noqa: E402
+from privacy_eval.model_v2_adapter import MASKER_SOURCE, ModelV2OnnxMasker  # noqa: E402
 
 TOKENIZER_DIR = REPO_ROOT / "model" / "DeBERTa-v3-xsmall" / "artifacts" / "model_v2" / "tokenizer"
 LABEL_MAP = REPO_ROOT / "model" / "DeBERTa-v3-xsmall" / "config" / "model_v2_label_map.json"
@@ -298,17 +298,32 @@ class MaskerSpanDecodingTests(unittest.TestCase):
 class MaskerDecodingContractTests(unittest.TestCase):
     """The masker must not reintroduce tokenizer word ids."""
 
-    SOURCE = ROOT / "privacy_eval" / "model_v2_adapter.py"
+    SOURCE = MASKER_SOURCE
+
+    @staticmethod
+    def _consolidation_calls(tree):
+        """Every call to ``consolidate_predictions_to_words``, however imported.
+
+        The decoder lived in privacy_eval and reached the function through
+        ``self._api.``, an ``ast.Attribute``. It now lives in the pipeline
+        beside ``span_merger`` and calls it by bare name, an ``ast.Name``.
+        Matching both is what keeps this guard from quietly finding zero calls
+        and passing on nothing.
+        """
+
+        names = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+            if name == "consolidate_predictions_to_words":
+                names.append(node)
+        return names
 
     def test_no_tokenizer_word_ids_reach_the_shared_decoder(self):
         tree = ast.parse(self.SOURCE.read_text(encoding="utf-8"))
-        calls = [
-            node
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "consolidate_predictions_to_words"
-        ]
+        calls = self._consolidation_calls(tree)
         self.assertEqual(len(calls), 1, "expected exactly one consolidation call")
         self.assertNotIn(
             "word_ids", [keyword.arg for keyword in calls[0].keywords],
@@ -319,13 +334,22 @@ class MaskerDecodingContractTests(unittest.TestCase):
     def test_the_masker_never_reads_tokenizer_word_ids(self):
         self.assertNotIn(".word_ids()", self.SOURCE.read_text(encoding="utf-8"))
 
-    def test_the_production_wordpiece_adapter_keeps_its_own_word_ids(self):
-        """The fix is Model V2 only; WordPiece word ids are correct as they are."""
+    def test_the_live_pipeline_decodes_through_this_masker(self):
+        """Production must not grow a second decoder beside this one.
+
+        The old form of this test asserted the opposite - that the production
+        adapter kept its own WordPiece word ids - because production was pinned
+        to TinyBERT. FullPipeline_V3 is Model V2 now, so the requirement flips:
+        ``PIIMaskerAdapter`` must delegate here and must never call the shared
+        consolidation itself.
+        """
 
         source = (
             REPO_ROOT / "FullPipeline_V3" / "integrated_pipeline" / "pii_adapter.py"
         ).read_text(encoding="utf-8")
-        self.assertIn("word_ids=", source)
+        self.assertIn("from .model_v2_masker import ModelV2OnnxMasker", source)
+        self.assertNotIn("word_ids", source)
+        self.assertEqual(self._consolidation_calls(ast.parse(source)), [])
 
 
 if __name__ == "__main__":

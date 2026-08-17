@@ -107,8 +107,8 @@ ADJACENT_OVERLAP_SECONDS = (
 
 # Display-only email cue. Canary runs with pnc: no, so a spoken address arrives
 # as "abdullah dot alhulez at gmail dot com" with no @ symbol at all, and
-# _EMAIL_PATTERN in structured_pii.py never fires on speech. TinyBERT does
-# recognise the address, so this cue exists only to blur the window between
+# _EMAIL_PATTERN in structured_pii.py never fires on speech. The privacy model
+# does recognise the address, so this cue exists only to blur the window between
 # "my email address is" and the model having enough of the value to label it.
 #
 # It lives here, not in structured_pii.py, because it must not change what the
@@ -740,8 +740,8 @@ class LivePreview:
                 if not cleaned:
                     # Nothing changed, so any repaint would be byte-identical to
                     # the last one. Returning here is what stops the repeated
-                    # [PREVIEW] line during silence, and it also keeps TinyBERT
-                    # off an unchanged buffer.
+                    # [PREVIEW] line during silence, and it also keeps the
+                    # privacy model off an unchanged buffer.
                     self.blank_segment_count += 1
                     return None
                 self._segments.append(

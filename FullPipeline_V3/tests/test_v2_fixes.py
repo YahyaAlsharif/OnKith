@@ -308,7 +308,7 @@ class FlickerTests(unittest.TestCase):
 
 
 class StubMasker:
-    """Stands in for TinyBERT: finds nothing, releases everything."""
+    """Stands in for the privacy model: finds nothing, releases everything."""
 
     def __init__(self) -> None:
         self.calls: list[str] = []

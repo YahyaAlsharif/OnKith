@@ -132,8 +132,8 @@ The live pipeline is implemented and validated end to end on a Windows laptop.
 
 | Component | Status |
 |---|---|
-| Moonshine streaming STT | Implemented, benchmarked |
-| TinyBERT INT8 PII masking | Implemented, 80 automated checks passing |
+| Canary 180M Flash STT (V3) | Implemented, benchmarked |
+| DeBERTa-v3-xsmall INT8 PII masking (Model V2) | Implemented, held-out typed F1 0.9588 |
 | Inactivity buffering | Implemented, unit-tested |
 | Fail-closed privacy boundary | Implemented, tested |
 | Windows support | Implemented, validated |
@@ -148,53 +148,63 @@ hardware have not yet been measured and are the immediate next step.
 ## Repository structure
 
 ```text
-Omit_AI/
-├── Omit_AI_RPi_Live/          Deployment package — the live pipeline
+OnKith/
+├── FullPipeline_V3/           Current deployment package — the live pipeline
 │   ├── app/                   Entry point, audio runtime, terminal UI
 │   ├── integrated_pipeline/   Buffering, PII masking, span merging, config
-│   ├── moonshine_runtime/     Moonshine SDK helpers and configuration
-│   ├── models/tinybert_pii/   INT8 ONNX model, tokenizer, label maps
-│   ├── scripts/               Environment checks and offline tests
+│   ├── models/canary/         Canary 180M Flash manifest (weights acquired on device)
+│   ├── models/deberta_pii/    Model V2 INT8 ONNX, tokenizer, label map, manifest
+│   ├── models/silero/         Silero VAD ONNX
+│   ├── scripts/               Environment checks and release packaging
 │   ├── run_live.sh            Linux / Raspberry Pi launcher
-│   ├── run_live.ps1           Windows PowerShell launcher
 │   └── install_pi.sh          Raspberry Pi installer
+├── FullPipeline_V1/           History: first integrated pipeline (Moonshine STT)
+├── FullPipeline_V2/           History: second integrated pipeline (Moonshine + SQLite/UI)
 ├── model/                     Research: training notebooks and artifacts
+│   ├── DeBERTa-v3-xsmall/     Model V2 — the deployed privacy model
+│   └── TinyBERT-4/            Model V1 — superseded, kept for provenance
 ├── moonshine-pi-v2/           Research: STT benchmarking harness
-├── tinybert_pii_rpi/          Exported PII model artifacts
+├── tinybert_pii_rpi/          Model V1 exported PII artifacts
 └── context/                   Coursework and background notebooks
 ```
 
 The deployment package is self-contained. Everything outside
-`Omit_AI_RPi_Live/` is research and experimentation history.
+`FullPipeline_V3/` is research and experimentation history.
+
+`FullPipeline_V1/` and `FullPipeline_V2/` are the earlier integrated pipelines,
+kept unchanged as evidence of how the design evolved. They still run Moonshine
+STT and the TinyBERT Model V1 masker; neither is maintained, and neither should
+be used for deployment. Only `FullPipeline_V3/` is current.
 
 ---
 
 ## Running the pipeline
 
 Full instructions are in
-[Omit_AI_RPi_Live/README_PI.md](Omit_AI_RPi_Live/README_PI.md).
+[FullPipeline_V3/README.md](FullPipeline_V3/README.md); the quick start is
+[FullPipeline_V3/START_HERE.md](FullPipeline_V3/START_HERE.md).
 
 ### Windows
 
 WSL is not required.
 
 ```powershell
-cd Omit_AI_RPi_Live
+cd FullPipeline_V3
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip wheel setuptools
-python -m pip install -r requirements-rpi.txt
+python -m pip install -r requirements-windows.txt
 
-.\run_live.ps1 --self-test
-.\run_live.ps1 --text-test "My name is Rayyan Khan and my email is rayyan@example.com"
-.\run_live.ps1 --list-devices
-.\run_live.ps1 --device 2
+python -m app.omit_ai_live --print-config
+python -m app.omit_ai_live --text-test "My name is Rayyan Khan and my email is rayyan@example.com"
+python -m app.omit_ai_live --list-devices
+python -m app.omit_ai_live --device 2
 ```
 
 ### Raspberry Pi OS (64-bit)
 
 ```bash
-cd ~/Omit_AI_RPi_Live
+cd ~/FullPipeline_V3
 chmod +x install_pi.sh run_live.sh check_pi.sh
 ./install_pi.sh
 
@@ -206,11 +216,13 @@ chmod +x install_pi.sh run_live.sh check_pi.sh
 ### Verify without a microphone
 
 ```bash
-python scripts/test_pii_offline.py
+cd FullPipeline_V3
+python -m pytest -q
 ```
 
-Runs 80 checks covering entity coverage, clean-text preservation, long input,
-window-boundary PII, fail-closed behaviour, and the ONNX label contract.
+`--text-test` above also exercises the whole privacy path without audio: it
+loads the Model V2 INT8 ONNX, masks the text, and prints the released
+transcript.
 
 ---
 

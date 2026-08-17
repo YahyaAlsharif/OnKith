@@ -1,7 +1,9 @@
 """Supplemental structured-PII recognizers for spoken-digit sequences.
 
 `structured_pii.StructuredPIIRecognizer` is frozen (it is a protected file), and
-two real gaps were confirmed against the live TinyBERT model:
+two real gaps were confirmed against the live privacy model (measured on
+Model V1, TinyBERT-4; both gaps are regex-layer gaps and are independent of
+which token classifier runs):
 
     phone number is a zero five five a six seven three four four two one
         -> released verbatim; the stray ASR filler "a" makes
@@ -11,7 +13,7 @@ two real gaps were confirmed against the live TinyBERT model:
     bank id is four five three three two one one one six five
         -> released verbatim; "bank id" matches neither `_ACCOUNT_CUE`
            (which wants "account"/"bank account") nor `_IDENTIFIER_CUE`
-           (which wants "id number"). TinyBERT returned no entities either.
+           (which wants "id number"). The token classifier returned no entities either.
 
 This module closes both gaps without editing the frozen recognizer. It runs as
 a wrapper *around* the masker and re-merges its spans through the authoritative

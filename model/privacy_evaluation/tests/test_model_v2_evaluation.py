@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import inspect
 import json
 import sys
 import unittest
@@ -20,7 +21,11 @@ from privacy_eval.dataset_metrics import (  # noqa: E402
     restrict_to_labels,
     subset_by,
 )
-from privacy_eval.model_v2_adapter import ModelV2OnnxMasker, repair_bio  # noqa: E402
+from privacy_eval.model_v2_adapter import (  # noqa: E402
+    MASKER_SOURCE,
+    ModelV2OnnxMasker,
+    repair_bio,
+)
 
 NOTEBOOK = REPO_ROOT / "model" / "DeBERTa-v3-xsmall" / "model_v2_deberta_v3_xsmall.ipynb"
 
@@ -176,7 +181,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_adapter_is_not_pinned_to_a_label_count(self):
         """No literal label count in the code; docstrings may mention 67."""
-        source = (ROOT / "privacy_eval" / "model_v2_adapter.py").read_text(encoding="utf-8")
+        source = MASKER_SOURCE.read_text(encoding="utf-8")
         tree = ast.parse(source)
         constants = [
             node.value
@@ -195,21 +200,39 @@ class AdapterTests(unittest.TestCase):
         self.assertNotIn("EXPECTED_LABEL_COUNT", assignments)
 
     def test_adapter_reuses_production_decoding(self):
-        source = (ROOT / "privacy_eval" / "model_v2_adapter.py").read_text(encoding="utf-8")
+        source = MASKER_SOURCE.read_text(encoding="utf-8")
         self.assertIn("consolidate_predictions_to_words", source)
         self.assertIn("merge_pii_spans", source)
 
-    def test_production_adapter_is_untouched_by_model_v2(self):
-        """Model V2 must not have relaxed the pinned production contract."""
-        adapter = (REPO_ROOT / "FullPipeline_V3" / "integrated_pipeline" / "pii_adapter.py")
-        source = adapter.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_LABEL_COUNT = 67", source)
+    def test_evaluation_and_production_share_one_masker(self):
+        """The name this harness imports must resolve into the pipeline.
+
+        Replaces the old "Model V2 must not touch production" guard. Production
+        *is* Model V2 now, and the whole point of the integration is that these
+        metrics were measured through the code the deployment runs. A second
+        copy of the decoder appearing under privacy_eval/ would silently break
+        that, so assert the import lands in FullPipeline_V3.
+        """
+
+        self.assertEqual(
+            Path(inspect.getsourcefile(ModelV2OnnxMasker)).resolve(),
+            MASKER_SOURCE.resolve(),
+        )
+
+    def test_production_runs_the_model_v2_ontology(self):
+        """The deployed pipeline is pinned to the 63-label Model V2 contract."""
+
+        source = (
+            REPO_ROOT / "FullPipeline_V3" / "integrated_pipeline" / "pii_adapter.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("EXPECTED_LABEL_COUNT = 63", source)
         config = json.loads(
             (REPO_ROOT / "FullPipeline_V3" / "config" / "live_config.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.assertEqual(config["pii"]["label_count"], 67)
+        self.assertEqual(config["pii"]["label_count"], 63)
+        self.assertEqual(config["pii"]["model_id"], "microsoft/deberta-v3-xsmall")
 
 
 class RunnerTests(unittest.TestCase):

@@ -1,4 +1,4 @@
-"""Canary-to-TinyBERT live privacy pipeline."""
+"""Canary-to-DeBERTa live privacy pipeline."""
 
 from .canary_adapter import CanaryAdapter
 from .config import (
@@ -11,6 +11,7 @@ from .config import (
     PipelineConfig,
 )
 from .inactivity_buffer import InactivityTranscriptBuffer
+from .model_v2_masker import ModelV2OnnxMasker
 from .pii_adapter import PIIMaskerAdapter
 from .pipeline import FailClosedMasker
 from .schemas import (
@@ -41,6 +42,7 @@ __all__ = [
     "CanaryUtteranceEnd",
     "FailClosedMasker",
     "InactivityTranscriptBuffer",
+    "ModelV2OnnxMasker",
     "PIIMaskerAdapter",
     "PIIResult",
     "PipelineConfig",

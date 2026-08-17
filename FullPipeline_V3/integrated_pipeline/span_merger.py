@@ -308,7 +308,7 @@ def consolidate_predictions_to_words(
                     start_char=row["start"],
                     end_char=row["end"],
                     text=text[row["start"] : row["end"]],
-                    source="tinybert_whole_word",
+                    source="model_whole_word",
                     confidence=row["confidence"],
                     metadata={"word_level": True},
                 )
@@ -320,7 +320,7 @@ def consolidate_predictions_to_words(
                 start_char=active["start"],
                 end_char=active["end"],
                 text=text[active["start"] : active["end"]],
-                source="tinybert_whole_word",
+                source="model_whole_word",
                 confidence=sum(values) / len(values),
                 metadata={"word_level": True, "word_count": len(values)},
             )
@@ -356,7 +356,7 @@ def _overlap(first: SpanCandidate, second: SpanCandidate) -> bool:
 
 def merge_pii_spans(
     text: str,
-    tinybert_spans: Sequence[SpanCandidate],
+    model_spans: Sequence[SpanCandidate],
     structured_spans: Sequence[SpanCandidate],
     mask_policy: Any = None,
 ) -> SpanMergeResult:
@@ -373,7 +373,7 @@ def merge_pii_spans(
     import time
 
     started = time.perf_counter()
-    candidates = [*structured_spans, *tinybert_spans]
+    candidates = [*structured_spans, *model_spans]
     for span in candidates:
         if (
             span.start_char < 0

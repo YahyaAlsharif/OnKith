@@ -566,7 +566,7 @@ def main(argv: list[str] | None = None) -> int:
         "Deployment artifacts present",
         lambda: (
             config.validate(require_artifacts=True),
-            f"{config.canary_model_path.name}, Silero and TinyBERT all present",
+            f"{config.canary_model_path.name}, Silero and DeBERTa PII all present",
         )[1],
     )
     report.run("Microphone callback ownership boundary", verify_runtime_boundary)
@@ -593,7 +593,7 @@ def main(argv: list[str] | None = None) -> int:
         pii.load()
     except Exception as exc:
         report.add(
-            "TinyBERT PII masking removes PII",
+            "DeBERTa PII masking removes PII",
             NOT_RUN if is_absence(exc) else FAIL,
             f"{type(exc).__name__}: {exc}",
         )
@@ -604,13 +604,13 @@ def main(argv: list[str] | None = None) -> int:
             )
             ok = probe.safe_to_release and "rayyan@example.com" not in probe.masked_text
             report.add(
-                "TinyBERT PII masking removes PII",
+                "DeBERTa PII masking removes PII",
                 PASS if ok else FAIL,
                 f"status={probe.privacy_status}",
             )
         except Exception as exc:
             report.add(
-                "TinyBERT PII masking removes PII", FAIL, f"{type(exc).__name__}: {exc}"
+                "DeBERTa PII masking removes PII", FAIL, f"{type(exc).__name__}: {exc}"
             )
 
     # Fail-closed behaviour is a property of the masking boundary itself and is

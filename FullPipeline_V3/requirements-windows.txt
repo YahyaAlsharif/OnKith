@@ -65,7 +65,7 @@ num2words
 # Replaces NeMo's texterrors<1.0.0 pin; imported by nemo.collections.asr
 texterrors==1.1.8
 
-# Runtime used by Silero VAD and TinyBERT PII
+# Runtime used by Silero VAD and the DeBERTa-v3-xsmall PII model
 onnx==1.17.0
 onnxruntime
 sounddevice==0.5.5

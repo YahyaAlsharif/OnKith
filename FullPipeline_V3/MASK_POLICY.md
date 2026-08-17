@@ -61,7 +61,7 @@ Each entity in `PIIResult.entities` carries a `masked` flag:
   "text": "Riyadh",
   "placeholder": None,      # no placeholder when not masked
   "masked": False,          # detected, reported, deliberately left visible
-  "source": "tinybert_whole_word",
+  "source": "model_whole_word",
   "confidence": 0.93,
 }
 ```
@@ -116,10 +116,11 @@ label-specific branching — a test asserts that no label name appears in
 `mask_policy.py`. It works unchanged for any label the model emits, including
 labels that do not exist yet.
 
-That matters because production still runs the TinyBERT 67-label contract.
-When it migrates to the Model V2 63-label DeBERTa model, this mechanism needs no
-redesign: a label absent from the policy (such as the new `PASSWORD`) simply
-defaults to masked.
+That was proved by the migration itself. The mechanism carried over from the
+67-label Model V1 (TinyBERT) contract to the 63-label Model V2
+(DeBERTa-v3-xsmall) ontology without a single change to `mask_policy.py`: a
+label absent from the policy — such as the new `PASSWORD` — simply defaults to
+masked.
 
 ## Tests
 

@@ -121,6 +121,76 @@ The Canary model stays loaded in memory while each speech segment is transcribed
 
 ---
 
+## Privacy Backend
+
+PII detection runs on **OnKith Model V2**: a DeBERTa-v3-xsmall token classifier
+fine-tuned on the OnKith privacy corpus and quantized to INT8 ONNX.
+
+| Setting          | Value                                          |
+| ---------------- | ---------------------------------------------- |
+| Base model       | `microsoft/deberta-v3-xsmall`                  |
+| Ontology         | `model_v2.ontology.1` — 31 entity types        |
+| Labels           | 63 BIO labels                                  |
+| Precision        | INT8 ONNX                                      |
+| Runtime          | onnxruntime, `CPUExecutionProvider`            |
+| Context window   | 512 tokens, 128-token overflow stride          |
+| Tokenizer        | SentencePiece, packaged locally                |
+| Model loading    | Once at startup, hash-verified                 |
+
+Artifacts live in `models/deberta_pii/` (ONNX, tokenizer, label map,
+`model_manifest.json`). They are byte-identical copies of the canonical
+artifacts under `model/DeBERTa-v3-xsmall/artifacts/model_v2/`, and the adapter
+refuses to start if the INT8 sha256 does not match the value pinned in
+`config/live_config.json`.
+
+### Held-out comparison
+
+Model V2 replaced the previous TinyBERT-4 masker (Model V1) after a direct
+40,909-row held-out comparison:
+
+| Metric                    | Model V1 (TinyBERT INT8) | **Model V2 (DeBERTa INT8)** |
+| ------------------------- | -----------------------: | --------------------------: |
+| Typed entity F1           |                   0.9502 |                  **0.9588** |
+| Private character leakage |                   0.0029 |                  **0.0017** |
+| Non-private overmasking   |                   0.0044 |                  **0.0029** |
+
+Model V1 remains in `model/TinyBERT-4/` and `tinybert_pii_rpi/` for provenance.
+It is no longer packaged with or reachable from this pipeline.
+
+### Decoding
+
+`integrated_pipeline/model_v2_masker.py` holds the only Model V2 decoder in the
+project; the offline evaluation harness imports the same module, so the numbers
+above were measured through the code this pipeline runs.
+
+SentencePiece pre-tokenizes on whitespace only, which means `Walusiak,` is one
+tokenizer word — comma included. The decoder therefore derives word groups from
+character offsets rather than tokenizer word ids, so an entity never absorbs the
+punctuation that follows it. `tests/test_deberta_pii_integration.py` pins that
+behaviour end to end.
+
+### Choosing what gets masked
+
+The model always predicts its complete ontology. Which detections are actually
+replaced in the released text is a configuration decision, set per entity type
+under `pii.mask_policy` in `config/live_config.json`:
+
+```json
+{
+  "pii": {
+    "mask_policy": { "CITY": false, "COUNTRY": false }
+  }
+}
+```
+
+With that policy, *"What time is it in Riyadh?"* is released unchanged while
+`Riyadh` is still detected and reported as a `CITY` with `"masked": false`.
+Every other entity type keeps masking normally. An empty policy — the shipped
+default — masks everything. See [MASK_POLICY.md](MASK_POLICY.md) for the full
+contract and its fail-closed rules.
+
+---
+
 ## Live Preview
 
 During long continuous speech, Omit AI can display an in-progress **masked preview** instead of waiting for the entire utterance to finish.

@@ -20,6 +20,17 @@ MASK_POLICY_KEY = "mask_policy"
 LIVE_STAGE5_MODE = "immediate"
 SESSION_DATABASE_FILENAME = "session_transcript.db"
 
+# Privacy model V2: DeBERTa-v3-xsmall INT8, 31 entity types / 63 BIO labels.
+# The packaged copy under models/deberta_pii/ must stay byte-identical to the
+# canonical artifact in model/DeBERTa-v3-xsmall/artifacts/model_v2/, which is
+# what the 40,909-row held-out comparison measured (typed F1 0.9588, leakage
+# 0.0017, overmasking 0.0029). PIIMaskerAdapter.verify_artifact enforces it.
+PII_MODEL_ID = "microsoft/deberta-v3-xsmall"
+PII_ONTOLOGY_VERSION = "model_v2.ontology.1"
+PII_ARTIFACT_SHA256 = "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8"
+PII_ARTIFACT_BYTES = 82_278_782
+PII_LABEL_COUNT = 63
+
 CANARY_MODEL_ID = "nvidia/canary-180m-flash"
 CANARY_ARTIFACT_FILE = "canary-180m-flash.nemo"
 CANARY_REVISION = "c770bfa0f70f66ad89dbf9827985f999675943a3"
@@ -116,16 +127,16 @@ class PipelineConfig:
         return (self.root / self.silero["artifact"]).resolve()
 
     @property
-    def tinybert_model_path(self) -> Path:
+    def pii_model_path(self) -> Path:
         return (self.root / self.pii["artifact"]).resolve()
 
     @property
-    def tinybert_tokenizer_path(self) -> Path:
+    def pii_tokenizer_path(self) -> Path:
         return (self.root / self.pii["tokenizer"]).resolve()
 
     @property
-    def tinybert_label_map_path(self) -> Path:
-        return (self.root / self.pii["id2label"]).resolve()
+    def pii_label_map_path(self) -> Path:
+        return (self.root / self.pii["label_map"]).resolve()
 
     @property
     def session_database_path(self) -> Path:
@@ -262,9 +273,13 @@ class PipelineConfig:
             "storage.foreign_keys": (bool(self.storage["foreign_keys"]), True),
             "storage.busy_timeout_ms": (int(self.storage["busy_timeout_ms"]), 5000),
             "pii.provider": (self.pii["provider"], "CPUExecutionProvider"),
+            "pii.model_id": (self.pii["model_id"], PII_MODEL_ID),
+            "pii.ontology_version": (self.pii["ontology_version"], PII_ONTOLOGY_VERSION),
+            "pii.sha256": (self.pii["sha256"], PII_ARTIFACT_SHA256),
+            "pii.size_bytes": (int(self.pii["size_bytes"]), PII_ARTIFACT_BYTES),
             "pii.context_limit": (int(self.pii["context_limit"]), 512),
             "pii.overflow_stride": (int(self.pii["overflow_stride"]), 128),
-            "pii.label_count": (int(self.pii["label_count"]), 67),
+            "pii.label_count": (int(self.pii["label_count"]), PII_LABEL_COUNT),
             "pii.word_policy": (self.pii_word_policy, PII_WORD_POLICY),
             "pii.structured_enabled": (self.enable_structured_pii, ENABLE_STRUCTURED_PII),
         }
@@ -289,10 +304,10 @@ class PipelineConfig:
                 )
         if require_artifacts or require_privacy_artifacts:
             paths = (
-                self.tinybert_model_path,
-                self.tinybert_tokenizer_path / "tokenizer.json",
-                self.tinybert_tokenizer_path / "tokenizer_config.json",
-                self.tinybert_label_map_path,
+                self.pii_model_path,
+                self.pii_tokenizer_path / "tokenizer.json",
+                self.pii_tokenizer_path / "tokenizer_config.json",
+                self.pii_label_map_path,
             )
             missing = [str(path) for path in paths if not path.is_file()]
             if missing:
