@@ -6,6 +6,14 @@ venv/
 env/
 ENV/
 */.venv/
+# Suffixed environments at any depth. The production-pin compatibility env
+# (model/DeBERTa-v3-xsmall/.venv-production/) is ignored by that directory's own
+# .gitignore, but that file only exists on branches carrying the Model V2 work:
+# checking out a branch without it exposed ~6,500 site-packages files as
+# untracked. These root rules make suffixed envs ignored repo-wide regardless of
+# which branch is checked out.
+.venv-*/
+venv-*/
 
 # ---------------------------------------------------------------------------
 # Python bytecode and build artifacts
