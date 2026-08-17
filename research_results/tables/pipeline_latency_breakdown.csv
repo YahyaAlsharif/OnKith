@@ -1,0 +1,10 @@
+run_id,device,scope,stage,mean_ms
+20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Neural decode (ONNX + span consolidation),83.15575085007731
+20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Structured regex layer,0.2859456000078353
+20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Span merge and mask policy,0.12420375017973129
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Silero VAD (per 3 s of audio),41.166040004463866
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Transcript merge,0.5444749993330333
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Wake-word normalisation,0.03803000072366558
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Inactivity buffer,0.13675500158569776
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Privacy masking,20.600300000660354
+20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Spoken-digit rendering,0.07891000059316866

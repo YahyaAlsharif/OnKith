@@ -145,6 +145,24 @@ hardware have not yet been measured and are the immediate next step.
 
 ---
 
+## Results and benchmarks
+
+Two notebooks at the repository root produce every number that goes into the
+report. Neither trains a model.
+
+| Notebook | Purpose |
+|---|---|
+| [`Research_Paper_Figures.ipynb`](Research_Paper_Figures.ipynb) | Turns the saved evaluation evidence into publication-quality figures and CSV tables under `research_results/`. |
+| [`Full_Pipeline_CPU_Benchmark.ipynb`](Full_Pipeline_CPU_Benchmark.ipynb) | Runs the real pipeline and the accepted INT8 privacy model on **any CPU**, including the Raspberry Pi, and records latency, memory and quality. |
+
+Run the benchmark notebook on a device, commit the folder it writes under
+`research_results/cpu_benchmarks/`, then rerun the figures notebook: it picks up
+every device it finds and adds the comparison and prediction-parity figures
+automatically. Full instructions:
+[research_results/README.md](research_results/README.md).
+
+---
+
 ## Repository structure
 
 ```text
@@ -165,6 +183,7 @@ OnKith/
 │   └── TinyBERT-4/            Model V1 — superseded, kept for provenance
 ├── moonshine-pi-v2/           Research: STT benchmarking harness
 ├── tinybert_pii_rpi/          Model V1 exported PII artifacts
+├── research_results/          Report figures, tables, and per-device CPU benchmarks
 └── context/                   Coursework and background notebooks
 ```
 

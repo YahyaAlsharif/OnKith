@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "artifact": "accepted_int8_candidate",
-  "accepted": false,
+  "accepted": true,
   "smoke_test": false,
-  "generated_utc": "2026-08-16T20:59:21Z",
+  "generated_utc": "2026-08-17T18:43:31Z",
   "model": {
     "int8_onnx": "model/DeBERTa-v3-xsmall/artifacts/model_v2/models/int8/model_int8.onnx",
     "int8_sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
@@ -24,7 +24,7 @@
     "path": "model/DeBERTa-v3-xsmall/artifacts/model_v2/tokenizer",
     "base_model": "microsoft/deberta-v3-xsmall",
     "base_model_revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
-    "tokenizer_sha256": "8196ef6e837c3ed355ae78bf29a244a33f4dc4179a7c364aedeb0cd6433e9948",
+    "tokenizer_sha256": "3557a81100ec95519fb3e5977f67d4fa1775dc82ea0b653015885746007acc67",
     "tokenizer_config_sha256": "357abebf47463a264d4dea3556f8f8cd49661d2e24079b5f6c4460d01ce8cf60"
   },
   "training": {
@@ -93,52 +93,104 @@
     },
     "int8_onnx": {
       "test": {
-        "typed_entity_f1": 0.5877468112435402,
-        "typed_entity_precision": 0.5848206987769174,
-        "typed_entity_recall": 0.59070235218181,
-        "private_character_recall": 0.9973793782342064,
-        "private_character_leakage": 0.002620621765793585,
-        "non_private_overmasking_rate": 0.06628362209152563,
+        "typed_entity_f1": 0.9526735866694973,
+        "typed_entity_precision": 0.9455563030925853,
+        "typed_entity_recall": 0.9598988276617781,
+        "private_character_recall": 0.9972715567669523,
+        "private_character_leakage": 0.0027284432330476616,
+        "non_private_overmasking_rate": 0.014432807080302425,
         "hard_negative_false_positive_rate": 0.25,
         "rows": 19136
       },
       "val_original": {
-        "typed_entity_f1": 0.6027711808750302,
-        "typed_entity_precision": 0.6029367358608151,
-        "typed_entity_recall": 0.6026057167808032,
-        "private_character_recall": 0.9982787531646916,
-        "private_character_leakage": 0.0017212468353083876,
-        "non_private_overmasking_rate": 0.053623414256480754,
+        "typed_entity_f1": 0.9587505750682468,
+        "typed_entity_precision": 0.9573678650318532,
+        "typed_entity_recall": 0.9601372849304425,
+        "private_character_recall": 0.9982923232884604,
+        "private_character_leakage": 0.0017076767115395963,
+        "non_private_overmasking_rate": 0.002923572198002015,
         "hard_negative_false_positive_rate": 0.0,
         "rows": 40909
       },
       "val_supplementary": {
-        "typed_entity_f1": 0.40072035850399973,
-        "typed_entity_precision": 0.3780025284450063,
-        "typed_entity_recall": 0.42634346314945193,
-        "private_character_recall": 0.9855563777368599,
-        "private_character_leakage": 0.01444362226314011,
-        "non_private_overmasking_rate": 0.1446053355438227,
+        "typed_entity_f1": 0.8848919372552271,
+        "typed_entity_precision": 0.8270519425184956,
+        "typed_entity_recall": 0.951430353800909,
+        "private_character_recall": 0.9843259738546345,
+        "private_character_leakage": 0.015674026145365505,
+        "non_private_overmasking_rate": 0.09387070797745244,
         "hard_negative_false_positive_rate": 0.0,
         "rows": 6907
       },
       "combined_validation": {
-        "typed_entity_f1": 0.5883812736662983,
-        "typed_entity_precision": 0.586022399809869,
-        "typed_entity_recall": 0.5907592142816499,
-        "private_character_recall": 0.9970435102725278,
-        "private_character_leakage": 0.0029564897274722,
-        "non_private_overmasking_rate": 0.06318639484118367,
+        "typed_entity_f1": 0.9534472651309778,
+        "typed_entity_precision": 0.9474196228713699,
+        "typed_entity_recall": 0.9595520962172555,
+        "private_character_recall": 0.9969363002748753,
+        "private_character_leakage": 0.003063699725124658,
+        "non_private_overmasking_rate": 0.01242577499375194,
         "hard_negative_false_positive_rate": 0.0,
         "rows": 47816
       },
       "ood_dev": {
-        "typed_entity_f1": 0.4563894523326572,
-        "typed_entity_precision": 0.4377431906614786,
-        "typed_entity_recall": 0.4766949152542373,
-        "private_character_recall": 0.8731598317560463,
-        "private_character_leakage": 0.12684016824395372,
-        "non_private_overmasking_rate": 0.04086052555587641,
+        "typed_entity_f1": 0.6881937436932392,
+        "typed_entity_precision": 0.6570327552986512,
+        "typed_entity_recall": 0.722457627118644,
+        "private_character_recall": 0.8725026288117771,
+        "private_character_leakage": 0.1274973711882229,
+        "non_private_overmasking_rate": 0.02195373508177398,
+        "hard_negative_false_positive_rate": 0.2222222222222222,
+        "rows": 360
+      }
+    },
+    "fp32_onnx": {
+      "test": {
+        "typed_entity_f1": 0.9548906360621529,
+        "typed_entity_precision": 0.9481987982121185,
+        "typed_entity_recall": 0.9616775994836307,
+        "private_character_recall": 0.9973667757250468,
+        "private_character_leakage": 0.002633224274953161,
+        "non_private_overmasking_rate": 0.014063100194138471,
+        "hard_negative_false_positive_rate": 0.25,
+        "rows": 19136
+      },
+      "val_original": {
+        "typed_entity_f1": 0.9610178025650318,
+        "typed_entity_precision": 0.9599710394715344,
+        "typed_entity_recall": 0.9620668509546696,
+        "private_character_recall": 0.9983222392431326,
+        "private_character_leakage": 0.0016777607568674302,
+        "non_private_overmasking_rate": 0.0026583641570677888,
+        "hard_negative_false_positive_rate": 0.0,
+        "rows": 40909
+      },
+      "val_supplementary": {
+        "typed_entity_f1": 0.8877844732973018,
+        "typed_entity_precision": 0.8292777283453905,
+        "typed_entity_recall": 0.9551733357098298,
+        "private_character_recall": 0.9858231086483913,
+        "private_character_leakage": 0.014176891351608711,
+        "non_private_overmasking_rate": 0.09480833447451306,
+        "hard_negative_false_positive_rate": 0.0,
+        "rows": 6907
+      },
+      "combined_validation": {
+        "typed_entity_f1": 0.9557544250783959,
+        "typed_entity_precision": 0.9499760353611559,
+        "typed_entity_recall": 0.9616035410633372,
+        "private_character_recall": 0.9971086716736984,
+        "private_character_leakage": 0.0028913283263015677,
+        "non_private_overmasking_rate": 0.012310331007199622,
+        "hard_negative_false_positive_rate": 0.0,
+        "rows": 47816
+      },
+      "ood_dev": {
+        "typed_entity_f1": 0.7063655030800821,
+        "typed_entity_precision": 0.6852589641434262,
+        "typed_entity_recall": 0.7288135593220338,
+        "private_character_recall": 0.8349106203995794,
+        "private_character_leakage": 0.16508937960042058,
+        "non_private_overmasking_rate": 0.021112652180613346,
         "hard_negative_false_positive_rate": 0.2222222222222222,
         "rows": 360
       }
@@ -158,32 +210,85 @@
     },
     "results": {
       "test": {
-        "typed_f1_drop": 0.36713993051873495,
-        "leakage_rise": -1.2602509159576059e-05,
-        "passes": false
+        "typed_f1_drop": 0.0022170493926555457,
+        "leakage_rise": 9.521895809450065e-05,
+        "passes": true
       },
       "val_original": {
-        "typed_f1_drop": 0.35825124482031057,
-        "leakage_rise": 4.410290224854396e-05,
-        "passes": false
+        "typed_f1_drop": 0.002267227496784985,
+        "leakage_rise": 2.9915954672166123e-05,
+        "passes": true
       },
       "val_supplementary": {
-        "typed_f1_drop": 0.4870364340738664,
-        "leakage_rise": 0.00025812668857883025,
-        "passes": false
+        "typed_f1_drop": 0.0028925360420747337,
+        "leakage_rise": 0.0014971347937567936,
+        "passes": true
       },
       "combined_validation": {
-        "typed_f1_drop": 0.36737573292542713,
-        "leakage_rise": 6.488293364426134e-05,
-        "passes": false
+        "typed_f1_drop": 0.002307159947418147,
+        "leakage_rise": 0.00017237139882309016,
+        "passes": true
       },
       "ood_dev": {
-        "typed_f1_drop": 0.25142947770849494,
-        "leakage_rise": -0.03969505783385907,
-        "passes": false
+        "typed_f1_drop": 0.0181717593868429,
+        "leakage_rise": -0.037592008412197675,
+        "passes": true
       }
     },
-    "passed": false
+    "passed": true,
+    "reference_runtime": "fp32_onnx",
+    "detail": {
+      "test": {
+        "fp32_typed_f1": 0.9548906360621529,
+        "int8_typed_f1": 0.9526735866694973,
+        "typed_f1_drop": 0.0022170493926555457,
+        "fp32_leakage": 0.002633224274953161,
+        "int8_leakage": 0.0027284432330476616,
+        "leakage_rise": 9.521895809450065e-05,
+        "rows": 19136,
+        "passes": true
+      },
+      "val_original": {
+        "fp32_typed_f1": 0.9610178025650318,
+        "int8_typed_f1": 0.9587505750682468,
+        "typed_f1_drop": 0.002267227496784985,
+        "fp32_leakage": 0.0016777607568674302,
+        "int8_leakage": 0.0017076767115395963,
+        "leakage_rise": 2.9915954672166123e-05,
+        "rows": 40909,
+        "passes": true
+      },
+      "val_supplementary": {
+        "fp32_typed_f1": 0.8877844732973018,
+        "int8_typed_f1": 0.8848919372552271,
+        "typed_f1_drop": 0.0028925360420747337,
+        "fp32_leakage": 0.014176891351608711,
+        "int8_leakage": 0.015674026145365505,
+        "leakage_rise": 0.0014971347937567936,
+        "rows": 6907,
+        "passes": true
+      },
+      "combined_validation": {
+        "fp32_typed_f1": 0.9557544250783959,
+        "int8_typed_f1": 0.9534472651309778,
+        "typed_f1_drop": 0.002307159947418147,
+        "fp32_leakage": 0.0028913283263015677,
+        "int8_leakage": 0.003063699725124658,
+        "leakage_rise": 0.00017237139882309016,
+        "rows": 47816,
+        "passes": true
+      },
+      "ood_dev": {
+        "fp32_typed_f1": 0.7063655030800821,
+        "int8_typed_f1": 0.6881937436932392,
+        "typed_f1_drop": 0.0181717593868429,
+        "fp32_leakage": 0.16508937960042058,
+        "int8_leakage": 0.1274973711882229,
+        "leakage_rise": -0.037592008412197675,
+        "rows": 360,
+        "passes": true
+      }
+    }
   },
   "frozen_benchmark": {
     "status": "not run",
@@ -196,5 +301,30 @@
       "generator_version": "1.0.0",
       "policy": "Frozen final set must not guide training, augmentation, thresholding, or model selection."
     }
+  },
+  "evaluation_provenance": {
+    "gate_comparison": "fp32_onnx vs int8_onnx, both decoded by the production decoder",
+    "fp32_onnx_report": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_fp32_onnx.json",
+    "fp32_onnx_report_sha256": "11463ad032dbc4ea991c7be7991d688e8dc41708b89421d95c7a32cedfd67a96",
+    "int8_onnx_report": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_int8_onnx.json",
+    "int8_onnx_report_sha256": "5e6d1988c348af506eaeabdf3e4e1414bf70af646334fb75ba7599fb6f42ac5a",
+    "fp32_pytorch_source": "carried forward from the superseded manifest; training-side predict_spans",
+    "decoder": "privacy_eval.model_v2_adapter.ModelV2OnnxMasker",
+    "decoder_module": "FullPipeline_V3/integrated_pipeline/model_v2_masker.py",
+    "note": "Section 26 of the training notebook compared a training-side FP32 decode with an INT8 decode that passed SentencePiece word ids into consolidate_predictions_to_words. Both confounds are removed here."
+  },
+  "supersedes": {
+    "generated_utc": "2026-08-16T20:59:21Z",
+    "accepted": false,
+    "int8_sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+    "gate_passed": false,
+    "typed_f1_drops": {
+      "test": 0.36713993051873495,
+      "val_original": 0.35825124482031057,
+      "val_supplementary": 0.4870364340738664,
+      "combined_validation": 0.36737573292542713,
+      "ood_dev": 0.25142947770849494
+    },
+    "reason": "The superseded gate measured a decoder defect as quantization loss. The model artifact is unchanged: same INT8 SHA-256, same run signature."
   }
 }

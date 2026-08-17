@@ -33,6 +33,35 @@
       "size_bytes": 7311
     }
   },
+  "release": {
+    "status": "accepted",
+    "accepted_candidate_manifest": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json",
+    "int8_quality_gate": "passed on test, val_original, val_supplementary, combined_validation, ood_dev",
+    "gate_thresholds": {
+      "max_typed_f1_drop": 0.02,
+      "max_leakage_rise": 0.015
+    },
+    "gate_reference": "fp32_onnx production path; both runtimes decoded by the same production decoder",
+    "evidence": [
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_fp32_onnx.json",
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_int8_onnx.json",
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_ood_final_int8.json"
+    ]
+  },
+  "int8_evaluation": {
+    "note": "Typed entity F1 of the packaged INT8 graph, decoded by the production decoder.",
+    "test": { "rows": 19136, "typed_f1": 0.9527, "leakage": 0.0027 },
+    "val_original": { "rows": 40909, "typed_f1": 0.9588, "leakage": 0.0017 },
+    "val_supplementary": { "rows": 6907, "typed_f1": 0.8849, "leakage": 0.0157 },
+    "combined_validation": { "rows": 47816, "typed_f1": 0.9534, "leakage": 0.0031 },
+    "ood_dev": { "rows": 360, "typed_f1": 0.6882, "leakage": 0.1275 },
+    "ood_final": {
+      "rows": 360,
+      "typed_f1": 0.6244,
+      "leakage": 0.1610,
+      "note": "One-shot frozen holdout, spent once on this exact artifact. Never re-run."
+    }
+  },
   "held_out_validation": {
     "source": "model/DeBERTa-v3-xsmall/deberta_vs_tinybert_int8_validation.ipynb",
     "rows": 40909,
@@ -46,6 +75,11 @@
       "private_character_leakage": 0.0029,
       "non_private_overmasking_rate": 0.0044
     }
+  },
+  "cpu_deployment_benchmark": {
+    "notebook": "Full_Pipeline_CPU_Benchmark.ipynb",
+    "results": "research_results/cpu_benchmarks/",
+    "note": "Hardware-agnostic; run it on the Raspberry Pi to produce Pi latency and memory evidence."
   },
   "physical_pi5_validation": "pending_not_run"
 }

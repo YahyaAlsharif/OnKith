@@ -6,3 +6,8 @@ onnxruntime==1.22.1
 torch==2.7.1
 nemo_toolkit[asr]==2.5.3
 transformers==4.53.3
+
+# Deployment benchmark only (Full_Pipeline_CPU_Benchmark.ipynb): process RSS,
+# core counts and total/available RAM. The live pipeline does not import it, and
+# the notebook reports "unavailable" rather than failing if it is absent.
+psutil==7.0.0

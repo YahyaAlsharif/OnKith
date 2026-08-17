@@ -1,0 +1,192 @@
+{
+  "generated_from": "Research_Paper_Figures.ipynb",
+  "repository_root": "OnKith",
+  "figures": [
+    {
+      "kind": "figure",
+      "name": "model_progression",
+      "files": [
+        "model_progression.png",
+        "model_progression.pdf"
+      ],
+      "caption": "Typed entity F1 and character-level error rates for TinyBERT INT8 and DeBERTa INT8 on the same held-out validation split."
+    },
+    {
+      "kind": "figure",
+      "name": "deberta_fp32_vs_int8",
+      "files": [
+        "deberta_fp32_vs_int8.png",
+        "deberta_fp32_vs_int8.pdf"
+      ],
+      "caption": "FP32 and INT8 typed entity F1 on every evaluation view, with the F1 lost to quantization against the 0.02 release gate."
+    },
+    {
+      "kind": "figure",
+      "name": "deberta_split_performance",
+      "files": [
+        "deberta_split_performance.png",
+        "deberta_split_performance.pdf"
+      ],
+      "caption": "Typed entity precision/recall/F1 and private-character recall for the deployed INT8 model on each evaluation view."
+    },
+    {
+      "kind": "figure",
+      "name": "per_entity_f1",
+      "files": [
+        "per_entity_f1.png",
+        "per_entity_f1.pdf"
+      ],
+      "caption": "Typed entity F1 per entity type on the combined validation view, annotated with gold support."
+    },
+    {
+      "kind": "figure",
+      "name": "ood_model_comparison",
+      "files": [
+        "ood_model_comparison.png",
+        "ood_model_comparison.pdf"
+      ],
+      "caption": "TinyBERT INT8 against DeBERTa INT8 on the OOD development and frozen final fixtures, model-only in both cases."
+    },
+    {
+      "kind": "figure",
+      "name": "model_size_comparison",
+      "files": [
+        "model_size_comparison.png",
+        "model_size_comparison.pdf"
+      ],
+      "caption": "On-disk size of every privacy-model artifact, deployed one highlighted."
+    },
+    {
+      "kind": "figure",
+      "name": "latency_by_input_length",
+      "files": [
+        "latency_by_input_length.png",
+        "latency_by_input_length.pdf"
+      ],
+      "caption": "Median single-threaded inference latency against input length for all three deployment candidates, on the development workstation."
+    },
+    {
+      "kind": "figure",
+      "name": "cpu_latency_distribution",
+      "files": [
+        "cpu_latency_distribution.png",
+        "cpu_latency_distribution.pdf"
+      ],
+      "caption": "Per-row masking latency distribution and cumulative distribution for every benchmarked device."
+    },
+    {
+      "kind": "figure",
+      "name": "pipeline_latency_breakdown",
+      "files": [
+        "pipeline_latency_breakdown.png",
+        "pipeline_latency_breakdown.pdf"
+      ],
+      "caption": "Mean latency of each stage inside a masking call and across the assembled pipeline, on the most recent benchmarked device."
+    },
+    {
+      "kind": "figure",
+      "name": "cpu_memory_and_throughput",
+      "files": [
+        "cpu_memory_and_throughput.png",
+        "cpu_memory_and_throughput.pdf"
+      ],
+      "caption": "Peak process RSS, resident privacy-stack cost and masking throughput for every benchmarked device."
+    }
+  ],
+  "tables": [
+    {
+      "kind": "table",
+      "name": "model_progression",
+      "files": [
+        "model_progression.csv"
+      ],
+      "caption": "Model generations with the metric each one actually has on record.",
+      "rows": 3
+    },
+    {
+      "kind": "table",
+      "name": "deberta_quantization",
+      "files": [
+        "deberta_quantization.csv"
+      ],
+      "caption": "FP32 against INT8 on every view, with the deltas the release gate reads.",
+      "rows": 5
+    },
+    {
+      "kind": "table",
+      "name": "deberta_split_performance",
+      "files": [
+        "deberta_split_performance.csv"
+      ],
+      "caption": "Every metric of the deployed INT8 model on every evaluation view.",
+      "rows": 6
+    },
+    {
+      "kind": "table",
+      "name": "per_entity_f1",
+      "files": [
+        "per_entity_f1.csv"
+      ],
+      "caption": "Per-entity precision, recall, F1 and support on the combined validation view.",
+      "rows": 30
+    },
+    {
+      "kind": "table",
+      "name": "ood_model_comparison",
+      "files": [
+        "ood_model_comparison.csv"
+      ],
+      "caption": "Both deployment models on the OOD development and frozen final fixtures.",
+      "rows": 4
+    },
+    {
+      "kind": "table",
+      "name": "model_size_comparison",
+      "files": [
+        "model_size_comparison.csv"
+      ],
+      "caption": "On-disk size of each privacy-model artifact.",
+      "rows": 5
+    },
+    {
+      "kind": "table",
+      "name": "latency_by_input_length",
+      "files": [
+        "latency_by_input_length.csv"
+      ],
+      "caption": "Single-threaded latency at four input lengths on the development workstation.",
+      "rows": 12
+    },
+    {
+      "kind": "table",
+      "name": "cpu_benchmark_runs",
+      "files": [
+        "cpu_benchmark_runs.csv"
+      ],
+      "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
+      "rows": 1
+    },
+    {
+      "kind": "table",
+      "name": "cpu_latency_percentiles",
+      "files": [
+        "cpu_latency_percentiles.csv"
+      ],
+      "caption": "Latency percentiles of the full masking call, per device.",
+      "rows": 1
+    },
+    {
+      "kind": "table",
+      "name": "pipeline_latency_breakdown",
+      "files": [
+        "pipeline_latency_breakdown.csv"
+      ],
+      "caption": "Mean latency per stage for the most recent benchmarked device.",
+      "rows": 9
+    }
+  ],
+  "cpu_benchmark_runs": [
+    "20260817T190227Z_windows-amd64_full_workstation"
+  ],
+  "unavailable_inputs": []
+}

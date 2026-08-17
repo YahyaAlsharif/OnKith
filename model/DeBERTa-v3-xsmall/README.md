@@ -8,7 +8,37 @@ There are three notebooks, and the split between them is deliberate.
 | [`model_v2_frozen_ood_final.ipynb`](model_v2_frozen_ood_final.ipynb) | **Final exam.** Score the already-accepted INT8 candidate on the frozen OOD final benchmark, once. | No - it spends the holdout |
 | [`deberta_vs_tinybert_int8_validation.ipynb`](deberta_vs_tinybert_int8_validation.ipynb) | **Compare the two deployment models.** Score the previous TinyBERT INT8 and the new DeBERTa INT8 against the same held-out AI4Privacy English validation split. | Yes, once its inputs are staged - see below |
 
-The teammate entry point is the first one. It builds, trains, evaluates, and exports the 31-entity / 63-BIO-label Model V2 model. Normal notebook defaults are the real run: up to 10 epochs with early stopping. No full Model V2 training has been run yet.
+The teammate entry point is the first one. It builds, trains, evaluates, and exports the 31-entity / 63-BIO-label Model V2 model. Normal notebook defaults are the real run: up to 10 epochs with early stopping.
+
+## Release status
+
+Model V2 is **trained, accepted and deployed**.
+
+| Step | State |
+|---|---|
+| Training run | complete, `run_signature 700f90cd…`, best epoch 3 |
+| FP32 export and INT8 quantization | complete |
+| INT8 quality gate over all five views | **passed** |
+| Accepted candidate manifest | `artifacts/model_v2/metrics/accepted_int8_candidate.json`, `accepted: true` |
+| Frozen OOD final benchmark | **spent**, `artifacts/model_v2/metrics/evaluation_ood_final_int8.json` |
+| Production migration | performed, `FullPipeline_V3/models/deberta_pii/` |
+
+Deployed INT8 typed entity F1: test 0.9527, original validation 0.9588, supplementary validation 0.8849, combined validation 0.9534, OOD dev 0.6882, frozen OOD final 0.6244. Quantization costs at most 0.0182 typed F1 (on OOD dev), against a gate of 0.02.
+
+### The corrected gate
+
+The gate in section 26 of the training notebook compared a training-side FP32 decode against an INT8 decode that fed SentencePiece `word_ids()` into `consolidate_predictions_to_words`. That grouped trailing punctuation into entity spans and reported INT8 typed F1 around 0.59 - a decoder defect measured as quantization loss. The decoder was fixed (see `FullPipeline_V3/integrated_pipeline/model_v2_masker.py`), both runtimes were re-scored through the one production path by [`deployment/evaluate_onnx_production_path.py`](deployment/evaluate_onnx_production_path.py), and the candidate manifest was re-issued from those reports by:
+
+```powershell
+.\.venv\Scripts\python.exe model\DeBERTa-v3-xsmall\deployment\finalize_int8_candidate.py --check   # recompute and print, write nothing
+.\.venv\Scripts\python.exe model\DeBERTa-v3-xsmall\deployment\finalize_int8_candidate.py           # re-issue the manifest
+```
+
+That script reads two JSON reports and re-hashes what is on disk. It never opens the ONNX graph as a model, and it refuses to run if the INT8 SHA-256 has changed. The model artifact is byte-for-byte the one that was quantized: `bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8`.
+
+### Deployment benchmarks
+
+Latency, memory and cross-device parity live outside this directory: run [`Full_Pipeline_CPU_Benchmark.ipynb`](../../Full_Pipeline_CPU_Benchmark.ipynb) at the repository root, on any CPU including the Raspberry Pi. See [`research_results/README.md`](../../research_results/README.md).
 
 The second notebook is separated for one reason: the frozen OOD final set can be spent exactly once, and a benchmark that sits inside a development notebook eventually gets run by accident. Nothing in the main notebook can load or score the frozen annotations, so no **Run All**, no re-run of a cell, and no smoke test can burn the final holdout.
 
