@@ -1,0 +1,639 @@
+{
+  "run_id": "20260818T061111Z_windows-amd64_smoke_workstation-smoke",
+  "mode": "smoke",
+  "view": "deployment_benchmark_subset",
+  "rows": 54,
+  "subset_sha256": "7d2c370d08a5df93cf0c59c36ef7c9cbf2844995472a232bdcf1995c9e39df46",
+  "int8_sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+  "failures": [],
+  "production_path": {
+    "rows": 54,
+    "rows_with_pii": 50,
+    "typed_entity": {
+      "precision": 0.9535603715170279,
+      "recall": 0.9716088328075709,
+      "f1": 0.9624999999999999,
+      "support": 317,
+      "predicted": 323,
+      "true_positives": 308
+    },
+    "binary_entity": {
+      "precision": 0.9659442724458205,
+      "recall": 0.9842271293375394,
+      "f1": 0.975,
+      "support": 317,
+      "predicted": 323,
+      "true_positives": 312
+    },
+    "private_character_recall": 0.9983268265476855,
+    "private_character_leakage": 0.001673173452314547,
+    "private_characters": 3586,
+    "non_private_overmasking_rate": 0.00748544496811755,
+    "overmasked_characters": 27,
+    "hard_negative_rows": 4,
+    "hard_negative_false_positive_rate": 0.25,
+    "per_label": {
+      "ACCOUNTNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "AGE": {
+        "precision": 0.9473684210526315,
+        "recall": 1.0,
+        "f1": 0.972972972972973,
+        "support": 18,
+        "predicted": 19,
+        "true_positives": 18
+      },
+      "BUILDINGNUM": {
+        "precision": 0.9285714285714286,
+        "recall": 1.0,
+        "f1": 0.962962962962963,
+        "support": 13,
+        "predicted": 14,
+        "true_positives": 13
+      },
+      "CITY": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 19,
+        "predicted": 19,
+        "true_positives": 19
+      },
+      "COUNTRY": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0,
+        "predicted": 1,
+        "true_positives": 0
+      },
+      "CREDITCARDNUMBER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 11,
+        "predicted": 11,
+        "true_positives": 11
+      },
+      "DATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 45,
+        "predicted": 45,
+        "true_positives": 45
+      },
+      "DRIVERLICENSENUM": {
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.888888888888889,
+        "support": 12,
+        "predicted": 15,
+        "true_positives": 12
+      },
+      "EMAIL": {
+        "precision": 0.9130434782608695,
+        "recall": 0.9130434782608695,
+        "f1": 0.9130434782608695,
+        "support": 23,
+        "predicted": 23,
+        "true_positives": 21
+      },
+      "GENDER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "predicted": 4,
+        "true_positives": 4
+      },
+      "GIVENNAME": {
+        "precision": 0.9411764705882353,
+        "recall": 1.0,
+        "f1": 0.9696969696969697,
+        "support": 32,
+        "predicted": 34,
+        "true_positives": 32
+      },
+      "IDCARDNUM": {
+        "precision": 0.9375,
+        "recall": 0.8333333333333334,
+        "f1": 0.8823529411764706,
+        "support": 18,
+        "predicted": 16,
+        "true_positives": 15
+      },
+      "IPV4": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "predicted": 4,
+        "true_positives": 4
+      },
+      "PASSPORTNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 7,
+        "predicted": 7,
+        "true_positives": 7
+      },
+      "PASSWORD": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "SEX": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6,
+        "predicted": 6,
+        "true_positives": 6
+      },
+      "SOCIALNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 12,
+        "predicted": 12,
+        "true_positives": 12
+      },
+      "STREET": {
+        "precision": 0.9333333333333333,
+        "recall": 0.9333333333333333,
+        "f1": 0.9333333333333333,
+        "support": 15,
+        "predicted": 15,
+        "true_positives": 14
+      },
+      "SURNAME": {
+        "precision": 0.9285714285714286,
+        "recall": 0.9629629629629629,
+        "f1": 0.9454545454545454,
+        "support": 27,
+        "predicted": 28,
+        "true_positives": 26
+      },
+      "TAXNUM": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1": 0.9333333333333333,
+        "support": 8,
+        "predicted": 7,
+        "true_positives": 7
+      },
+      "TELEPHONENUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 11,
+        "predicted": 11,
+        "true_positives": 11
+      },
+      "TITLE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 18,
+        "predicted": 18,
+        "true_positives": 18
+      },
+      "URL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "ZIPCODE": {
+        "precision": 0.9090909090909091,
+        "recall": 0.9090909090909091,
+        "f1": 0.9090909090909091,
+        "support": 11,
+        "predicted": 11,
+        "true_positives": 10
+      }
+    },
+    "boundary_correct_type_confusions": {
+      "IDCARDNUM->DRIVERLICENSENUM": 3,
+      "TAXNUM->IDCARDNUM": 1
+    }
+  },
+  "model_attributed": {
+    "rows": 54,
+    "rows_with_pii": 50,
+    "typed_entity": {
+      "precision": 0.9630872483221476,
+      "recall": 0.9053627760252366,
+      "f1": 0.9333333333333333,
+      "support": 317,
+      "predicted": 298,
+      "true_positives": 287
+    },
+    "binary_entity": {
+      "precision": 0.9731543624161074,
+      "recall": 0.9148264984227129,
+      "f1": 0.9430894308943089,
+      "support": 317,
+      "predicted": 298,
+      "true_positives": 290
+    },
+    "private_character_recall": 0.8817624093697713,
+    "private_character_leakage": 0.11823759063022865,
+    "private_characters": 3586,
+    "non_private_overmasking_rate": 0.007532956685499058,
+    "overmasked_characters": 24,
+    "hard_negative_rows": 4,
+    "hard_negative_false_positive_rate": 0.25,
+    "per_label": {
+      "ACCOUNTNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "AGE": {
+        "precision": 0.9473684210526315,
+        "recall": 1.0,
+        "f1": 0.972972972972973,
+        "support": 18,
+        "predicted": 19,
+        "true_positives": 18
+      },
+      "BUILDINGNUM": {
+        "precision": 0.9285714285714286,
+        "recall": 1.0,
+        "f1": 0.962962962962963,
+        "support": 13,
+        "predicted": 14,
+        "true_positives": 13
+      },
+      "CITY": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 19,
+        "predicted": 19,
+        "true_positives": 19
+      },
+      "COUNTRY": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0,
+        "predicted": 1,
+        "true_positives": 0
+      },
+      "CREDITCARDNUMBER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 11,
+        "predicted": 11,
+        "true_positives": 11
+      },
+      "DATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 45,
+        "predicted": 45,
+        "true_positives": 45
+      },
+      "DRIVERLICENSENUM": {
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.888888888888889,
+        "support": 12,
+        "predicted": 15,
+        "true_positives": 12
+      },
+      "EMAIL": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 23,
+        "predicted": 0,
+        "true_positives": 0
+      },
+      "GENDER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "predicted": 4,
+        "true_positives": 4
+      },
+      "GIVENNAME": {
+        "precision": 0.9411764705882353,
+        "recall": 1.0,
+        "f1": 0.9696969696969697,
+        "support": 32,
+        "predicted": 34,
+        "true_positives": 32
+      },
+      "IDCARDNUM": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "support": 18,
+        "predicted": 15,
+        "true_positives": 15
+      },
+      "IPV4": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "predicted": 4,
+        "true_positives": 4
+      },
+      "PASSPORTNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 7,
+        "predicted": 7,
+        "true_positives": 7
+      },
+      "PASSWORD": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "SEX": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6,
+        "predicted": 6,
+        "true_positives": 6
+      },
+      "SOCIALNUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 12,
+        "predicted": 12,
+        "true_positives": 12
+      },
+      "STREET": {
+        "precision": 0.9333333333333333,
+        "recall": 0.9333333333333333,
+        "f1": 0.9333333333333333,
+        "support": 15,
+        "predicted": 15,
+        "true_positives": 14
+      },
+      "SURNAME": {
+        "precision": 0.9285714285714286,
+        "recall": 0.9629629629629629,
+        "f1": 0.9454545454545454,
+        "support": 27,
+        "predicted": 28,
+        "true_positives": 26
+      },
+      "TAXNUM": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1": 0.9333333333333333,
+        "support": 8,
+        "predicted": 7,
+        "true_positives": 7
+      },
+      "TELEPHONENUM": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 11,
+        "predicted": 11,
+        "true_positives": 11
+      },
+      "TITLE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 18,
+        "predicted": 18,
+        "true_positives": 18
+      },
+      "URL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1,
+        "predicted": 1,
+        "true_positives": 1
+      },
+      "ZIPCODE": {
+        "precision": 1.0,
+        "recall": 0.9090909090909091,
+        "f1": 0.9523809523809523,
+        "support": 11,
+        "predicted": 10,
+        "true_positives": 10
+      }
+    },
+    "boundary_correct_type_confusions": {
+      "IDCARDNUM->DRIVERLICENSENUM": 3
+    }
+  },
+  "ood_dev": {
+    "rows": 40,
+    "complete_fixture": false,
+    "seconds": 2.291313299999956,
+    "metrics": {
+      "rows": 40,
+      "rows_with_pii": 32,
+      "typed_entity": {
+        "precision": 0.8490566037735849,
+        "recall": 0.8653846153846154,
+        "f1": 0.8571428571428571,
+        "support": 52,
+        "predicted": 53,
+        "true_positives": 45
+      },
+      "binary_entity": {
+        "precision": 0.8867924528301887,
+        "recall": 0.9038461538461539,
+        "f1": 0.8952380952380953,
+        "support": 52,
+        "predicted": 53,
+        "true_positives": 47
+      },
+      "private_character_recall": 0.8656036446469249,
+      "private_character_leakage": 0.13439635535307515,
+      "private_characters": 878,
+      "non_private_overmasking_rate": 0.007832898172323759,
+      "overmasked_characters": 6,
+      "hard_negative_rows": 8,
+      "hard_negative_false_positive_rate": 0.125,
+      "per_label": {
+        "ACCOUNTNUM": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "BUILDINGNUM": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1": 0.8,
+          "support": 3,
+          "predicted": 2,
+          "true_positives": 2
+        },
+        "CITY": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571,
+          "support": 3,
+          "predicted": 4,
+          "true_positives": 3
+        },
+        "CREDITCARDNUMBER": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6666666666666666,
+          "support": 2,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "DATE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6,
+          "predicted": 6,
+          "true_positives": 6
+        },
+        "DRIVERLICENSENUM": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "EMAIL": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 7,
+          "predicted": 7,
+          "true_positives": 7
+        },
+        "GIVENNAME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 9,
+          "predicted": 9,
+          "true_positives": 9
+        },
+        "IDCARDNUM": {
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1,
+          "predicted": 3,
+          "true_positives": 1
+        },
+        "ORGANISATION": {
+          "precision": 0.5714285714285714,
+          "recall": 1.0,
+          "f1": 0.7272727272727273,
+          "support": 4,
+          "predicted": 7,
+          "true_positives": 4
+        },
+        "PASSPORTNUM": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "STREET": {
+          "precision": 0.6666666666666666,
+          "recall": 0.6666666666666666,
+          "f1": 0.6666666666666666,
+          "support": 3,
+          "predicted": 3,
+          "true_positives": 2
+        },
+        "SURNAME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 8,
+          "predicted": 8,
+          "true_positives": 8
+        },
+        "TELEPHONENUM": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 2,
+          "predicted": 1,
+          "true_positives": 0
+        },
+        "ZIPCODE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        }
+      },
+      "boundary_correct_type_confusions": {
+        "TELEPHONENUM->ORGANISATION": 1,
+        "ACCOUNTNUM->TELEPHONENUM": 1
+      }
+    },
+    "latency": {
+      "count": 40,
+      "mean_ms": 57.276264999998716,
+      "std_ms": 138.54767410624163,
+      "min_ms": 15.26250000000573,
+      "max_ms": 553.9731000000074,
+      "p50_ms": 17.381349999993745,
+      "p90_ms": 22.702640000005662,
+      "p95_ms": 529.1598250000077,
+      "p99_ms": 551.9876880000055,
+      "total_ms": 2291.0505999999486
+    },
+    "release_reference": {
+      "typed_entity_f1": 0.6881937436932392,
+      "typed_entity_precision": 0.6570327552986512,
+      "typed_entity_recall": 0.722457627118644,
+      "private_character_recall": 0.8725026288117771,
+      "private_character_leakage": 0.1274973711882229,
+      "non_private_overmasking_rate": 0.02195373508177398,
+      "hard_negative_false_positive_rate": 0.2222222222222222,
+      "rows": 360
+    },
+    "typed_f1_delta_vs_release": 0.16894911344961794
+  }
+}
