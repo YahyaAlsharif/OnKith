@@ -1,0 +1,3 @@
+run_id,device,subset,clips,reference_words,aggregate_wer,mean_wer,median_wer,min_wer,max_wer,substitutions,deletions,insertions
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,public,12,222,0.04054054054054054,0.022096530920060333,0.0,0.0,0.1,9,0,0
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,synthetic_privacy,32,647,0.0401854714064915,0.05852493048636364,0.0,0.0,0.5,23,1,2

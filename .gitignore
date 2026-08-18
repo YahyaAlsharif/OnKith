@@ -70,6 +70,13 @@ model/TinyBERT-4/artifacts/tinybert_pii/checkpoints/
 model/TinyBERT-4/artifacts/tinybert_pii/huggingface_model/
 model/TinyBERT-4/artifacts/tinybert_pii/onnx_model/model_fp32.onnx
 
+# The pinned Canary speech recogniser is acquired, never committed: it is a
+# 700 MB third-party artifact that FullPipeline_V3/scripts/acquire_canary.py
+# downloads and SHA-256 verifies on each device. Its manifest is tracked; the
+# weights are not. The DeBERTa INT8 model *is* committed, because it is this
+# project's own release artifact and the Pi cannot rebuild it.
+*.nemo
+
 # ---------------------------------------------------------------------------
 # Generated PII corpora (model/data)
 # ---------------------------------------------------------------------------
@@ -91,6 +98,14 @@ model/data/.*_execution.ipynb
 *.raw
 moonshine_received_audio/
 transcripts/
+
+# Except the audio benchmark fixtures. They are not recorded speech: the
+# privacy clips are Piper TTS output of sentences written for this project with
+# entirely fictional PII, and the public clips are verbatim LibriSpeech
+# dev-clean (CC BY 4.0). Full_Pipeline_Audio_Benchmark.py needs them on the
+# Raspberry Pi, which has no TTS and no dataset download, so they are committed
+# and their SHA-256 is pinned in audio_benchmark.manifest.json.
+!model/privacy_evaluation/fixtures/audio_benchmark/clips/*.wav
 
 # ---------------------------------------------------------------------------
 # Jupyter

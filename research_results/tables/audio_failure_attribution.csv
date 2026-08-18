@@ -1,0 +1,5 @@
+run_id,device,outcome,entities,share
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Protected,42,0.7
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,"STT altered, masked anyway",5,0.08333333333333333
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Privacy-model failure,10,0.16666666666666666
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,"STT-caused, nothing masked",3,0.05

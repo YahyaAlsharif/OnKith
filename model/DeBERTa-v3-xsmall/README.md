@@ -38,7 +38,7 @@ That script reads two JSON reports and re-hashes what is on disk. It never opens
 
 ### Deployment benchmarks
 
-Latency, memory and cross-device parity live outside this directory: run [`Full_Pipeline_CPU_Benchmark.ipynb`](../../Full_Pipeline_CPU_Benchmark.ipynb) at the repository root, on any CPU including the Raspberry Pi. See [`research_results/README.md`](../../research_results/README.md).
+Latency, memory and cross-device parity live outside this directory: run [`Full_Pipeline_CPU_Benchmark.py`](../../Full_Pipeline_CPU_Benchmark.py) at the repository root, on any CPU including the Raspberry Pi. End-to-end behaviour from real audio is [`Full_Pipeline_Audio_Benchmark.py`](../../Full_Pipeline_Audio_Benchmark.py). See [`research_results/README.md`](../../research_results/README.md).
 
 The second notebook is separated for one reason: the frozen OOD final set can be spent exactly once, and a benchmark that sits inside a development notebook eventually gets run by accident. Nothing in the main notebook can load or score the frozen annotations, so no **Run All**, no re-run of a cell, and no smoke test can burn the final holdout.
 

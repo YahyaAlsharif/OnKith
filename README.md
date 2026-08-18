@@ -147,19 +147,39 @@ hardware have not yet been measured and are the immediate next step.
 
 ## Results and benchmarks
 
-Two notebooks at the repository root produce every number that goes into the
-report. Neither trains a model.
+Three entry points at the repository root produce every number that goes into the
+report. None of them trains a model.
 
-| Notebook | Purpose |
-|---|---|
-| [`Research_Paper_Figures.ipynb`](Research_Paper_Figures.ipynb) | Turns the saved evaluation evidence into publication-quality figures and CSV tables under `research_results/`. |
-| [`Full_Pipeline_CPU_Benchmark.ipynb`](Full_Pipeline_CPU_Benchmark.ipynb) | Runs the real pipeline and the accepted INT8 privacy model on **any CPU**, including the Raspberry Pi, and records latency, memory and quality. |
+| Entry point | Run it on | Purpose |
+|---|---|---|
+| [`Full_Pipeline_CPU_Benchmark.py`](Full_Pipeline_CPU_Benchmark.py) | any CPU, Raspberry Pi included | Scores the committed 2,000-row held-out subset through the accepted INT8 privacy model and records latency, memory and quality. |
+| [`Full_Pipeline_Audio_Benchmark.py`](Full_Pipeline_Audio_Benchmark.py) | any CPU, Raspberry Pi included | Drives committed WAV clips through the whole deployment - VAD, STT, masking - and records word error rate, real-time factor, memory and end-to-end privacy leakage. |
+| [`Research_Paper_Figures.ipynb`](Research_Paper_Figures.ipynb) | the workstation | Turns the saved evidence into publication-quality figures and CSV tables under `research_results/`. |
 
-Run the benchmark notebook on a device, commit the folder it writes under
-`research_results/cpu_benchmarks/`, then rerun the figures notebook: it picks up
-every device it finds and adds the comparison and prediction-parity figures
-automatically. Full instructions:
-[research_results/README.md](research_results/README.md).
+The two benchmarks are plain scripts, not notebooks, because the Raspberry Pi has
+no Jupyter:
+
+```bash
+git pull
+python Full_Pipeline_CPU_Benchmark.py
+python Full_Pipeline_Audio_Benchmark.py
+```
+
+Commit the folders they write under `research_results/cpu_benchmarks/`, then
+rerun the figures notebook on the workstation: it picks up every device it finds
+and adds the comparison and prediction-parity figures automatically. Full
+instructions: [research_results/README.md](research_results/README.md).
+
+The audio benchmark needs the production speech recognizer, which is not part of
+the default install:
+
+```bash
+pip install "nemo-toolkit[asr]==2.5.3" "torch==2.7.1"
+python FullPipeline_V3/scripts/acquire_canary.py
+```
+
+Without it the script still verifies the fixtures and runs its reference-text
+control arms, reports exactly what is missing, and exits with code 2.
 
 ---
 

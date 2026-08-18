@@ -1,0 +1,1695 @@
+{
+  "schema_version": 1,
+  "artifact": "audio_benchmark",
+  "purpose": "A small, fixed set of 16 kHz WAV clips scored end to end by Full_Pipeline_Audio_Benchmark.py on every device. It is a controlled deployment benchmark, not a comprehensive speech-recognition benchmark and not a replacement for the large held-out text evaluation.",
+  "generated_utc": "2026-08-18T05:10:04.260360+00:00",
+  "generator": "model/privacy_evaluation/scripts/build_audio_benchmark.py",
+  "ontology_version": "model_v2.ontology.1",
+  "sample_rate": 16000,
+  "audio_format": "16-bit PCM mono WAV",
+  "silence_padding_seconds": 0.25,
+  "peak_dbfs": -3.0,
+  "subsets": {
+    "synthetic_privacy": {
+      "name": "synthetic privacy speech benchmark",
+      "source": "Piper TTS (MIT) reading sentences written for this project",
+      "voices": {
+        "ljspeech": {
+          "model": "en_US-ljspeech-high.onnx",
+          "speaker": null,
+          "dataset": "LJ Speech",
+          "dataset_license": "public domain",
+          "accent": "en_US"
+        },
+        "libritts_f": {
+          "model": "en_US-libritts_r-medium.onnx",
+          "speaker": 92,
+          "dataset": "LibriTTS-R",
+          "dataset_license": "CC BY 4.0",
+          "accent": "en_US"
+        },
+        "libritts_m": {
+          "model": "en_US-libritts_r-medium.onnx",
+          "speaker": 511,
+          "dataset": "LibriTTS-R",
+          "dataset_license": "CC BY 4.0",
+          "accent": "en_US"
+        },
+        "vctk_a": {
+          "model": "en_GB-vctk-medium.onnx",
+          "speaker": 8,
+          "dataset": "VCTK",
+          "dataset_license": "CC BY 4.0",
+          "accent": "en_GB"
+        },
+        "vctk_b": {
+          "model": "en_GB-vctk-medium.onnx",
+          "speaker": 47,
+          "dataset": "VCTK",
+          "dataset_license": "CC BY 4.0",
+          "accent": "en_GB"
+        }
+      },
+      "license": "Piper is MIT. Voice models are trained on LJ Speech (public domain), LibriTTS-R (CC BY 4.0) and VCTK (CC BY 4.0).",
+      "privacy_notice": "Every name, number, address, credential and document identifier is fictional. Telephone numbers use the NANP 555-01xx fictional range and web/e-mail addresses use the RFC 2606 reserved example domains. No real personal information is present.",
+      "privacy_annotated": true,
+      "reporting_label": "synthetic privacy speech benchmark",
+      "summary": {
+        "clips": 32,
+        "total_duration_seconds": 183.684,
+        "total_bytes": 5879294,
+        "duration_seconds": {
+          "min": 1.882,
+          "median": 4.111,
+          "mean": 5.74,
+          "max": 15.117
+        },
+        "duration_buckets": {
+          "0-5s": 18,
+          "10-20s": 4,
+          "5-10s": 10
+        },
+        "clips_with_private_information": 25,
+        "privacy_annotated_clips": 32,
+        "hard_negative_clips": 7,
+        "expected_spans": 60,
+        "entity_types": 21,
+        "spans_by_entity": {
+          "ACCOUNTNUM": 3,
+          "AGE": 2,
+          "AMOUNT": 1,
+          "BANKNAME": 1,
+          "BUILDINGNUM": 3,
+          "CITY": 3,
+          "CREDITCARDNUMBER": 1,
+          "DATE": 6,
+          "DRIVERLICENSENUM": 1,
+          "EMAIL": 3,
+          "GIVENNAME": 8,
+          "IDCARDNUM": 1,
+          "ORGANISATION": 2,
+          "PASSWORD": 1,
+          "STREET": 3,
+          "SURNAME": 9,
+          "TELEPHONENUM": 4,
+          "TIME": 5,
+          "TITLE": 1,
+          "URL": 1,
+          "ZIPCODE": 1
+        }
+      }
+    },
+    "public": {
+      "name": "LibriSpeech dev-clean subset",
+      "source": "hf-internal-testing/librispeech_asr_dummy :: clean/validation-00000-of-00001.parquet",
+      "upstream": "LibriSpeech ASR corpus, dev-clean validation split",
+      "license": "CC BY 4.0",
+      "citation": "V. Panayotov, G. Chen, D. Povey and S. Khudanpur, \"Librispeech: An ASR corpus based on public domain audio books\", ICASSP 2015, pp. 5206-5210.",
+      "split": "validation (dev-clean)",
+      "selection": "Round-robin over duration buckets, shortest first within each bucket, corpus sorted by utterance id. No randomness.",
+      "privacy_annotated": false,
+      "privacy_notice": "Not annotated for private information and excluded from every privacy metric. Read prose contains person names, so the model detects real entities here that carry no gold annotation.",
+      "reporting_label": "LibriSpeech dev-clean subset",
+      "summary": {
+        "clips": 12,
+        "total_duration_seconds": 96.015,
+        "total_bytes": 3073006,
+        "duration_seconds": {
+          "min": 1.64,
+          "median": 5.12,
+          "mean": 8.001,
+          "max": 29.4
+        },
+        "duration_buckets": {
+          "0-5s": 4,
+          "10-20s": 4,
+          "20-30s": 1,
+          "5-10s": 3
+        },
+        "clips_with_private_information": 0,
+        "privacy_annotated_clips": 0,
+        "hard_negative_clips": 0,
+        "expected_spans": 0,
+        "entity_types": 0,
+        "spans_by_entity": {}
+      }
+    }
+  },
+  "totals": {
+    "clips": 44,
+    "total_duration_seconds": 279.699,
+    "total_bytes": 8952300,
+    "duration_seconds": {
+      "min": 1.64,
+      "median": 5.015,
+      "mean": 6.357,
+      "max": 29.4
+    },
+    "duration_buckets": {
+      "0-5s": 22,
+      "10-20s": 8,
+      "20-30s": 1,
+      "5-10s": 13
+    },
+    "clips_with_private_information": 25,
+    "privacy_annotated_clips": 32,
+    "hard_negative_clips": 7,
+    "expected_spans": 60,
+    "entity_types": 21,
+    "spans_by_entity": {
+      "ACCOUNTNUM": 3,
+      "AGE": 2,
+      "AMOUNT": 1,
+      "BANKNAME": 1,
+      "BUILDINGNUM": 3,
+      "CITY": 3,
+      "CREDITCARDNUMBER": 1,
+      "DATE": 6,
+      "DRIVERLICENSENUM": 1,
+      "EMAIL": 3,
+      "GIVENNAME": 8,
+      "IDCARDNUM": 1,
+      "ORGANISATION": 2,
+      "PASSWORD": 1,
+      "STREET": 3,
+      "SURNAME": 9,
+      "TELEPHONENUM": 4,
+      "TIME": 5,
+      "TITLE": 1,
+      "URL": 1,
+      "ZIPCODE": 1
+    }
+  },
+  "clips": [
+    {
+      "clip_id": "benign_001",
+      "audio_path": "clips/benign_001.wav",
+      "sha256": "09434fc0ff3c13fb50668e6f49bf5b36d0a3b322f3a7ce94842ee37aa41e5c20",
+      "bytes": 94436,
+      "duration_seconds": 2.95,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Turn the kitchen lights off, please.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "no private information at all"
+    },
+    {
+      "clip_id": "benign_002",
+      "audio_path": "clips/benign_002.wav",
+      "sha256": "62231d910439e2096b4bd7d4cb1b95d382120a076a5dc951fc141019ef991610",
+      "bytes": 60256,
+      "duration_seconds": 1.882,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Set a timer for twenty minutes.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "hard negative: a benign number that is not private"
+    },
+    {
+      "clip_id": "benign_003",
+      "audio_path": "clips/benign_003.wav",
+      "sha256": "809c17d79c4718e8f8554a805d0f2da95b25bc0d4f5118c48cb2dd129b24423d",
+      "bytes": 113012,
+      "duration_seconds": 3.53,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "The recipe needs three hundred grams of flour and two eggs.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "vctk_a",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 8,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "hard negative: quantities that must not be masked"
+    },
+    {
+      "clip_id": "benign_004",
+      "audio_path": "clips/benign_004.wav",
+      "sha256": "cbf28a0da6d85fa07a9c67cda784321b5bbb5a27f097fa73f081f6925eca4826",
+      "bytes": 81804,
+      "duration_seconds": 2.555,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Remind me to water the plants when I get home this evening.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "ordinary assistant request, no private information"
+    },
+    {
+      "clip_id": "benign_005",
+      "audio_path": "clips/benign_005.wav",
+      "sha256": "8665ad90e051b526af5439b965a9af6ddc51c1d5639a10a00eba443025719ace",
+      "bytes": 173570,
+      "duration_seconds": 5.423,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "I keep forgetting the password for that site, so I should probably use the password manager instead of writing it down.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "hard negative: talks about passwords without disclosing one"
+    },
+    {
+      "clip_id": "benign_006",
+      "audio_path": "clips/benign_006.wav",
+      "sha256": "611491b64fe4e4aa4d90f115d64a523c13ddebb29903a5e1700c9d26bd9a98bf",
+      "bytes": 182858,
+      "duration_seconds": 5.713,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "The number seventeen bus takes about forty minutes at this hour, so it is quicker to walk.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "hard negative: route and duration numbers, nothing private"
+    },
+    {
+      "clip_id": "benign_007",
+      "audio_path": "clips/benign_007.wav",
+      "sha256": "9ebce6ada69407d0338034123c6e84dd87315a98e92f71f085345e96c9fe2525",
+      "bytes": 439206,
+      "duration_seconds": 13.724,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "I have been meaning to reorganise the garage for months now. There are four boxes of books that should go to the charity shop, a bicycle that needs a new chain, and far too many empty jars. Perhaps this weekend.",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": true,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "long benign clip, no private information"
+    },
+    {
+      "clip_id": "privacy_001",
+      "audio_path": "clips/privacy_001.wav",
+      "sha256": "09e3a6bd863297ae80a1cd425b2654d8aa7101a4ddf4ffbe31e85e4ef188a3a5",
+      "bytes": 66572,
+      "duration_seconds": 2.079,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "My name is Alex Carter.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Alex",
+          "start": 11,
+          "end": 15
+        },
+        {
+          "label": "SURNAME",
+          "text": "Carter",
+          "start": 16,
+          "end": 22
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "entity at the end of a short sentence"
+    },
+    {
+      "clip_id": "privacy_002",
+      "audio_path": "clips/privacy_002.wav",
+      "sha256": "7564af66965ff13a50c1fd2f73db9dc882cf42fd0ba4a721f3878daf24a7924d",
+      "bytes": 60998,
+      "duration_seconds": 1.905,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Priya Nandakumar is joining the call.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Priya",
+          "start": 0,
+          "end": 5
+        },
+        {
+          "label": "SURNAME",
+          "text": "Nandakumar",
+          "start": 6,
+          "end": 16
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "entity at the very start of the utterance"
+    },
+    {
+      "clip_id": "privacy_003",
+      "audio_path": "clips/privacy_003.wav",
+      "sha256": "6675a6997c971d6016b95fe9fbe8b62fd626f99c0e71f944efbe7f930f4ded64",
+      "bytes": 116726,
+      "duration_seconds": 3.646,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Call me back on five five five, zero one four seven.",
+      "expected_private_spans": [
+        {
+          "label": "TELEPHONENUM",
+          "text": "five five five, zero one four seven",
+          "start": 16,
+          "end": 51
+        }
+      ],
+      "category": [
+        "TELEPHONENUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_a",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 8,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "spoken digits, telephone"
+    },
+    {
+      "clip_id": "privacy_004",
+      "audio_path": "clips/privacy_004.wav",
+      "sha256": "204c7c8410c22573b0fe8e2908d384ca5c15ac0a9475eff733486910d3f5607c",
+      "bytes": 130102,
+      "duration_seconds": 4.064,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "My email is alex dot carter at example dot com.",
+      "expected_private_spans": [
+        {
+          "label": "EMAIL",
+          "text": "alex dot carter at example dot com",
+          "start": 12,
+          "end": 46
+        }
+      ],
+      "category": [
+        "EMAIL"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "spoken e-mail address, the classic STT surface change"
+    },
+    {
+      "clip_id": "privacy_005",
+      "audio_path": "clips/privacy_005.wav",
+      "sha256": "3a60aa7e045f6c4d6965fc51760fc31eac7045b224d177b7899b8a2c97943a57",
+      "bytes": 114126,
+      "duration_seconds": 3.565,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Send the package to one forty two Cedar Street tomorrow.",
+      "expected_private_spans": [
+        {
+          "label": "BUILDINGNUM",
+          "text": "one forty two",
+          "start": 20,
+          "end": 33
+        },
+        {
+          "label": "STREET",
+          "text": "Cedar Street",
+          "start": 34,
+          "end": 46
+        }
+      ],
+      "category": [
+        "BUILDINGNUM",
+        "STREET"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_b",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 47,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "address-like phrase in a natural request"
+    },
+    {
+      "clip_id": "privacy_006",
+      "audio_path": "clips/privacy_006.wav",
+      "sha256": "8236f792b3b3167e1da7207a910cfd8f4cadf5104d35ab78729a7eed8745a132",
+      "bytes": 78460,
+      "duration_seconds": 2.45,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "My reference number is seven four nine two one eight.",
+      "expected_private_spans": [
+        {
+          "label": "ACCOUNTNUM",
+          "text": "seven four nine two one eight",
+          "start": 23,
+          "end": 52
+        }
+      ],
+      "category": [
+        "ACCOUNTNUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "spoken digits, reference number"
+    },
+    {
+      "clip_id": "privacy_007",
+      "audio_path": "clips/privacy_007.wav",
+      "sha256": "ea6fbca8ff8dffbcc798e43cf6e562b7292f81468eed7e3719259cb4c4cd9a48",
+      "bytes": 118584,
+      "duration_seconds": 3.704,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "The appointment is on the twelfth of March if that still works.",
+      "expected_private_spans": [
+        {
+          "label": "DATE",
+          "text": "twelfth of March",
+          "start": 26,
+          "end": 42
+        }
+      ],
+      "category": [
+        "DATE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "spoken date"
+    },
+    {
+      "clip_id": "privacy_008",
+      "audio_path": "clips/privacy_008.wav",
+      "sha256": "ba39eca69fda511f55c37ca00ed252bcbe888eb66122446440aff6f7846a9324",
+      "bytes": 72516,
+      "duration_seconds": 2.265,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "I will be in Manchester at half past four.",
+      "expected_private_spans": [
+        {
+          "label": "CITY",
+          "text": "Manchester",
+          "start": 13,
+          "end": 23
+        },
+        {
+          "label": "TIME",
+          "text": "half past four",
+          "start": 27,
+          "end": 41
+        }
+      ],
+      "category": [
+        "CITY",
+        "TIME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "city and spoken time in one clause"
+    },
+    {
+      "clip_id": "privacy_009",
+      "audio_path": "clips/privacy_009.wav",
+      "sha256": "0a37414832dd2c6fddafa9ff545cb4985b31f322f61ab439e17e9752966c1181",
+      "bytes": 131588,
+      "duration_seconds": 4.111,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Tomas just turned forty one so we should send something.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Tomas",
+          "start": 0,
+          "end": 5
+        },
+        {
+          "label": "AGE",
+          "text": "forty one",
+          "start": 18,
+          "end": 27
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "AGE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "name plus age"
+    },
+    {
+      "clip_id": "privacy_010",
+      "audio_path": "clips/privacy_010.wav",
+      "sha256": "d02b40672e06e5a84c9b16da3d0568f307c0142bb6bc0cb886762edf02b67652",
+      "bytes": 73258,
+      "duration_seconds": 2.288,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Doctor Okonjo works at Northgate Clinic.",
+      "expected_private_spans": [
+        {
+          "label": "SURNAME",
+          "text": "Okonjo",
+          "start": 7,
+          "end": 13
+        },
+        {
+          "label": "ORGANISATION",
+          "text": "Northgate Clinic",
+          "start": 23,
+          "end": 39
+        }
+      ],
+      "category": [
+        "SURNAME",
+        "ORGANISATION"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "person and organisation together"
+    },
+    {
+      "clip_id": "privacy_011",
+      "audio_path": "clips/privacy_011.wav",
+      "sha256": "c14ae58213137ee6e0e9ce124d59b1619f283d8ca7eb812abfc4d756eb5d0a67",
+      "bytes": 114498,
+      "duration_seconds": 3.577,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "The booking page is example dot com slash booking.",
+      "expected_private_spans": [
+        {
+          "label": "URL",
+          "text": "example dot com slash booking",
+          "start": 20,
+          "end": 49
+        }
+      ],
+      "category": [
+        "URL"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_b",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 47,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "spoken URL"
+    },
+    {
+      "clip_id": "privacy_012",
+      "audio_path": "clips/privacy_012.wav",
+      "sha256": "f8ec7dfe86e0883343e11bda5c86280a26f1a834602709b2fefd110f16a6f53a",
+      "bytes": 254188,
+      "duration_seconds": 7.942,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "If you need me urgently, ask for Alex Carter and use the mobile number five five five, zero one six two.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Alex",
+          "start": 33,
+          "end": 37
+        },
+        {
+          "label": "SURNAME",
+          "text": "Carter",
+          "start": 38,
+          "end": 44
+        },
+        {
+          "label": "TELEPHONENUM",
+          "text": "five five five, zero one six two",
+          "start": 71,
+          "end": 103
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME",
+        "TELEPHONENUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "several entities, one of them spoken digits"
+    },
+    {
+      "clip_id": "privacy_013",
+      "audio_path": "clips/privacy_013.wav",
+      "sha256": "97d39b2a26378787487fbf835c6026664fad6aa2878fd181c56cf3ce6df28637",
+      "bytes": 127130,
+      "duration_seconds": 3.971,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Please forward the invoice to billing at example dot org before the thirtieth of September.",
+      "expected_private_spans": [
+        {
+          "label": "EMAIL",
+          "text": "billing at example dot org",
+          "start": 30,
+          "end": 56
+        },
+        {
+          "label": "DATE",
+          "text": "thirtieth of September",
+          "start": 68,
+          "end": 90
+        }
+      ],
+      "category": [
+        "EMAIL",
+        "DATE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "e-mail and date in a natural instruction"
+    },
+    {
+      "clip_id": "privacy_014",
+      "audio_path": "clips/privacy_014.wav",
+      "sha256": "cc59ac3b035079b9f77e33515b1aeb7315ae724b07ff22955a4f4be447332cc8",
+      "bytes": 168368,
+      "duration_seconds": 5.26,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "The delivery address is twenty seven Alder Lane, Leeds, postcode L S one, four B N.",
+      "expected_private_spans": [
+        {
+          "label": "BUILDINGNUM",
+          "text": "twenty seven",
+          "start": 24,
+          "end": 36
+        },
+        {
+          "label": "STREET",
+          "text": "Alder Lane",
+          "start": 37,
+          "end": 47
+        },
+        {
+          "label": "CITY",
+          "text": "Leeds",
+          "start": 49,
+          "end": 54
+        },
+        {
+          "label": "ZIPCODE",
+          "text": "L S one, four B N",
+          "start": 65,
+          "end": 82
+        }
+      ],
+      "category": [
+        "BUILDINGNUM",
+        "STREET",
+        "CITY",
+        "ZIPCODE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_a",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 8,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "full spoken address, four entity types"
+    },
+    {
+      "clip_id": "privacy_015",
+      "audio_path": "clips/privacy_015.wav",
+      "sha256": "7e2702c0047ef95a89add692127bb15d5a2d52b2d2092f9bded69ff2ebd0da78",
+      "bytes": 163910,
+      "duration_seconds": 5.121,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "The card on the account ends with four one one two, six six eight three and it expires next year.",
+      "expected_private_spans": [
+        {
+          "label": "CREDITCARDNUMBER",
+          "text": "four one one two, six six eight three",
+          "start": 34,
+          "end": 71
+        }
+      ],
+      "category": [
+        "CREDITCARDNUMBER"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "spoken card digits"
+    },
+    {
+      "clip_id": "privacy_016",
+      "audio_path": "clips/privacy_016.wav",
+      "sha256": "88443a3ce1b23dec0a11f9c99bec7e41c6b7cd16aa5dd8093399008ed8ba38fb",
+      "bytes": 244158,
+      "duration_seconds": 7.629,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "They asked for my identity card number, which is X B nine four two seven one, before they would release the parcel.",
+      "expected_private_spans": [
+        {
+          "label": "IDCARDNUM",
+          "text": "X B nine four two seven one",
+          "start": 49,
+          "end": 76
+        }
+      ],
+      "category": [
+        "IDCARDNUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "ljspeech",
+        "model": "en_US-ljspeech-high.onnx",
+        "speaker_id": null,
+        "accent": "en_US",
+        "tts_dataset": "LJ Speech",
+        "tts_dataset_license": "public domain"
+      },
+      "note": "alphanumeric document number"
+    },
+    {
+      "clip_id": "privacy_017",
+      "audio_path": "clips/privacy_017.wav",
+      "sha256": "1a36cc7ae29876795e1baf1d4d359388285447b6c5ada0bacc99c8ebaaabdc83",
+      "bytes": 186200,
+      "duration_seconds": 5.817,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "The temporary password for the guest network is maple river four four, change it afterwards.",
+      "expected_private_spans": [
+        {
+          "label": "PASSWORD",
+          "text": "maple river four four",
+          "start": 48,
+          "end": 69
+        }
+      ],
+      "category": [
+        "PASSWORD"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_b",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 47,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "an actually disclosed credential"
+    },
+    {
+      "clip_id": "privacy_018",
+      "audio_path": "clips/privacy_018.wav",
+      "sha256": "e6096d93d0327d8f68f3c4925a67b9c76a105dfbe1ccef8196db06895eb2bd5c",
+      "bytes": 147192,
+      "duration_seconds": 4.598,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "The transfer went out from Harbour Mutual, account three three one nine zero five, yesterday afternoon.",
+      "expected_private_spans": [
+        {
+          "label": "BANKNAME",
+          "text": "Harbour Mutual",
+          "start": 27,
+          "end": 41
+        },
+        {
+          "label": "ACCOUNTNUM",
+          "text": "three three one nine zero five",
+          "start": 51,
+          "end": 81
+        }
+      ],
+      "category": [
+        "BANKNAME",
+        "ACCOUNTNUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "bank name plus spoken account digits"
+    },
+    {
+      "clip_id": "privacy_019",
+      "audio_path": "clips/privacy_019.wav",
+      "sha256": "72fffa1843d4af066390a915acbfb3b49840a63ca904ca1c9965b250b8e5a7a2",
+      "bytes": 130472,
+      "duration_seconds": 4.076,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "Professor Aldridge is expecting the draft by nine in the morning on Friday.",
+      "expected_private_spans": [
+        {
+          "label": "TITLE",
+          "text": "Professor",
+          "start": 0,
+          "end": 9
+        },
+        {
+          "label": "SURNAME",
+          "text": "Aldridge",
+          "start": 10,
+          "end": 18
+        },
+        {
+          "label": "TIME",
+          "text": "nine in the morning",
+          "start": 45,
+          "end": 64
+        },
+        {
+          "label": "DATE",
+          "text": "Friday",
+          "start": 68,
+          "end": 74
+        }
+      ],
+      "category": [
+        "TITLE",
+        "SURNAME",
+        "TIME",
+        "DATE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_a",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 8,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "title, surname and two temporal entities"
+    },
+    {
+      "clip_id": "privacy_020",
+      "audio_path": "clips/privacy_020.wav",
+      "sha256": "5210afc2816f6856bdf36078b45d222312627ced6c9b68c302301cf0abbb5dfe",
+      "bytes": 319204,
+      "duration_seconds": 9.974,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "Just to confirm the details for the visit. The tenant is Rachel Whitfield, the property is at eighty four Beacon Road, and the best number to reach her on is five five five, zero one three nine. She is usually free after six in the evening.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Rachel",
+          "start": 57,
+          "end": 63
+        },
+        {
+          "label": "SURNAME",
+          "text": "Whitfield",
+          "start": 64,
+          "end": 73
+        },
+        {
+          "label": "BUILDINGNUM",
+          "text": "eighty four",
+          "start": 94,
+          "end": 105
+        },
+        {
+          "label": "STREET",
+          "text": "Beacon Road",
+          "start": 106,
+          "end": 117
+        },
+        {
+          "label": "TELEPHONENUM",
+          "text": "five five five, zero one three nine",
+          "start": 158,
+          "end": 193
+        },
+        {
+          "label": "TIME",
+          "text": "six in the evening",
+          "start": 221,
+          "end": 239
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME",
+        "BUILDINGNUM",
+        "STREET",
+        "TELEPHONENUM",
+        "TIME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "multi-sentence, six entities across three sentences"
+    },
+    {
+      "clip_id": "privacy_021",
+      "audio_path": "clips/privacy_021.wav",
+      "sha256": "b6f5a37ea78f38222a4a6e7b08db182a8bf5cadbd697902b6cb4551ec34873c5",
+      "bytes": 418028,
+      "duration_seconds": 13.062,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "I have sent the signed contract over already. It went to contracts at example dot net from my work account on the fourth of June, and the reference they gave me was eight zero two five one seven, so it should be easy enough to find.",
+      "expected_private_spans": [
+        {
+          "label": "EMAIL",
+          "text": "contracts at example dot net",
+          "start": 57,
+          "end": 85
+        },
+        {
+          "label": "DATE",
+          "text": "fourth of June",
+          "start": 114,
+          "end": 128
+        },
+        {
+          "label": "ACCOUNTNUM",
+          "text": "eight zero two five one seven",
+          "start": 165,
+          "end": 194
+        }
+      ],
+      "category": [
+        "EMAIL",
+        "DATE",
+        "ACCOUNTNUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_b",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 47,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "multi-sentence with an entity in the final clause"
+    },
+    {
+      "clip_id": "privacy_022",
+      "audio_path": "clips/privacy_022.wav",
+      "sha256": "000da3c501a079450536d114c3501cdea5b8dcd54cd70db003de0fc269904f58",
+      "bytes": 267192,
+      "duration_seconds": 8.348,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "The weather looks fine for the weekend, so we will stick with the plan. Meet Daniel outside the station at about quarter past two, and if anything changes he will text you. Bring the twenty pound note you owe me.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Daniel",
+          "start": 77,
+          "end": 83
+        },
+        {
+          "label": "TIME",
+          "text": "quarter past two",
+          "start": 113,
+          "end": 129
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "TIME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "private and non-private information mixed in one clip"
+    },
+    {
+      "clip_id": "privacy_023",
+      "audio_path": "clips/privacy_023.wav",
+      "sha256": "1926ea372ee45e6f98e86c039ce7fbbe8cd88bb67a767ec2455041ba419efe83",
+      "bytes": 315490,
+      "duration_seconds": 9.858,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "Ferreira called about the insurance claim this morning. She said the policy was opened in Bristol, the excess is two hundred and fifty pounds, and she will write to us again on the second of November.",
+      "expected_private_spans": [
+        {
+          "label": "SURNAME",
+          "text": "Ferreira",
+          "start": 0,
+          "end": 8
+        },
+        {
+          "label": "CITY",
+          "text": "Bristol",
+          "start": 90,
+          "end": 97
+        },
+        {
+          "label": "AMOUNT",
+          "text": "two hundred and fifty pounds",
+          "start": 113,
+          "end": 141
+        },
+        {
+          "label": "DATE",
+          "text": "second of November",
+          "start": 181,
+          "end": 199
+        }
+      ],
+      "category": [
+        "SURNAME",
+        "CITY",
+        "AMOUNT",
+        "DATE"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "vctk_a",
+        "model": "en_GB-vctk-medium.onnx",
+        "speaker_id": 8,
+        "accent": "en_GB",
+        "tts_dataset": "VCTK",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "entity at the very start and the very end of a long clip"
+    },
+    {
+      "clip_id": "privacy_024",
+      "audio_path": "clips/privacy_024.wav",
+      "sha256": "36f0140f3cb5eacabaab15522a9bac2a11c74c4434a768385c4ba4bc9f4a0753",
+      "bytes": 483788,
+      "duration_seconds": 15.117,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "Here is everything the clinic asked for, so you do not have to call back. The patient is Miriam Halstead, she is sixty three, and she is registered with Riverbank Health Centre. Her contact number is five five five, zero one eight eight, and the follow up appointment is on the nineteenth of January at ten past eleven. Everything else on the form can stay as it is.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Miriam",
+          "start": 89,
+          "end": 95
+        },
+        {
+          "label": "SURNAME",
+          "text": "Halstead",
+          "start": 96,
+          "end": 104
+        },
+        {
+          "label": "AGE",
+          "text": "sixty three",
+          "start": 113,
+          "end": 124
+        },
+        {
+          "label": "ORGANISATION",
+          "text": "Riverbank Health Centre",
+          "start": 153,
+          "end": 176
+        },
+        {
+          "label": "TELEPHONENUM",
+          "text": "five five five, zero one eight eight",
+          "start": 200,
+          "end": 236
+        },
+        {
+          "label": "DATE",
+          "text": "nineteenth of January",
+          "start": 278,
+          "end": 299
+        },
+        {
+          "label": "TIME",
+          "text": "ten past eleven",
+          "start": 303,
+          "end": 318
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME",
+        "AGE",
+        "ORGANISATION",
+        "TELEPHONENUM",
+        "DATE",
+        "TIME"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_f",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 92,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "seven entities in one long utterance, worst case for the decoder"
+    },
+    {
+      "clip_id": "privacy_025",
+      "audio_path": "clips/privacy_025.wav",
+      "sha256": "d79f9191080ac3c17bf6368aef139634f9db8a03825297f34bf92beaedb7b53c",
+      "bytes": 431404,
+      "duration_seconds": 13.48,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "We went through the whole checklist twice this afternoon and most of it was fine. Two of the smoke alarms needed new batteries and the back gate still sticks. The only thing outstanding is the paperwork for Owen Bradshaw, whose driving licence number is B R A D S nine one one zero four. Everything else can wait until the next visit.",
+      "expected_private_spans": [
+        {
+          "label": "GIVENNAME",
+          "text": "Owen",
+          "start": 207,
+          "end": 211
+        },
+        {
+          "label": "SURNAME",
+          "text": "Bradshaw",
+          "start": 212,
+          "end": 220
+        },
+        {
+          "label": "DRIVERLICENSENUM",
+          "text": "B R A D S nine one one zero four",
+          "start": 254,
+          "end": 286
+        }
+      ],
+      "category": [
+        "GIVENNAME",
+        "SURNAME",
+        "DRIVERLICENSENUM"
+      ],
+      "source": "synthetic",
+      "subset": "synthetic_privacy",
+      "privacy_annotated": true,
+      "is_hard_negative": false,
+      "speaker": {
+        "voice": "libritts_m",
+        "model": "en_US-libritts_r-medium.onnx",
+        "speaker_id": 511,
+        "accent": "en_US",
+        "tts_dataset": "LibriTTS-R",
+        "tts_dataset_license": "CC BY 4.0"
+      },
+      "note": "one entity buried late in a long, mostly benign clip"
+    },
+    {
+      "clip_id": "public_001",
+      "audio_path": "clips/public_001.wav",
+      "sha256": "931406756f452d5dac808bf6bd7c3709d4c3de632a0df5ea4024491af47515f8",
+      "bytes": 940844,
+      "duration_seconds": 29.4,
+      "duration_bucket": "20-30s",
+      "sample_rate": 16000,
+      "reference_transcript": "LINNELL'S PICTURES ARE A SORT OF UP GUARDS AND AT EM PAINTINGS AND MASON'S EXQUISITE IDYLLS ARE AS NATIONAL AS A JINGO POEM MISTER BIRKET FOSTER'S LANDSCAPES SMILE AT ONE MUCH IN THE SAME WAY THAT MISTER CARKER USED TO FLASH HIS TEETH AND MISTER JOHN COLLIER GIVES HIS SITTER A CHEERFUL SLAP ON THE BACK BEFORE HE SAYS LIKE A SHAMPOOER IN A TURKISH BATH NEXT MAN",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-128104-0004"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_002",
+      "audio_path": "clips/public_002.wav",
+      "sha256": "c4403a020082507d7121bef3dcda22b6159fe3a968be5edd53eec0627dce7e4a",
+      "bytes": 163884,
+      "duration_seconds": 5.12,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "AS FOR ETCHINGS THEY ARE OF TWO KINDS BRITISH AND FOREIGN",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-128104-0008"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_003",
+      "audio_path": "clips/public_003.wav",
+      "sha256": "60de0343e00de8f74a36c8b9b3ed01d834cf5705a6ec8c068e40640d43dd05c5",
+      "bytes": 348364,
+      "duration_seconds": 10.885,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "BECAUSE YOU WERE SLEEPING INSTEAD OF CONQUERING THE LOVELY ROSE PRINCESS HAS BECOME A FIDDLE WITHOUT A BOW WHILE POOR SHAGGY SITS THERE A COOING DOVE",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-135031-0000"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_004",
+      "audio_path": "clips/public_004.wav",
+      "sha256": "dfb55a05864fa8a3c498007504da3610da18783589ef7ba63eb62f567e874a97",
+      "bytes": 356204,
+      "duration_seconds": 11.13,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "HE HAS GONE AND GONE FOR GOOD ANSWERED POLYCHROME WHO HAD MANAGED TO SQUEEZE INTO THE ROOM BESIDE THE DRAGON AND HAD WITNESSED THE OCCURRENCES WITH MUCH INTEREST",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-135031-0001"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_005",
+      "audio_path": "clips/public_005.wav",
+      "sha256": "165e5c768a7712852d43203f34b8adacab77dbe0c792e16ba3095910fd1d2f41",
+      "bytes": 367244,
+      "duration_seconds": 11.475,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "I HAVE REMAINED A PRISONER ONLY BECAUSE I WISHED TO BE ONE AND WITH THIS HE STEPPED FORWARD AND BURST THE STOUT CHAINS AS EASILY AS IF THEY HAD BEEN THREADS",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-135031-0002"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_006",
+      "audio_path": "clips/public_006.wav",
+      "sha256": "3fd636bd665d90319983cfb1b4be1da1980728e169b995c4d3e38fc135efa592",
+      "bytes": 61164,
+      "duration_seconds": 1.91,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "HE DOESN'T WORK AT ALL",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-135031-0009"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_007",
+      "audio_path": "clips/public_007.wav",
+      "sha256": "415be691855ae69827f6ad8d409bceb9b5d9de339e624f4ffd14cffcd2653b7f",
+      "bytes": 55724,
+      "duration_seconds": 1.74,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "WHERE IS THAT",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-135031-0014"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_008",
+      "audio_path": "clips/public_008.wav",
+      "sha256": "9e6bd37cf9891ea31c7d53e74b872c320021083b4bd077ed2d18540f4c0c6ccd",
+      "bytes": 162924,
+      "duration_seconds": 5.09,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "ONE MINUTE A VOICE SAID AND THE TIME BUZZER SOUNDED",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-141231-0004"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_009",
+      "audio_path": "clips/public_009.wav",
+      "sha256": "2d142b0c105a0a671d78be0434c22a0bacb81c4473833774b69d4da9e557306e",
+      "bytes": 344364,
+      "duration_seconds": 10.76,
+      "duration_bucket": "10-20s",
+      "sample_rate": 16000,
+      "reference_transcript": "PARTICULARLY SO ON THIS LAST NIGHT WHEN ONLY TWO OF THE LITTLE CUBICLES WERE OCCUPIED THE THOUSANDS OF OTHERS STANDING WITH DARK EMPTY DOORS",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-141231-0010"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_010",
+      "audio_path": "clips/public_010.wav",
+      "sha256": "fff9fa47259a7e9d4963451cbe2681fa305624270a1b123d4cfe48f8b5a9c6e8",
+      "bytes": 160524,
+      "duration_seconds": 5.015,
+      "duration_bucket": "5-10s",
+      "sample_rate": 16000,
+      "reference_transcript": "THE OTHER VOICE SNAPPED WITH A HARSH URGENCY CLEARLY USED TO COMMAND",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-141231-0011"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_011",
+      "audio_path": "clips/public_011.wav",
+      "sha256": "1f343d58d6a9354964793cab867a5c03931c12c34fde1cd9b08e9edd1dc69fe9",
+      "bytes": 52522,
+      "duration_seconds": 1.64,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "THE TWENTIES",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-141231-0013"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    },
+    {
+      "clip_id": "public_012",
+      "audio_path": "clips/public_012.wav",
+      "sha256": "0ec8458da358479bc285476eba91e8011a989be8e4737d5838c55fa13fd8496d",
+      "bytes": 59244,
+      "duration_seconds": 1.85,
+      "duration_bucket": "0-5s",
+      "sample_rate": 16000,
+      "reference_transcript": "TEN SECONDS",
+      "expected_private_spans": [],
+      "category": [],
+      "source": "librispeech_dev_clean",
+      "subset": "public",
+      "is_hard_negative": false,
+      "speaker": {
+        "librispeech_utterance_id": "1272-141231-0016"
+      },
+      "note": "LibriSpeech dev-clean, verbatim. A real-speech word-error-rate and real-time-factor reference. Not annotated for privacy: read prose contains person names, so detections here are unscored rather than counted as false positives.",
+      "privacy_annotated": false
+    }
+  ]
+}

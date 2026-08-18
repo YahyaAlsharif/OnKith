@@ -91,6 +91,69 @@
         "cpu_memory_and_throughput.pdf"
       ],
       "caption": "Peak process RSS, resident privacy-stack cost and masking throughput for every benchmarked device."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_pipeline_stage_latency",
+      "files": [
+        "audio_pipeline_stage_latency.png",
+        "audio_pipeline_stage_latency.pdf"
+      ],
+      "caption": "Mean per-clip latency of every pipeline stage from audio to sanitized text, and each stage's share of total processing time."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_duration_scaling",
+      "files": [
+        "audio_duration_scaling.png",
+        "audio_duration_scaling.pdf"
+      ],
+      "caption": "Audio duration against end-to-end latency, STT latency and STT real-time factor. RTF below 1 means the device processes speech faster than it arrives."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_latency_by_duration_bucket",
+      "files": [
+        "audio_latency_by_duration_bucket.png",
+        "audio_latency_by_duration_bucket.pdf"
+      ],
+      "caption": "Mean end-to-end latency per clip-duration bucket, with the observed minimum and maximum as whiskers."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_latency_and_memory",
+      "files": [
+        "audio_latency_and_memory.png",
+        "audio_latency_and_memory.pdf"
+      ],
+      "caption": "Cumulative distribution of end-to-end latency with P50/P90/P95/P99, and resident memory as each model loads, against the 4 GiB Raspberry Pi budget."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_privacy_reference_vs_pipeline",
+      "files": [
+        "audio_privacy_reference_vs_pipeline.png",
+        "audio_privacy_reference_vs_pipeline.pdf"
+      ],
+      "caption": "Private-character recall and leakage for the same clips scored from written reference text, from uncased unpunctuated reference text, and end to end from audio; plus the attribution of every end-to-end failure."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_word_error_rate",
+      "files": [
+        "audio_word_error_rate.png",
+        "audio_word_error_rate.pdf"
+      ],
+      "caption": "Word error rate on the synthetic privacy clips and on the LibriSpeech dev-clean clips, reported separately because they are different distributions."
+    },
+    {
+      "kind": "figure",
+      "name": "audio_postprocessing_amplification",
+      "files": [
+        "audio_postprocessing_amplification.png",
+        "audio_postprocessing_amplification.pdf"
+      ],
+      "caption": "The spoken-digit finding: utterances where the privacy model did not mask a spoken number and the display renderer then rendered it as a numeral."
     }
   ],
   "tables": [
@@ -164,7 +227,7 @@
         "cpu_benchmark_runs.csv"
       ],
       "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
-      "rows": 1
+      "rows": 2
     },
     {
       "kind": "table",
@@ -183,10 +246,97 @@
       ],
       "caption": "Mean latency per stage for the most recent benchmarked device.",
       "rows": 9
+    },
+    {
+      "kind": "table",
+      "name": "audio_deployment_summary",
+      "files": [
+        "audio_deployment_summary.csv"
+      ],
+      "caption": "One row per device: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy.",
+      "rows": 1
+    },
+    {
+      "kind": "table",
+      "name": "audio_pipeline_stage_latency",
+      "files": [
+        "audio_pipeline_stage_latency.csv"
+      ],
+      "caption": "Per-stage mean latency and share of processing time for the audio pipeline.",
+      "rows": 6
+    },
+    {
+      "kind": "table",
+      "name": "audio_clip_scaling",
+      "files": [
+        "audio_clip_scaling.csv"
+      ],
+      "caption": "Per-clip duration, latency and real-time factor behind the scaling figure.",
+      "rows": 44
+    },
+    {
+      "kind": "table",
+      "name": "audio_latency_by_duration_bucket",
+      "files": [
+        "audio_latency_by_duration_bucket.csv"
+      ],
+      "caption": "End-to-end latency statistics per clip-duration bucket.",
+      "rows": 4
+    },
+    {
+      "kind": "table",
+      "name": "audio_memory_breakdown",
+      "files": [
+        "audio_memory_breakdown.csv"
+      ],
+      "caption": "Resident memory after each model loads, and the peak during the run.",
+      "rows": 6
+    },
+    {
+      "kind": "table",
+      "name": "audio_failure_attribution",
+      "files": [
+        "audio_failure_attribution.csv"
+      ],
+      "caption": "Every expected private entity, attributed to protection, a privacy-model failure, or the speech recognizer.",
+      "rows": 4
+    },
+    {
+      "kind": "table",
+      "name": "audio_privacy_arms",
+      "files": [
+        "audio_privacy_arms.csv"
+      ],
+      "caption": "Privacy metrics for each route to the model: written reference text, uncased unpunctuated reference text, and the real audio pipeline.",
+      "rows": 3
+    },
+    {
+      "kind": "table",
+      "name": "audio_word_error_rate",
+      "files": [
+        "audio_word_error_rate.csv"
+      ],
+      "caption": "Word error rate per fixture subset.",
+      "rows": 2
+    },
+    {
+      "kind": "table",
+      "name": "audio_postprocessing_amplification",
+      "files": [
+        "audio_postprocessing_amplification.csv"
+      ],
+      "caption": "Spoken numbers the privacy model left unmasked and the display renderer then rewrote into numerals of identifier length. Every value is fictional: telephone numbers come from the NANP 555-01xx range reserved for fiction.",
+      "rows": 2
     }
   ],
   "cpu_benchmark_runs": [
-    "20260817T190227Z_windows-amd64_full_workstation"
+    "20260817T190227Z_windows-amd64_full_workstation",
+    "20260818T061111Z_windows-amd64_smoke_workstation-smoke"
   ],
-  "unavailable_inputs": []
+  "audio_benchmark_runs": [
+    "20260818T062503Z_windows-amd64_audio_full_workstation"
+  ],
+  "unavailable_inputs": [
+    "20260818T061111Z_windows-amd64_smoke_workstation-smoke: smoke mode (54 rows), listed in the run table but excluded from the comparison figures"
+  ]
 }

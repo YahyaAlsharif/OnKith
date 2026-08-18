@@ -1,0 +1,7 @@
+run_id,device,stage,mean_ms,share_of_processing
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Audio load,1.4898840909309414,0.0003192192715781388
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Silero VAD,104.76842272726634,0.02244745063791588
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Canary STT,4535.6146340909,0.9717907644405833
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Transcript merge / normalisation,0.19454318182128685,4.168239205284805e-05
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,DeBERTa INT8 masking,25.07022727271843,0.005371491471725846
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Spoken-digit rendering,0.13717954546812258,2.9391786143841723e-05

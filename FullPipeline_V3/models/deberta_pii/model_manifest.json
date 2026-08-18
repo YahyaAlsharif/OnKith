@@ -77,9 +77,12 @@
     }
   },
   "cpu_deployment_benchmark": {
-    "notebook": "Full_Pipeline_CPU_Benchmark.ipynb",
+    "entry_points": [
+      "Full_Pipeline_CPU_Benchmark.py",
+      "Full_Pipeline_Audio_Benchmark.py"
+    ],
     "results": "research_results/cpu_benchmarks/",
-    "note": "Hardware-agnostic; run it on the Raspberry Pi to produce Pi latency and memory evidence."
+    "note": "Hardware-agnostic Python scripts, no Jupyter required; run them on the Raspberry Pi to produce Pi latency, memory and end-to-end audio evidence."
   },
   "physical_pi5_validation": "pending_not_run"
 }

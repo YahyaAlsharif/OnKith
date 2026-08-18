@@ -1,0 +1,7 @@
+run_id,device,stage,rss_mib
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Baseline process,48.78515625
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,VAD loaded,72.7109375
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,STT loaded,2083.9765625
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,DeBERTa loaded,2315.93359375
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,All models loaded,2317.8671875
+20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Peak during run,2372.875
