@@ -1,10 +1,11 @@
 run_id,device,scope,stage,mean_ms
-20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Neural decode (ONNX + span consolidation),83.15575085007731
-20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Structured regex layer,0.2859456000078353
-20260817T190227Z_windows-amd64_full_workstation,workstation,masking_call,Span merge and mask policy,0.12420375017973129
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Silero VAD (per 3 s of audio),41.166040004463866
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Transcript merge,0.5444749993330333
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Wake-word normalisation,0.03803000072366558
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Inactivity buffer,0.13675500158569776
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Privacy masking,20.600300000660354
-20260817T190227Z_windows-amd64_full_workstation,workstation,pipeline,Spoken-digit rendering,0.07891000059316866
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Neural decode (ONNX + span consolidation),83.057044730504
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Structured regex layer,0.1784132779994252
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Span merge and mask policy,0.07970403648641877
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Silero VAD (3 s synthetic probe),30.357567399914842
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Canary STT (3 s synthetic probe),18400.841480999952
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Transcript merge,0.4549400500309275
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Wake-word normalisation,0.021010099953855388
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Inactivity buffer,0.08510315014973457
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Privacy masking,19.73317884990138
+20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Spoken-digit rendering,0.04286450002837228

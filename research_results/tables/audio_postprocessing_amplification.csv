@@ -1,3 +1,3 @@
 run_id,device,clip_id,subset,unmasked_entity_labels,digits,rendered_value,privacy_input_text,final_masked_output
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,privacy_003,synthetic_privacy,TELEPHONENUM,7,5550147,call me back on five five five zero one four seven,call me back on 5550147
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,privacy_015,synthetic_privacy,CREDITCARDNUMBER,8,41126683,the card on the account ends with four one one two six six eight three and it expires next year,the card on the account ends with 41126683 and it expires next year
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,privacy_003,synthetic_privacy,TELEPHONENUM,7,5550147,call me back on five five five zero one four seven,call me back on 5550147
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,privacy_015,synthetic_privacy,CREDITCARDNUMBER,8,41126683,the card on the account ends with four one one two six six eight three and it expires next year,the card on the account ends with 41126683 and it expires next year

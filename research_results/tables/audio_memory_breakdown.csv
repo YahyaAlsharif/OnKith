@@ -1,7 +1,7 @@
 run_id,device,stage,rss_mib
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Baseline process,48.78515625
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,VAD loaded,72.7109375
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,STT loaded,2083.9765625
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,DeBERTa loaded,2315.93359375
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,All models loaded,2317.8671875
-20260818T062503Z_windows-amd64_audio_full_workstation,workstation,Peak during run,2372.875
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Baseline process,60.015625
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,VAD loaded,94.078125
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,STT loaded,1990.34375
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,DeBERTa loaded,2018.484375
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,All models loaded,2020.546875
+20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Peak during run,2030.9375

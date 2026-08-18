@@ -81,7 +81,7 @@
         "pipeline_latency_breakdown.png",
         "pipeline_latency_breakdown.pdf"
       ],
-      "caption": "Mean latency of each stage inside a masking call and across the assembled pipeline, on the most recent benchmarked device."
+      "caption": "Mean latency of each stage inside a masking call and across the assembled pipeline, on the most recent benchmarked device. The two audio stages are driven by a synthesised probe tone rather than speech; the real-speech cost is in the audio benchmark section."
     },
     {
       "kind": "figure",
@@ -91,6 +91,15 @@
         "cpu_memory_and_throughput.pdf"
       ],
       "caption": "Peak process RSS, resident privacy-stack cost and masking throughput for every benchmarked device."
+    },
+    {
+      "kind": "figure",
+      "name": "deployment_parity",
+      "files": [
+        "deployment_parity.png",
+        "deployment_parity.pdf"
+      ],
+      "caption": "Prediction agreement and typed-F1 difference between benchmarked devices running the identical INT8 artifact."
     },
     {
       "kind": "figure",
@@ -227,7 +236,7 @@
         "cpu_benchmark_runs.csv"
       ],
       "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
-      "rows": 2
+      "rows": 3
     },
     {
       "kind": "table",
@@ -236,7 +245,7 @@
         "cpu_latency_percentiles.csv"
       ],
       "caption": "Latency percentiles of the full masking call, per device.",
-      "rows": 1
+      "rows": 2
     },
     {
       "kind": "table",
@@ -245,7 +254,16 @@
         "pipeline_latency_breakdown.csv"
       ],
       "caption": "Mean latency per stage for the most recent benchmarked device.",
-      "rows": 9
+      "rows": 10
+    },
+    {
+      "kind": "table",
+      "name": "deployment_parity",
+      "files": [
+        "deployment_parity.csv"
+      ],
+      "caption": "Cross-device prediction agreement and metric deltas.",
+      "rows": 1
     },
     {
       "kind": "table",
@@ -254,7 +272,7 @@
         "audio_deployment_summary.csv"
       ],
       "caption": "One row per device: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy.",
-      "rows": 1
+      "rows": 2
     },
     {
       "kind": "table",
@@ -331,12 +349,16 @@
   ],
   "cpu_benchmark_runs": [
     "20260817T190227Z_windows-amd64_full_workstation",
-    "20260818T061111Z_windows-amd64_smoke_workstation-smoke"
+    "20260818T061111Z_windows-amd64_smoke_workstation-smoke",
+    "20260818T082425Z_linux-aarch64_full"
   ],
   "audio_benchmark_runs": [
-    "20260818T062503Z_windows-amd64_audio_full_workstation"
+    "20260818T062503Z_windows-amd64_audio_full_workstation",
+    "20260818T080651Z_linux-aarch64_audio_full",
+    "20260818T081310Z_linux-aarch64_audio_full"
   ],
   "unavailable_inputs": [
-    "20260818T061111Z_windows-amd64_smoke_workstation-smoke: smoke mode (54 rows), listed in the run table but excluded from the comparison figures"
+    "20260818T061111Z_windows-amd64_smoke_workstation-smoke: smoke mode (54 rows), listed in the run table but excluded from the comparison figures",
+    "20260818T080651Z_linux-aarch64_audio_full: speech recognizer unavailable (RuntimeError: NeMo backend unavailable: torch import failed: ModuleNotFoundError: No module named 'torch'; nemo import f), listed in the run table but excluded from the deployment summary"
   ]
 }

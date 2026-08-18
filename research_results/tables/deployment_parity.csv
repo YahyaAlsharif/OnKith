@@ -1,0 +1,2 @@
+reference_run,reference_device,comparison_run,comparison_device,shared_rows,identical_predictions,agreement,reference_typed_f1,comparison_typed_f1,typed_f1_delta,character_recall_delta,same_model_hash
+20260817T190227Z_windows-amd64_full_workstation,workstation,20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,2000,1967,0.9835,0.9452325372598313,0.944843435794312,-0.0003891014655192926,-5.405843717054548e-05,True
