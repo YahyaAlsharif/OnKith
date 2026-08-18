@@ -1,5 +1,12 @@
 # TinyBERT OOD baseline findings
 
+> **Historical record.** This documents the state when TinyBERT-4 was the
+> deployed privacy model, and "current" below means current *then*. It is the
+> evidence that motivated the move to DeBERTa-v3-xsmall (Model V2), and it is
+> kept unchanged for that reason. Model V2's results on the same two fixtures are
+> in the root [`README.md`](../../README.md) and in
+> [`research_results/`](../../research_results/).
+
 This is the first frozen comparison for the current TinyBERT checkpoint. It is
 not a Model V2 result and it is not a Raspberry Pi benchmark.
 

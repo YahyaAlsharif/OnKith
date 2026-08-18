@@ -24,6 +24,8 @@ model/privacy_evaluation/fixtures/**/*.manifest.json -text
 *.ort binary
 *.bin binary
 *.safetensors binary
+*.pt binary
+*.nemo binary
 *.wav binary
 *.flac binary
 *.png binary
@@ -33,3 +35,4 @@ model/privacy_evaluation/fixtures/**/*.manifest.json -text
 # Large vendored model artifacts are not useful in diffs.
 *.onnx -diff
 *.safetensors -diff
+*.pt -diff

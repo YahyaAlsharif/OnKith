@@ -29,6 +29,6 @@
   },
   "conversion": null,
   "converted_artifact": null,
-  "physical_pi5_validation": "pending_not_run",
+  "physical_pi5_validation": "validated_20260818T081310Z_linux-aarch64_audio_full",
   "parity_validation": "native_nemo_reference_backend_no_conversion"
 }

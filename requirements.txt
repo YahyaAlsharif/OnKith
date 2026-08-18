@@ -1,4 +1,8 @@
-# Home AI Python dependencies
+# OnKith research/evaluation Python dependencies
+#
+# This is the workstation environment for the training, evaluation and figure
+# notebooks. The production pipeline pins its own, much smaller runtime in
+# FullPipeline_V3/requirements-rpi.txt and requirements-windows.txt.
 #
 # Required Python version: 3.11.9
 #

@@ -1,6 +1,0 @@
-{
-  "run_id": "20260818T080651Z_linux-aarch64_audio_full",
-  "available": false,
-  "reason": "RuntimeError: NeMo backend unavailable: torch import failed: ModuleNotFoundError: No module named 'torch'; nemo import failed: ModuleNotFoundError: No module named 'nemo'",
-  "how_to_enable": "The audio benchmark needs the production speech recognizer. Install it, then run\nthis script again - nothing else changes:\n\n    pip install \"nemo-toolkit[asr]==2.5.3\" \"torch==2.7.1\"\n    python FullPipeline_V3/scripts/acquire_canary.py\n\nThe second command downloads the pinned nvidia/canary-180m-flash artifact and\nverifies its SHA-256. Both are CPU-only and work on Raspberry Pi OS (aarch64).\nUntil then the control arms below still run, so the fixtures, the privacy model\nand the memory profile are all validated - only the recognizer is missing."
-}

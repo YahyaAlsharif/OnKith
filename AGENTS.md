@@ -1,8 +1,8 @@
 # AGENTS.md
 
-## Home AI Project Agent Instructions
+## OnKith project agent instructions
 
-This repository is for the Home AI project. Keep all work simple, clear, and easy for the team to understand.
+This repository is for OnKith (formerly "Home AI"). Keep all work simple, clear, and easy for the team to understand.
 
 ## 1. Plan First, Then Wait for Approval
 

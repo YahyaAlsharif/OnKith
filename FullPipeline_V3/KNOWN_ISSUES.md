@@ -48,6 +48,58 @@ Still open, by design:
 
 ---
 
+## Spoken identifiers can be rebuilt as digits after masking
+
+**Where:** `app/digit_normalizer.py`, downstream of `integrated_pipeline`.
+
+**Status:** open, measured, deliberately not fixed during the release freeze.
+
+### What happens
+
+Canary runs with `pnc: no`, so numbers arrive as digit words. If the privacy
+model does not mask a spoken identifier - phrasing and cue structure decide this,
+and the miss is already counted as a privacy-model failure - the display
+renderer, which runs *after* masking by design, rewrites the surviving words into
+a numeral:
+
+```
+recognized : call me back on five five five zero one four seven
+released   : call me back on five five five zero one four seven
+displayed  : call me back on 5550147
+```
+
+The same effect reproduced on a spoken card-style number
+(`four one one two six six eight three` -> `41126683`), and it reproduced
+identically on the development workstation and on the Raspberry Pi 5. Measured
+frequency in the committed audio benchmark: 2 identifiers across 2 of 32 clips.
+
+### Why it matters, and how much
+
+No additional information is released. The digit words were already in the
+released text, so no per-entity privacy metric moves. What changes is the *form*:
+a copyable seven- or eight-digit numeral is materially more useful to a reader
+than the same digits spelled out, and no entity-counting metric would ever show
+it. That is why the audio benchmark reports it separately, in
+`audio_postprocessing_amplification.csv`.
+
+The reconstruction is display-only. Storage, Onkith and the preview's own
+arithmetic all keep the original text, so it reaches the terminal and the JSON
+`display_text` field, not the database.
+
+### Why it was not fixed here
+
+Two candidate fixes exist and both change production behaviour:
+
+- normalise spoken numbers *before* the privacy model, so digit sequences reach
+  it in the form it handles best;
+- re-screen the text after every post-masking transform, so a render step can
+  never assemble something the privacy layer declined to protect.
+
+Either is a real change to the release path and belongs in the next model
+generation with its own evaluation, not in a documentation freeze.
+
+---
+
 ## The same person can be labelled as two different people
 
 **Where:** `integrated_pipeline/span_merger.py`, in `merge_pii_spans`.

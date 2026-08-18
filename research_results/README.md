@@ -34,8 +34,8 @@ python Full_Pipeline_Audio_Benchmark.py python Full_Pipeline_Audio_Benchmark.py
                 figures/  tables/  summaries/
 ```
 
-1. Run both benchmarks here; commit the folders they write.
-2. Faris pulls, runs the same two commands on the Pi, and commits what they
+1. Run both benchmarks on the workstation; commit the folders they write.
+2. On the Raspberry Pi, pull, run the same two commands, and commit what they
    write there.
 3. Pull that back and rerun `Research_Paper_Figures.ipynb`. The device
    comparison and the prediction-parity figure appear on their own - no edits.
@@ -95,6 +95,35 @@ run without that key is a text run.
 | `ood_dev_parity_data.jsonl` | `audio_failure_analysis.jsonl` |
 | `memory_metrics.json` | |
 | `benchmark_summary.md` | `audio_benchmark_summary.md` |
+
+## The canonical benchmark runs
+
+Four runs, and only four. Each one is a complete, successful run of a committed
+entry point against the hash-verified deployment artifact, and every figure and
+table in this directory is derived from them.
+
+| Run id | Device | Benchmark |
+|---|---|---|
+| `20260817T190227Z_windows-amd64_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows |
+| `20260818T082425Z_linux-aarch64_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows |
+| `20260818T062503Z_windows-amd64_audio_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips |
+| `20260818T081310Z_linux-aarch64_audio_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips |
+
+Runs that are *not* kept, and why:
+
+- **Smoke runs.** `--smoke-test` scores about 50 rows or four clips. It proves
+  the harness works on a machine; it is not a measurement, and leaving one beside
+  the full runs invites it to be read as one. Rerun it locally whenever you want
+  it - the output just should not be committed.
+- **Runs where a stage was unavailable.** An audio run without the speech
+  recognizer installed produces `stt_available: false`, no word error rate, no
+  real-time factor and no memory profile. One such Raspberry Pi attempt was made
+  before the NeMo stack was installed on the device; it was committed by mistake
+  and has been removed. The valid Pi audio run, made minutes later on the same
+  board with the full stack, is the one listed above.
+
+The figures notebook already refuses to put an incomplete run into the comparison
+figures, but the safer rule is that this directory only ever holds evidence.
 
 ## What is canonical
 

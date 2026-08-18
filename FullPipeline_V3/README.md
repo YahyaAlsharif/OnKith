@@ -1,10 +1,46 @@
-# Omit AI
+# OnKith production pipeline (FullPipeline_V3)
 
 **Local speech-to-text and privacy processing for Raspberry Pi 5**
 
-Omit AI is a local English speech-to-text pipeline built for the **Raspberry Pi 5**. It uses **NVIDIA Canary 180M Flash** for transcription, **Silero VAD** for speech detection, overlap-based segmentation for continuous speech, PII masking, and local SQLite storage.
+This is the **current** OnKith deployment package and the only maintained one.
+Earlier integrated pipelines live under [`../archive/`](../archive/) and should
+not be used. The Python entry point is still `app.omit_ai_live` and some code
+still says "Omit AI" — that is the project's earlier name, kept so the module
+paths in existing instructions keep working.
+
+It is a local English speech-to-text pipeline built for the **Raspberry Pi 5**. It uses **NVIDIA Canary 180M Flash** for transcription, **Silero VAD** for speech detection, overlap-based segmentation for continuous speech, PII masking, and local SQLite storage.
 
 Speech recognition and privacy processing run locally. Internet access is only required during setup to download the model and for optional YouTube playback through Onkith.
+
+## Measured on a Raspberry Pi 5 (4 GB)
+
+The whole package has been run end to end on a Raspberry Pi 5 Model B Rev 1.0
+with 3.95 GiB visible RAM, 64-bit Raspberry Pi OS, Python 3.11.9.
+
+| Measurement | Result |
+|---|---|
+| Peak RSS, full audio pipeline | **2,031 MiB** of 3.95 GiB |
+| Memory after Canary loads | 1,990 MiB |
+| Memory added by the DeBERTa INT8 masker | **28 MiB** |
+| Aggregate WER, 44 committed clips (279.7 s) | 0.0403 |
+| Mean STT real-time factor | **2.022** |
+| Mean full-pipeline real-time factor | **2.041** |
+| Mean end-to-end latency per clip | 13.9 s |
+| STT share of processing time | 99.2% |
+| Privacy masking, mean per clip | 30.4 ms |
+| Privacy model on 2,000 committed rows | typed F1 0.9448, 83.6 ms mean, 11.95 rows/s |
+
+Two conclusions, both important:
+
+* **It fits.** The complete stack runs on a 4 GB Pi 5 without running out of
+  memory, with roughly half the board's RAM to spare.
+* **It is not real-time.** At RTF ≈ 2, the device needs about two seconds of
+  computation per second of speech. Use it for push-to-talk, turn-based
+  interaction and batch utterance processing — not live streaming transcription.
+
+The privacy model is not the bottleneck: it is 0.2% of processing time and 1.4%
+of the resident memory. Reproduce with `python Full_Pipeline_Audio_Benchmark.py`
+and `python Full_Pipeline_CPU_Benchmark.py` from the repository root.
 
 ## Features
 
@@ -37,7 +73,10 @@ Speech recognition and privacy processing run locally. Internet access is only r
 | Model RTF     |           **0.0784** |
 | Model size    |  **180M parameters** |
 
-> **Note:** The reported RTF is from the LibriSpeech benchmark and is not a Raspberry Pi 5 runtime measurement.
+> **Note:** The WER and RTF above come from the published LibriSpeech benchmark
+> for this model and are **not** Raspberry Pi 5 runtime measurements. The measured
+> Pi 5 numbers are at the top of this file: aggregate WER 0.0403 and mean STT RTF
+> 2.022 on the committed 44-clip fixture.
 
 ---
 
@@ -237,12 +276,14 @@ The original STT transcript is still used for storage, PII detection, and Onkith
 
 ## Installation
 
-Extract the project:
+From a clone of the repository:
 
 ```bash
-unzip Omit_AI_RPi_Live_CANARY_180M_PI5_4GB_FINAL.zip
-cd Omit_AI_RPi_Live
+cd FullPipeline_V3
 ```
+
+(A packaged release ZIP built by `scripts/build_release_zip.py` unpacks to the
+same layout; `cd` into it instead.)
 
 Make the scripts executable:
 
@@ -288,11 +329,15 @@ Start Omit AI:
 
 ## Verification
 
-Run the test suite:
+Run the test suite from this directory, with the interpreter of the environment
+you installed into:
 
 ```bash
-.venv/bin/python -m unittest discover -s tests -v
+python -m pytest -q
 ```
+
+`python -m unittest discover -s tests -v` works as well; the suite uses no
+pytest-only features.
 
 Run the built-in self-test:
 
@@ -335,6 +380,9 @@ YOUTUBE_API_KEY=your_key_here
 YOUTUBE_REGION=SA
 ```
 
+Keep them in a local `.env` beside this file or in the shell environment. `.env`
+and `*.key` are gitignored repository-wide; never commit a real key.
+
 Example commands:
 
 ```text
@@ -356,7 +404,9 @@ Speech-to-text and PII processing remain local.
 * PII detection may produce false positives or false negatives
 * Raw transcripts are stored locally in SQLite
 * YouTube playback requires internet access and API quota
-* Raspberry Pi 5 RTF, memory usage, and command latency still need to be measured on the final hardware setup
+* **Speech recognition is not real-time on a Raspberry Pi 5** (measured RTF ≈ 2.0). Push-to-talk and turn-based use work; live streaming transcription does not
+* **Spoken numeric identifiers can survive masking and then be rendered as digits.** With `pnc: no` the recognizer emits digit words. If the privacy model misses one, `app/digit_normalizer.py` — which runs *after* masking, by design, for display only — can rewrite the surviving words into a numeral such as `5550147`. No new information is released, but the compact form is worse. Measured on 2 of 60 entities in the audio benchmark, identically on the workstation and the Pi
+* Repeated mentions of one person receive different placeholder numbers — see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)
 
 ---
 

@@ -1,5 +1,10 @@
 # Source dataset builders
 
+> The assembled Model V2 corpus these builders feed into is published as
+> [`KhalidAlharbi377/pii-detection-multisource-en-saudi-arabic`](https://huggingface.co/datasets/KhalidAlharbi377/pii-detection-multisource-en-saudi-arabic)
+> (CC BY 4.0) — 284,619 rows in the same four splits recorded in
+> `model/DeBERTa-v3-xsmall/config/model_v2_data_manifest.json`.
+
 Two notebooks that produce local PII corpora. Their **outputs are gitignored**;
 only the generators and this file are tracked.
 

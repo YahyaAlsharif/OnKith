@@ -84,5 +84,5 @@
     "results": "research_results/cpu_benchmarks/",
     "note": "Hardware-agnostic Python scripts, no Jupyter required; run them on the Raspberry Pi to produce Pi latency, memory and end-to-end audio evidence."
   },
-  "physical_pi5_validation": "pending_not_run"
+  "physical_pi5_validation": "validated_20260818T082425Z_linux-aarch64_full"
 }

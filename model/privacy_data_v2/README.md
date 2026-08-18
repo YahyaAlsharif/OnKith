@@ -208,10 +208,14 @@ verify_manifest(read_manifest("committed.json"), read_manifest("regenerated.json
 A difference in only `artifacts.val_supplementary.sha256` means the selection or
 split logic changed and the committed holdout is no longer valid.
 
-## Intentionally postponed
+## Postponed at the time — current status
 
-- the production migration from the TinyBERT 67-label contract to this 63-label
-  model — a separate reviewed release;
-- Raspberry Pi latency and memory benchmarking, which requires a trained INT8
-  model first;
-- collecting or licensing external real-person data.
+- **The production migration** from the TinyBERT 67-label contract to this
+  63-label model: **done.** `FullPipeline_V3` runs the DeBERTa-v3-xsmall INT8
+  model on the 63-label ontology.
+- **Raspberry Pi latency and memory benchmarking:** **done.** Both the 2,000-row
+  text benchmark and the 44-clip audio benchmark have been run on a Raspberry Pi
+  5 Model B Rev 1.0; see [`research_results/`](../../research_results/).
+- **Collecting or licensing external real-person data:** still not done, and
+  still deliberate. Every privacy fixture in this repository is synthetic or
+  drawn from a public dataset.

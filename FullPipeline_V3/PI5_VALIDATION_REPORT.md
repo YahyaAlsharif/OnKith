@@ -1,6 +1,26 @@
 # Raspberry Pi 5 Validation Report
 
-## Status
+> ## Superseded — historical document
+>
+> This report describes the state of the package **before** it was run on real
+> Raspberry Pi 5 hardware. It is kept unchanged as the record of what had and had
+> not been verified at that time.
+>
+> The pipeline has since been measured on a Raspberry Pi 5 Model B Rev 1.0 (4 GB).
+> Both benchmarks completed on the device with the real NeMo/Canary backend and
+> the real INT8 privacy model:
+>
+> * `research_results/cpu_benchmarks/20260818T082425Z_linux-aarch64_full/`
+>   — 2,000-row privacy benchmark: typed F1 0.9448, mean masking latency 83.6 ms,
+>   throughput 11.95 rows/s, peak RSS 2,393 MiB.
+> * `research_results/cpu_benchmarks/20260818T081310Z_linux-aarch64_audio_full/`
+>   — 44-clip end-to-end audio benchmark: aggregate WER 0.0403, mean STT RTF
+>   2.022, mean pipeline RTF 2.041, peak RSS 2,031 MiB of 3.95 GiB.
+>
+> Headline conclusion: the whole stack **fits** on a 4 GB Pi 5, and speech
+> recognition is **not real-time** on it. See the root `README.md`.
+
+## Status at the time of writing
 
 **PENDING — NOT RUN ON PHYSICAL RASPBERRY PI 5 HARDWARE.**
 **Real-model (NeMo + `.nemo`) validation also NOT RUN.**
