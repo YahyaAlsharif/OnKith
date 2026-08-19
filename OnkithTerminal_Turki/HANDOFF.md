@@ -476,10 +476,27 @@ install rather than on first use, because it comes from HuggingFace and a
 venue is the wrong place to discover that.
 
 ```bash
-# 1. everything. Python 3.11 exactly, 2 GiB free disk, sudo.
-#    apt packages, both recognisers, base.en cached, yt-dlp, piper.
+# 0. get the current version
+git pull
+
+# 1. everything. Python 3.11 exactly, 3 GiB free disk, sudo.
+#    apt packages, both recognisers, base.en cached, yt-dlp, and the
+#    Kokoro voice with its two model files (337 MB, the slow part).
 #    Ends by reporting whether hardware PWM is available.
 ./install_pi.sh
+
+# 1b. .env is gitignored, so it did not arrive with the code. It needs
+#     the two voice paths the installer just printed, and a model name
+#     Groq still serves - every Llama name was withdrawn and a dead one
+#     fails as HTTP 404, which on screen reads like the network dying.
+cat >> .env <<'ENV'
+ONKITH_KOKORO_MODEL=/home/pi/onkith-voices/kokoro-v1.0.onnx
+ONKITH_KOKORO_VOICES=/home/pi/onkith-voices/voices-v1.0.bin
+ENV
+sed -i 's|^GROQ_MODEL=.*|GROQ_MODEL=openai/gpt-oss-120b|' .env
+
+# 1c. what the masker keeps and what it releases, before trusting it
+.venv/bin/python eval/check_masking.py
 
 # 2. confirm what the board actually is, rather than assuming
 ./run_live.sh --device-report
@@ -506,6 +523,36 @@ does not, so it waits for the audio server and writes to
 `~/.local/state/onkith/onkith.log`, keeping the previous run as `.log.1`.
 `./install_desktop.sh --remove` takes all three back out, and none of it
 needed a password to install.
+
+### Memory is the new risk, and it may be the one that bites
+
+Two models changed since the last handoff and both are heavier than what
+they replaced.
+
+| | was | now |
+|---|---|---|
+| privacy classifier | TinyBERT-4, 14 MB | DeBERTa-v3-xsmall, 78 MB |
+| voice | piper | Kokoro, 310 MB graph |
+
+On an M-series laptop the Python process holds **1.2 GB** with the
+recogniser, the classifier and the voice all resident, and Kokoro takes
+one to three seconds a sentence. Neither number has been taken on the
+board. **On a 4 GB Pi 5, with Chromium also holding a 2.3 MB viewer and a
+7.6 MB scene, that is close enough to the ceiling to be the thing that
+fails.**
+
+Both are one line in `.env` to undo, and neither needs anything else
+changed:
+
+```bash
+ONKITH_TTS=piper              # lighter voice, needs ONKITH_PIPER_MODEL
+ONKITH_PII_ENGINE=tinybert    # the old classifier, still packaged
+```
+
+If it swaps, if it stutters, or if the OOM killer takes it, say which of
+the two you turned off and what changed. That is a real finding either
+way, and `eval/results/CLASSIFIER_COMPARISON.md` says what the old
+classifier costs in privacy terms so the trade is a known one.
 
 **Step 4 is the decision.** RTF for `base.en` on the Pi. On a Mac it is
 0.07x against Moonshine's 0.06x, which says nothing about a 4 GB Pi 5.
