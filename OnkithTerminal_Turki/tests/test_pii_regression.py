@@ -74,13 +74,54 @@ class ReleasedEntityTests(unittest.TestCase):
     reaches this. The classifier is not wrong; the policy was.
     """
 
-    def test_the_shipped_policy_releases_places_and_nothing_else(self):
+    def test_the_shipped_policy_releases_places_and_the_clock(self):
         released = set(PipelineConfig().never_masked_entities)
-        self.assertEqual(released, {"CITY", "COUNTRY", "TIMEZONE"})
+        # Pinned exactly rather than checked for membership. Every name
+        # added here is a category the device stops protecting, so the
+        # list growing should require somebody to come and change this
+        # line on purpose.
+        self.assertEqual(
+            released, {"CITY", "COUNTRY", "TIMEZONE", "TIME", "TITLE"}
+        )
         # A street, a building number and a postcode are somebody's home.
         for still_private in ("STREET", "BUILDINGNUM", "ZIPCODE", "GIVENNAME"):
             with self.subTest(entity=still_private):
                 self.assertNotIn(still_private, released)
+        # TITLE is the honorific in this ontology - Doctor, Professor,
+        # Mrs - and is released by decision. The surname beside it still
+        # carries the identity and is still masked, which is what the
+        # test below holds.
+
+    def test_the_clock_survives_so_reminders_do(self):
+        # Masking "half past four" takes every reminder, alarm and "when
+        # does it start" with it, and a time on its own identifies nobody.
+        adapter = PIIMaskerAdapter(PipelineConfig())
+        adapter.load()
+        for spoken in (
+            "remind me at half past four",
+            "the meeting is at 9:30 tomorrow morning",
+        ):
+            with self.subTest(spoken=spoken):
+                self.assertEqual(adapter.mask_text(spoken).masked_text, spoken)
+
+    def test_an_honorific_is_released_but_the_name_beside_it_is_not(self):
+        # The whole point of releasing TITLE: "Mrs" names nobody, "Nowak"
+        # does, and the second must not travel out on the first's ticket.
+        adapter = PIIMaskerAdapter(PipelineConfig())
+        adapter.load()
+        masked = adapter.mask_text("please tell Mrs Nowak I called").masked_text
+        self.assertIn("Mrs", masked)
+        self.assertNotIn("Nowak", masked)
+
+    def test_the_name_of_a_book_is_not_somebody_personal_data(self):
+        adapter = PIIMaskerAdapter(PipelineConfig())
+        adapter.load()
+        for spoken in (
+            "I am reading The Great Gatsby",
+            "have you seen the film The Godfather",
+        ):
+            with self.subTest(spoken=spoken):
+                self.assertEqual(adapter.mask_text(spoken).masked_text, spoken)
 
     def test_a_released_label_never_becomes_a_placeholder(self):
         adapter = PIIMaskerAdapter(PipelineConfig())

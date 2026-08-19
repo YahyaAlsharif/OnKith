@@ -42,6 +42,7 @@ let outputLevel = { peak: 0, rms: 0 };
 let assistantState = "idle";
 let hearing = false;
 let panelAskedFor = null;
+let devices = { mic: {}, audio: {} };
 let socket = null;
 let connected = false;
 let reconnectDelay = RECONNECT_MINIMUM_MS;
@@ -95,6 +96,21 @@ const elements = {
   said: elementById("said"),
   gateChip: elementById("gate-chip"),
   petState: elementById("pet-state"),
+  deviceMic: elementById("device-mic"),
+  micState: elementById("mic-state"),
+  micName: elementById("mic-name"),
+  micDetail: elementById("mic-detail"),
+  micMeter: elementById("mic-meter"),
+  deviceAudio: elementById("device-audio"),
+  audioState: elementById("audio-state"),
+  audioName: elementById("audio-name"),
+  audioDetail: elementById("audio-detail"),
+  deviceLight: elementById("device-light"),
+  lightState: elementById("light-state"),
+  lightLevel: elementById("light-level"),
+  lightDetail: elementById("light-detail"),
+  lamp: elementById("lamp"),
+  speaker: document.querySelector(".obj-speaker"),
 };
 
 function selectedVideo() {
@@ -243,6 +259,9 @@ function applyMessage(message) {
     if (message.listening) applyListening(message.listening);
     if (message.gate) applyGate(message.gate);
     if (message.panel) applyPanel(message.panel);
+    if (message.devices) applyDevices(message.devices);
+    if (message.light) applyLight(message.light);
+    if (message.input) applyInput(message.input);
     if (message.conversation) applyConversation(message.conversation);
     if (message.status) applyStatus(message.status);
     refreshConnection();
@@ -255,6 +274,9 @@ function applyMessage(message) {
   else if (type === "listening") applyListening(message);
   else if (type === "gate") applyGate(message);
   else if (type === "panel") applyPanel(message);
+  else if (type === "devices") applyDevices(message);
+  else if (type === "light") applyLight(message);
+  else if (type === "input") applyInput(message);
   else if (type === "conversation") applyConversation(message);
   else if (type === "status") applyStatus(message);
 }
@@ -279,6 +301,117 @@ function applyListening(section) {
   // it there to be read as a reply to what is being said now.
   if (hearing) elements.heard.textContent = "";
   refreshPet();
+  refreshMicCard();
+}
+
+// ------------------------------------------------------ attached devices
+
+function applyDevices(section) {
+  if (section.open !== undefined) {
+    elements.shell.dataset.devices = section.open === true ? "open" : "closed";
+    // The middle column has just changed width and the recorder in the
+    // other panel measures itself against the box it is given.
+    window.dispatchEvent(new Event("resize"));
+  }
+  if (section.mic) devices.mic = section.mic;
+  if (section.audio) devices.audio = section.audio;
+  refreshMicCard();
+  refreshAudioCard();
+}
+
+function setCard(card, status, state, name, detail) {
+  card.dataset.status = status;
+  card.querySelector(".device-state").textContent = state;
+  card.querySelector(".device-name").textContent = name;
+  card.querySelector(".device-detail").textContent = detail;
+}
+
+function refreshMicCard() {
+  const mic = devices.mic || {};
+  if (!mic.name) {
+    // Before capture opens, and on a surface-only run, which never opens
+    // one at all. Saying "not opened" beats an empty card that reads as a
+    // panel that failed to load.
+    setCard(elements.deviceMic, "missing", "None", "Not opened", "");
+    return;
+  }
+  const detail = [
+    mic.id === null || mic.id === undefined ? null : `id ${mic.id}`,
+    mic.sample_rate ? `${(mic.sample_rate / 1000).toFixed(1)} kHz` : null,
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
+  setCard(
+    elements.deviceMic,
+    hearing ? "live" : "ready",
+    hearing ? "Hearing" : "Idle",
+    mic.name,
+    detail,
+  );
+}
+
+function refreshAudioCard() {
+  const audio = devices.audio || {};
+  // Playback is the honest headline. A sink can be named while mpv is
+  // missing, and on this board the usual failure is the other way round:
+  // everything installed and nothing to play it through.
+  const sink = audio.sink || "No output device";
+  const detail = [
+    audio.server ? `${audio.server}` : null,
+    audio.speech ? `voice ${audio.speech}` : null,
+    audio.playback === true ? "mpv ready" : "mpv unavailable",
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
+  const missing = !audio.sink;
+  setCard(
+    elements.deviceAudio,
+    missing ? "missing" : "ready",
+    missing ? "Silent" : "Ready",
+    sink,
+    detail,
+  );
+}
+
+function applyLight(section) {
+  const brightness = Number.isFinite(section.brightness)
+    ? Math.max(0, Math.min(100, section.brightness))
+    : 0;
+  const on = section.on === true;
+  // Off is dark, whatever the remembered level says. The controller keeps
+  // the brightness through an off so that on returns to it, and drawing
+  // that remembered number as light would contradict the lamp on the desk.
+  const lit = on ? brightness / 100 : 0;
+  elements.lamp.style.setProperty("--lamp", String(lit));
+  // The card warms with the lamp. Light is the only thing on this panel
+  // that emits rather than reports, so it is the only one allowed out of
+  // its own box.
+  elements.deviceLight.style.setProperty("--card-glow", String(lit));
+
+  const wired = section.backend && section.backend !== "none";
+  elements.lightLevel.textContent = `${on ? brightness : 0}%`;
+  setCardStatus(
+    elements.deviceLight,
+    wired ? (on ? "live" : "ready") : "missing",
+  );
+  elements.lightState.textContent = wired ? (on ? "On" : "Off") : "Not wired";
+  elements.lightDetail.textContent = wired
+    ? `${section.backend}  ·  set to ${brightness}%`
+    : "No PWM chip on this machine";
+}
+
+function setCardStatus(card, status) {
+  card.dataset.status = status;
+}
+
+// The microphone's basket, filling from the bottom with the voice in the
+// room. Scaled the same way the speaker is, so the two objects on the
+// panel are reading in the same units as each other.
+function applyInput(section) {
+  elements.micMeter.style.setProperty(
+    "--level",
+    loudness(section.rms).toFixed(3),
+  );
 }
 
 const GATE_LABEL = { held: "Held", sent: "Sent", blocked: "Blocked" };
@@ -441,6 +574,18 @@ function applyLevel(section) {
     peak: Number(section.peak) || 0,
     rms: Number(section.rms) || 0,
   };
+  // The speaker's dust cap, pushed by what is actually coming out. This
+  // number was measured and stored and never shown until the devices
+  // panel had somewhere to put it.
+  elements.speaker.style.setProperty("--out", String(loudness(outputLevel.rms)));
+}
+
+// Sound sits low in a linear scale, so a raw RMS barely moves anything at
+// a normal speaking or listening volume, which is the opposite of what
+// these two meters are for. The cube root opens out the quiet end, where
+// the difference between working and nearly deaf actually lives.
+function loudness(rms) {
+  return Math.cbrt(Math.max(0, Math.min(1, Number(rms) || 0)));
 }
 
 function applyAssistant(section) {

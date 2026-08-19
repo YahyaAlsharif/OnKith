@@ -173,6 +173,7 @@ class LiveSTTRuntime:
         on_partial: Callable[[str], None] | None = None,
         music_worker: OnkithMusicWorker | None = None,
         on_panel: Callable[[bool], None] | None = None,
+        on_devices_panel: Callable[[bool], None] | None = None,
         on_volume: Callable[[int], None] | None = None,
         on_light: Callable[[str, int | None], None] | None = None,
         utc_now: Callable[[], str] = utc_now_iso,
@@ -185,6 +186,11 @@ class LiveSTTRuntime:
         # Showing or hiding the player is a screen instruction and goes
         # nowhere near the music worker: the track carries on either way.
         self.on_panel = on_panel
+        # The devices panel, which is the same kind of instruction about a
+        # different window. Kept as its own callback rather than a flag on
+        # the one above, so a surface is free to offer one panel and not
+        # the other.
+        self.on_devices_panel = on_devices_panel
         # Volume is the level, not the transport. Asking for it quieter
         # must never be a way of stopping the track by accident.
         self.on_volume = on_volume
@@ -325,6 +331,23 @@ class LiveSTTRuntime:
                             except Exception:
                                 # A screen that cannot be told must never
                                 # reach back into the transcript lane.
+                                pass
+                        self.on_event(
+                            "onkith_command_queued",
+                            {"intent": interception.intent},
+                        )
+                    elif interception.intent in (
+                        "SHOW_DEVICES",
+                        "HIDE_DEVICES",
+                    ):
+                        # The other panel. Same rule: an instruction about
+                        # a screen touches neither the music nor the lamp.
+                        if self.on_devices_panel is not None:
+                            try:
+                                self.on_devices_panel(
+                                    interception.intent == "SHOW_DEVICES"
+                                )
+                            except Exception:
                                 pass
                         self.on_event(
                             "onkith_command_queued",

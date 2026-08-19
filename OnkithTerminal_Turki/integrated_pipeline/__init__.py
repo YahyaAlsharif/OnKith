@@ -1,4 +1,4 @@
-"""Deployment-only Moonshine-to-TinyBERT privacy pipeline."""
+"""Deployment-only speech-to-masked-text privacy pipeline."""
 
 from .config import (
     BUFFER_INACTIVITY_SECONDS,

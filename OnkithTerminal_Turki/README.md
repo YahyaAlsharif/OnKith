@@ -2,7 +2,7 @@
 
 This folder contains the standalone Onkith terminal product. It does not import, build, start, or modify the website in `../onkith-web`.
 
-The runtime records short utterances, transcribes them locally with Moonshine, masks private text with TinyBERT and structured recognizers, and renders the result through the original Onkith ANSI terminal UI.
+The runtime records short utterances, transcribes them locally with Moonshine, masks private text with a local DeBERTa classifier and structured recognizers, and renders the result through the original Onkith ANSI terminal UI.
 
 ```text
   You      Please call [GIVENNAME_1] at [TELEPHONENUM_1]
@@ -63,6 +63,83 @@ Onkith close it
 ```
 
 Press `Ctrl+C` once for a drain-first shutdown.
+
+## Voice
+
+Kokoro is the voice the device ships with. It needs two downloaded files,
+which `install_pi.sh` fetches into `~/onkith-voices/`, and two lines in
+`.env` pointing at them:
+
+```text
+ONKITH_KOKORO_MODEL=/home/pi/onkith-voices/kokoro-v1.0.onnx
+ONKITH_KOKORO_VOICES=/home/pi/onkith-voices/voices-v1.0.bin
+```
+
+Only the ONNX build is allowed. Plain `kokoro` pulls torch, which this
+deployment forbids and `check_pi.sh` rejects.
+
+**It is not free.** On an M-series MacBook, Kokoro holds about 600 MB
+resident on top of everything else and takes one to three seconds a
+sentence. With the recogniser and the classifier alongside it the process
+sits at roughly 1.2 GB. None of that has been measured on the Pi. If the
+board cannot hold it, or answers too slowly to use, one line in `.env`
+moves to a lighter voice and nothing else changes:
+
+```text
+ONKITH_TTS=piper
+```
+
+The order without an explicit choice is kokoro, piper, espeak, say — first
+one installed wins.
+
+## Privacy classifier
+
+Two are packaged. **Model V2** (DeBERTa-v3-xsmall INT8, 63 labels) is what
+runs. **Model V1** (TinyBERT-4 INT8, 67 labels) is the one it replaced, kept
+loadable so the two can be measured against each other and so a bad result on
+the Pi is a config key rather than a redeploy.
+
+Switch with `pii.engine` in `config/live_config.json`, or without editing
+anything:
+
+```sh
+ONKITH_PII_ENGINE=tinybert .venv/bin/python -m app.omit_ai_live
+```
+
+Measure them against each other on the speech-like corpus:
+
+```sh
+.venv/bin/python eval/compare_classifiers.py
+```
+
+The findings are in [eval/results/CLASSIFIER_COMPARISON.md](eval/results/CLASSIFIER_COMPARISON.md).
+In short: Model V2 leaks a third as much private text and raises a quarter as
+many false alarms, for 5.7x the disk and 2.6x the memory. Nothing has been
+measured on the Pi 5 yet, which is the open question.
+
+## Session report
+
+`Ctrl+C` prints a session report and then a hardware usage report, after
+the live screen has released the terminal. The session report covers what
+the device heard, latency at p50/p95/max for every stage, backlog
+high-water marks, what was masked, and how the assistant did. Add
+`--report-file run.json` to keep the same numbers as JSON.
+
+It deliberately contains no accuracy. Word error rate, wake recall and
+intent accuracy all need ground truth, and a live session has none. Those
+come from the corpus:
+
+```sh
+.venv/bin/python eval/run_eval.py --engine whisper --no-record
+```
+
+Two lines in it are worth reading first on new hardware. **loudest /
+threshold** is the peak input level divided by the speech threshold the
+calibration chose; under 2x on a session where people did speak means the
+microphone barely clears its own gate. **near misses** lists how the
+recogniser actually spelled the device's name when it nearly matched, and
+those spellings go straight into `wake.spellings` in
+`config/live_config.json`.
 
 If you prefer an activated environment, run:
 
@@ -136,13 +213,25 @@ Masked speech is answered by Groq. Configure it in `onkith-terminal/.env`:
 
 ```text
 GROQ_API_KEY=your_key_here
-GROQ_MODEL=groq/compound-mini
-GROQ_FALLBACK_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_FALLBACK_MODEL=openai/gpt-oss-20b
 ```
 
 The model is whatever Groq currently serves; change `GROQ_MODEL` without touching code. With no key set, Onkith transcribes and masks as before and sends nothing anywhere. `--no-assistant` disables it even when a key is present.
 
-A compound model answers by searching the web on the server, which costs around 3400 tokens a question against a free tier of 8000 a minute. That is two questions a minute before the device starts refusing people. On a refusal it drops to `GROQ_FALLBACK_MODEL`, which costs a few hundred tokens against a limit of 12000, and sends the next minute of questions straight there rather than spending a round trip rediscovering the limit. The fallback cannot search the web, so it answers from what it knows and from the clock the device gives it.
+**Check the name against the live catalogue before a demo.** Groq withdraws models, and a withdrawn name fails as HTTP 404, which on the screen reads like the device losing its network. Every Llama model is gone, including both names this repo used to ship:
+
+```bash
+curl -sH "Authorization: Bearer $GROQ_API_KEY" \
+     -H "User-Agent: Onkith/1.0" \
+     https://api.groq.com/openai/v1/models | grep '"id"'
+```
+
+The `User-Agent` is required. Without one Cloudflare answers 403 `error code: 1010` and the request never reaches Groq.
+
+On a rate limit or a withdrawn name the device drops to `GROQ_FALLBACK_MODEL` and sends the next minute of questions straight there, rather than spending a round trip rediscovering the problem. `groq/compound` and `groq/compound-mini` can search the web on the server, which costs around 3400 tokens a question against a free tier of 8000 a minute: two questions before the device starts refusing people, which is why they are not the default.
+
+The `gpt-oss` models reason before answering and the reasoning is billed against `max_tokens`, so the client sends them `reasoning_effort: low`. Without it the whole 160-token budget goes to reasoning and the reply comes back empty.
 
 The path is:
 
@@ -316,7 +405,7 @@ Raspberry Pi setup remains available through `install_pi.sh`, `check_pi.sh`, and
 2. Moonshine converts the audio to text locally.
 3. Onkith wake commands are separated from ordinary speech.
 4. Music commands are sent to the isolated music worker.
-5. Ordinary speech is masked by TinyBERT and structured recognizers.
+5. Ordinary speech is masked by the local classifier and structured recognizers.
 6. The terminal displays the masked result and SQLite stores the local record.
 
 Masking failures fail closed and display `[BLOCKED: PII MASKING FAILED]`.

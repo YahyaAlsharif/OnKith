@@ -12,9 +12,10 @@ from __future__ import annotations
 
 import queue
 import threading
+import time
 from typing import Any, Callable
 
-from app.llm import LLMUnavailable, parse_command
+from app.llm import LLMUnavailable, ModelGone, parse_command
 from app.rehydrate import RehydrationMap
 
 LogFunction = Callable[[str], None]
@@ -22,6 +23,11 @@ LogFunction = Callable[[str], None]
 MAX_RETAINED_TURNS = 20
 UNREACHABLE_REPLY = "I could not reach the network just then."
 EMPTY_REPLY = "I heard you, but nothing came back."
+# A withdrawn model name reaches the network perfectly well and is told
+# no such thing exists. Saying "I could not reach the network" sends
+# somebody to check the wifi for a fault that is in a config file, which
+# is where an evening went.
+MISCONFIGURED_REPLY = "My language model is not set up correctly."
 
 
 class AssistantWorker:
@@ -34,11 +40,17 @@ class AssistantWorker:
         speech: Any,
         bus: Any,
         log: LogFunction = lambda message: None,
+        on_reply: Callable[[float, bool], None] = lambda seconds, failed: None,
     ) -> None:
         self.llm = llm
         self.speech = speech
         self.bus = bus
         self.log = log
+        # How long the network round trip took, reported whether or not it
+        # produced an answer. This is the only latency in the run that is
+        # not the board's fault, and separating it from the rest is the
+        # difference between "the Pi is too slow" and "the wifi is".
+        self.on_reply = on_reply
         self.queue: queue.Queue[
             tuple[str, list, Callable[[str], None] | None, bool] | None
         ] = queue.Queue()
@@ -133,6 +145,14 @@ class AssistantWorker:
         except Exception:
             pass
 
+    def _note_reply(self, seconds: float, failed: bool = False) -> None:
+        try:
+            self.on_reply(seconds, failed)
+        except Exception:
+            # A meter that cannot be written to must not cost somebody
+            # their answer.
+            pass
+
     def _state(self, state: str) -> None:
         try:
             self.bus.publish("assistant", {"state": state})
@@ -155,6 +175,7 @@ class AssistantWorker:
                     # about.
                     continue
                 self._state("thinking")
+                asked_at = time.perf_counter()
                 try:
                     reply = self.llm.reply_to(masked_text)
                 except LLMUnavailable as error:
@@ -162,10 +183,16 @@ class AssistantWorker:
                     self._state("idle")
                     continue
                 except Exception as error:
+                    self._note_reply(time.perf_counter() - asked_at, failed=True)
                     message = f"{type(error).__name__}: {error}"
                     self.errors.append(message)
                     self.log(f"Assistant reply failed: {message}")
                     self._consecutive_failures += 1
+                    spoken = (
+                        MISCONFIGURED_REPLY
+                        if isinstance(error, ModelGone)
+                        else UNREACHABLE_REPLY
+                    )
                     # Written to the screen every time, even though it is
                     # only spoken once. Speaking the same sentence after
                     # every utterance is unbearable, but leaving the screen
@@ -174,13 +201,14 @@ class AssistantWorker:
                     # somebody, which is exactly what it looks like when
                     # the wake word was never heard. Those two failures are
                     # nothing alike and have to look different.
-                    self._record("onkith", UNREACHABLE_REPLY)
+                    self._record("onkith", spoken)
                     self._state("idle")
                     if self._consecutive_failures == 1:
-                        self.speech.speak(UNREACHABLE_REPLY)
+                        self.speech.speak(spoken)
                     continue
 
                 self._consecutive_failures = 0
+                self._note_reply(time.perf_counter() - asked_at)
 
                 # An instruction the device failed to recognise itself.
                 # Carried out rather than answered, and never spoken:

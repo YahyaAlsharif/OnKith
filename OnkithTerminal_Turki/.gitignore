@@ -6,15 +6,3 @@ __pycache__/
 session_transcript.db
 session_transcript.db-shm
 session_transcript.db-wal
-
-# The evaluation corpus is committed, as a deliberate exception to the
-# repository-wide rule against recorded speech in the root .gitignore.
-# Its owner asked for it to be here. 24 of the 48 clips are one person
-# reading a fixed script, and the numbers in them are placeholders:
-# 0501234567, 1098765432, turki at example dot com. Nothing in them is
-# anybody's real detail.
-#
-# Without the audio eval/run_eval.py cannot run, and the recogniser
-# decision in HANDOFF.md cannot be checked by whoever inherits it, which
-# is the whole reason the corpus exists.
-!eval/corpus/clips/*.wav

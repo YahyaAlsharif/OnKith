@@ -410,6 +410,7 @@ class LiveUI:
         self._last = {}                # last latency dict
         self._word_i = 0
         self._word_t = 0.0
+        self._usage = ""
 
         self._rows, self._cols = self._size()
         self._active = False
@@ -641,6 +642,10 @@ class LiveUI:
         except (TypeError, ValueError):
             pass
 
+    def set_usage(self, text):
+        """Show what the board is spending, on the bottom row."""
+        self._usage = str(text or "")
+
     def ready(self, threshold=None):
         self._threshold = threshold or 0.0
         d = f"threshold {threshold:.5f}" if threshold else None
@@ -807,6 +812,14 @@ class LiveUI:
         # row 3: one quiet control hint
         r3 = _Line()
         r3.add("  ctrl-c to stop", self.c(t.faint))
+        usage = self._usage
+        if usage:
+            # Right-aligned so the hint never moves as the numbers change
+            # width, and dropped entirely rather than colliding with it.
+            start = cols - 1 - len(usage)
+            if start > r3.w + 1:
+                r3.pad_to(start)
+                r3.add(usage, self.c(t.muted))
 
         with self._lock:
             out = [f"{ESC}7"]

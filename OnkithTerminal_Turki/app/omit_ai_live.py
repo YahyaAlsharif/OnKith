@@ -49,9 +49,12 @@ from app.onkith_music import (
     WakeWords,
     configure_wake_words,
     intercept_onkith_command,
+    play_query_from,
     requested_level,
     without_wake_word,
 )
+from app.resources import ResourceMonitor
+from app.session_report import SessionReport
 from app.terminal_ui import TerminalUI
 from integrated_pipeline.config import PipelineConfig
 from integrated_pipeline.moonshine_adapter import MoonshineAdapter
@@ -113,7 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Recorded utterances through Moonshine Medium Streaming and "
-            "TinyBERT private terminal text"
+            "on-device private terminal text"
         )
     )
     parser.add_argument("--list-devices", action="store_true")
@@ -168,6 +171,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-assistant",
         action="store_true",
         help="transcribe and mask without sending anything to the LLM",
+    )
+    parser.add_argument(
+        "--report-file",
+        help="also write the end-of-session report to this path as JSON",
     )
     return parser
 
@@ -366,6 +373,9 @@ def assistant_command(intent: str, raw_transcript: str, core: Any, music: Any) -
     if core is not None and intent in ("SHOW", "HIDE"):
         core.set_panel(intent == "SHOW")
         return
+    if core is not None and intent in ("SHOW_DEVICES", "HIDE_DEVICES"):
+        core.set_devices_panel(intent == "SHOW_DEVICES")
+        return
     if core is not None and intent in ("LOUDER", "QUIETER"):
         core.step_volume(VOLUME_STEP if intent == "LOUDER" else -VOLUME_STEP)
         return
@@ -379,11 +389,11 @@ def assistant_command(intent: str, raw_transcript: str, core: Any, music: Any) -
     if intent == "CLOSE":
         music.submit_close()
     elif intent == "PLAY":
-        # Whatever was said, minus the name that summoned it. The
+        # From the verb onward, not from the start of the sentence. The
         # recogniser may have mangled the title, and if it did there is
         # nothing here that can un-mangle it, but a bad search is a
         # better answer than a sentence explaining the wording.
-        query = without_wake_word(raw_transcript).strip()
+        query = play_query_from(raw_transcript)
         if query:
             music.submit_play(query)
 
@@ -613,7 +623,7 @@ def main(argv: list[str] | None = None) -> int:
             },
             config={
                 "stt": stt_label,
-                "privacy": "TinyBERT-4 INT8 + structured PII",
+                "privacy": f"{config.pii_display_name} + structured PII",
                 "sample rate": "selected device default",
                 "max recording": (
                     f"{config.audio['maximum_utterance_seconds']:.1f}s"
@@ -643,7 +653,8 @@ def main(argv: list[str] | None = None) -> int:
             f"recording_max="
             f"{config.audio['maximum_utterance_seconds']:.1f}s, "
             "Stage5=immediate, SQLite=WAL/NORMAL, "
-            "PII=TinyBERT-4 INT8+structured whole_word_union",
+            f"PII={config.pii_display_name}"
+            "+structured whole_word_union",
         )
 
     moonshine = (
@@ -658,6 +669,29 @@ def main(argv: list[str] | None = None) -> int:
     assistant: AssistantWorker | None = None
     errors: list[str] = []
     interrupted = False
+    session_report = SessionReport(
+        session_id=session_id,
+        started_at_utc=session_started_at,
+        stt_engine=stt_label,
+    )
+    # Every runtime already publishes what it did; until now it went to the
+    # status log, where it scrolled away under the live screen. This taps
+    # the same stream on the way past and keeps the distributions.
+    def on_event(name: str, payload: dict[str, Any]) -> None:
+        session_report.observe_event(name, payload)
+        ui.event(name, payload)
+
+    # Started before the models load, because loading them is the heaviest
+    # minute of the run and a report that begins after it is a report that
+    # misses the peak.
+    monitor = ResourceMonitor(
+        on_sample=(
+            (lambda _sample: live_ui.set_usage(monitor.status_line()))
+            if live_ui is not None
+            else lambda _sample: None
+        )
+    )
+    monitor.start()
     try:
         # The core owns audio, so it starts before the models load: the
         # screen is up while Moonshine and the masker are still loading.
@@ -710,9 +744,10 @@ def main(argv: list[str] | None = None) -> int:
         if live_ui is None:
             ui.line(
                 "MODEL",
-                "TinyBERT INT8 loaded with CPUExecutionProvider "
-                f"(resource loads={pii_adapter.load_count}, "
-                f"path={config.tinybert_model_path})",
+                f"{config.pii_engine} INT8 loaded with CPUExecutionProvider "
+                f"({config.pii_label_count} labels, "
+                f"resource loads={pii_adapter.load_count}, "
+                f"path={config.pii_model_path})",
             )
 
         audio = LiveAudioRuntime(
@@ -720,11 +755,29 @@ def main(argv: list[str] | None = None) -> int:
             session_id,
             device=args.device,
             once=args.once,
-            on_event=audio_event_bridge(core, ui.event),
+            on_event=audio_event_bridge(core, on_event),
+            # Two readers of one number, and neither may be allowed to
+            # stall the other: this runs on the sounddevice callback
+            # thread. The core throttles its own copy; the terminal meter
+            # wants every block it can get.
+            # A third reader now, because whether the microphone is loud
+            # enough to cross its own threshold has been guessed at since
+            # the first Pi run and never once measured.
             on_level=(
-                live_ui.set_level
+                (
+                    lambda rms: (
+                        session_report.observe_level(rms),
+                        live_ui.set_level(rms),
+                        core.set_input_level(rms),
+                    )
+                )
                 if live_ui is not None
-                else lambda rms: None
+                else (
+                    lambda rms: (
+                        session_report.observe_level(rms),
+                        core.set_input_level(rms),
+                    )
+                )
             ),
             # So the device stops answering itself. The speaker and the
             # microphone are in one room, so without this every reply is
@@ -733,6 +786,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         with muted_stderr():
             audio.prepare_device()
+        # The device that was actually opened, which is not always the one
+        # that was asked for. It goes to the screen as well as to the
+        # session row, because a wrong microphone is invisible until
+        # somebody notices the device is deaf.
+        core.set_microphone(
+            audio.device_name, audio.device_id, audio.sample_rate
+        )
+        session_report.microphone = f"{audio.device_name} @ {audio.sample_rate} Hz"
         storage = SQLiteTranscriptStore(
             config.session_database_path,
             busy_timeout_ms=int(config.storage["busy_timeout_ms"]),
@@ -772,21 +833,28 @@ def main(argv: list[str] | None = None) -> int:
                 log=lambda message: ui.event(
                     "onkith_status", {"message": message}
                 ),
+                on_reply=session_report.observe_reply,
             )
+            session_report.assistant_model = llm.settings.model
             ui.line(
                 "ASSISTANT",
                 f"Groq {llm.settings.model}, voice {core.speech.backend_name}",
             )
+        session_report.voice = core.speech.backend_name
+
+        def record_output(result: LiveOutput) -> None:
+            session_report.observe_output(result)
+            ui.output(result)
 
         privacy = LivePrivacyRuntime(
             config,
             safe_masker,
             storage,
-            on_event=ui.event,
+            on_event=on_event,
             on_output=lambda result: forward_masked_output(
                 result,
                 assistant,
-                ui.output,
+                record_output,
                 core,
                 # `music` is bound below and read when this runs, which
                 # is after everything has started. The raw transcript
@@ -814,10 +882,11 @@ def main(argv: list[str] | None = None) -> int:
             audio.completed_recording_queue,
             moonshine,
             privacy,
-            on_event=ui.event,
+            on_event=on_event,
             on_partial=ui.partial if args.show_partials else None,
             music_worker=music,
             on_panel=core.set_panel,
+            on_devices_panel=core.set_devices_panel,
             on_volume=core.step_volume,
             on_light=core.handle_light,
         )
@@ -841,6 +910,7 @@ def main(argv: list[str] | None = None) -> int:
         _record_error(errors, "runtime", exc)
         ui.line("ERROR", f"{type(exc).__name__}: {exc}", force=True)
     finally:
+        monitor.stop()
         _shutdown_pipeline(
             session_id=session_id,
             ui=ui,
@@ -857,47 +927,18 @@ def main(argv: list[str] | None = None) -> int:
                 core.shutdown()
             except BaseException as exc:
                 _record_error(errors, "core shutdown", exc)
-        if audio is not None:
-            audio_audit = audio.audit()
-            ui.line(
-                "CAPTURE METRICS",
-                f"callback_avg={audio_audit['callback_average_seconds']:.6f}s, "
-                f"callback_max={audio_audit['callback_max_seconds']:.6f}s, "
-                f"audio_queue_high_water="
-                f"{audio_audit['audio_queue_high_water_mark']}, "
-                f"recording_queue_high_water="
-                f"{audio_audit['completed_queue_high_water_mark']}, "
-                f"dropped_chunks={audio_audit['queue_overflow_count']}",
-            )
-        if storage is not None:
-            db_audit = storage.audit()
-            ui.line(
-                "DB",
-                f"operations={db_audit['operation_count']}, "
-                f"queue_high_water={db_audit['queue_high_water_mark']}, "
-                f"queue_wait_max="
-                f"{db_audit['maximum_queue_wait_seconds']:.6f}s, "
-                f"write_total={db_audit['total_write_seconds']:.6f}s, "
-                f"write_max={db_audit['maximum_write_seconds']:.6f}s",
-            )
-        if privacy is not None:
-            ui.line(
-                "PII METRICS",
-                f"mask_queue_high_water={privacy.queue_high_water_mark}",
-            )
-        if moonshine.loaded:
-            counters = moonshine.counters
-            ui.line(
-                "COUNTERS",
-                "model_resource_loads="
-                f"{counters.model_resource_load_count}, "
-                f"utterance_sessions={counters.utterance_session_count}, "
-                f"callbacks={counters.callback_count}, "
-                f"STT_add={counters.stt_processing_seconds:.3f}s, "
-                f"finalization={counters.finalization_seconds:.3f}s, "
-                f"STT_total={counters.total_stt_seconds:.3f}s, "
-                f"queue_wait={counters.total_queue_wait_seconds:.3f}s",
-            )
+        # These used to be four tagged lines printed here. Under the live
+        # screen they went to the status log and scrolled away, so the
+        # numbers existed and nobody ever had them. They go into the
+        # session report instead, which is printed after the screen has
+        # released the terminal.
+        _collect_audit(
+            session_report,
+            audio=audio,
+            storage=storage,
+            privacy=privacy,
+            moonshine=moonshine,
+        )
         moonshine.close()
 
     if errors:
@@ -910,6 +951,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if live_ui is not None:
             live_ui.stop()
+        _print_usage_report(monitor, session_report, args)
         return 1
     ui.line(
         "SHUTDOWN",
@@ -917,7 +959,89 @@ def main(argv: list[str] | None = None) -> int:
     )
     if live_ui is not None:
         live_ui.stop()
+    _print_usage_report(monitor, session_report, args)
     return 0
+
+
+def _collect_audit(
+    report: SessionReport,
+    *,
+    audio: Any,
+    storage: Any,
+    privacy: Any,
+    moonshine: Any,
+) -> None:
+    """Gather the end-of-run counters every worker keeps for itself.
+
+    Each of these is a high-water mark rather than an average, because
+    the question they answer is whether the board ever fell behind, and
+    an average over a quiet hour hides the thirty seconds it did.
+    """
+
+    try:
+        if audio is not None:
+            report.audit.update(audio.audit())
+        if storage is not None:
+            # Named rather than copied wholesale: the store's audit also
+            # carries its absolute path and its thread ids, and this
+            # artifact is written to be attached to a report and sent to
+            # somebody. Prefixed because the database and the capture
+            # lane both call their backlog "queue_high_water_mark".
+            db_audit = storage.audit()
+            report.audit.update(
+                {
+                    f"db_{name}": db_audit[name]
+                    for name in (
+                        "operation_count",
+                        "rejected_operation_count",
+                        "queue_high_water_mark",
+                        "maximum_queue_wait_seconds",
+                        "total_write_seconds",
+                        "maximum_write_seconds",
+                    )
+                    if name in db_audit
+                }
+            )
+        if privacy is not None:
+            report.audit["mask_queue_high_water_mark"] = (
+                privacy.queue_high_water_mark
+            )
+        if moonshine.loaded:
+            counters = moonshine.counters
+            report.audit.update(
+                {
+                    "model_resource_loads": counters.model_resource_load_count,
+                    "utterance_sessions": counters.utterance_session_count,
+                    "stt_seconds_total": counters.total_stt_seconds,
+                    "stt_queue_wait_total": counters.total_queue_wait_seconds,
+                }
+            )
+    except Exception as error:
+        report.audit["audit_error"] = f"{type(error).__name__}: {error}"
+
+
+def _print_usage_report(
+    monitor: ResourceMonitor,
+    report: SessionReport,
+    args: argparse.Namespace,
+) -> None:
+    """After the live screen has released the terminal, not before.
+
+    The status bar owns the bottom three rows while it runs, so anything
+    printed there during shutdown is overwritten by the next repaint.
+    """
+    if args.report_file:
+        try:
+            report.write_json(args.report_file)
+        except OSError as error:
+            print(f"Could not write {args.report_file}: {error}", file=sys.stderr)
+    if args.json_output:
+        print(json.dumps(report.as_dict(), ensure_ascii=False))
+        return
+    print()
+    print(report.text())
+    print()
+    print(monitor.report())
 
 
 if __name__ == "__main__":

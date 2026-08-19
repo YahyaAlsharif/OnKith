@@ -119,14 +119,101 @@
        percentages alike. The panel snaps to width and carries its own
        arrival instead, which is also the cheaper of the two on a Pi given
        there is a WebGL canvas inside the track being resized. */
+    /* Three columns: what is attached, the conversation, what is playing.
+       The conversation is the constant and keeps the middle; the two
+       panels are companions that arrive on their own side and leave
+       again. Written out as four whole states rather than as two
+       independent widths, because a grid track cannot be set from two
+       selectors at once and the combined case is the one that would
+       otherwise silently lose a panel. */
+    /* Named areas rather than bare tracks. There are two panels that open
+       and close independently, which is four states, and each of the
+       three breakpoints below arranges those four differently. Written as
+       columns alone it was already the kind of rule where the combined
+       case gets forgotten and a panel silently disappears; named areas
+       let each breakpoint state its arrangement once, in a shape that can
+       be read. */
     .app-shell {
       block-size: 100dvh;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 0;
+      grid-template-areas: "devices room player";
+      grid-template-columns: 0 minmax(0, 1fr) 0;
+      grid-template-rows: minmax(0, 1fr);
       overflow: hidden;
     }
+    .devices-panel { grid-area: devices; }
+    .room { grid-area: room; }
+    .player-panel { grid-area: player; }
+
+    /* A floor on the devices track. Below about 15rem the object stages
+       hold their size while the labels underneath them wrap to three and
+       four lines, which reads as a fault rather than a narrow column. */
+    .app-shell[data-devices="open"] {
+      grid-template-columns: minmax(15rem, 0.38fr) minmax(0, 1fr) 0;
+    }
     .app-shell[data-player="open"] {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 0.52fr);
+      grid-template-columns: 0 minmax(0, 1fr) minmax(0, 0.52fr);
+    }
+    .app-shell[data-devices="open"][data-player="open"] {
+      grid-template-columns:
+        minmax(15rem, 0.38fr) minmax(0, 1fr) minmax(0, 0.52fr);
+    }
+
+    /* Three columns need room. Between the phone breakpoint and this one
+       they fit only by squeezing the player until its masthead overlaps
+       itself, so the devices panel takes a full row across the top and
+       lets the player keep its column. Nothing about the player changes
+       here, which matters: it behaved correctly at these widths before
+       this panel existed and has to go on doing so. */
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .app-shell {
+        grid-template-areas:
+          "devices devices"
+          "room player";
+        grid-template-columns: minmax(0, 1fr) 0;
+        grid-template-rows: 0 minmax(0, 1fr);
+      }
+      .app-shell[data-devices="open"],
+      .app-shell[data-player="open"],
+      .app-shell[data-devices="open"][data-player="open"] {
+        grid-template-columns: minmax(0, 1fr) 0;
+      }
+      .app-shell[data-player="open"],
+      .app-shell[data-devices="open"][data-player="open"] {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.52fr);
+      }
+      .app-shell[data-devices="open"],
+      .app-shell[data-devices="open"][data-player="open"] {
+        /* Sized to its content. A fraction here was guesswork against a
+           card whose height depends on how far the device name wraps, and
+           it guessed low: the last line of every card fell outside its own
+           border. Content sizing is only safe because the rule below lays
+           these three side by side -- stacked, auto would ask for four
+           fifths of the window. */
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+      /* Lying down: the three objects sit in a row rather than a stack.
+         Selected through the shell rather than on their own, because the
+         component rules for this panel are further down the sheet and
+         would otherwise win on source order and leave it stacked. */
+      .app-shell .devices-panel {
+        flex-direction: row;
+        align-items: stretch;
+        border-inline-end: 0;
+        border-block-end: 1px solid var(--hairline);
+        transform: translateY(calc(var(--s5) * -1));
+      }
+      .app-shell[data-devices="open"] .devices-panel { transform: none; }
+      .app-shell .devices-panel .device-card {
+        flex: 1 1 0;
+        min-inline-size: 0;
+      }
+      .app-shell .devices-title { display: none; }
+      /* Shorter objects here. Side by side there is width to read them at
+         and only a band of height to do it in, and at the standing sizes
+         the labels underneath fell off the bottom of the row. */
+      .app-shell .device-stage { block-size: 68px; }
+      .app-shell .device-stage-tall { block-size: 84px; }
     }
 
     .room {
@@ -144,7 +231,14 @@
       border-inline-start: 1px solid var(--hairline);
       background: var(--surface);
       padding: var(--s5);
-      overflow: auto;
+      /* Sideways never. The active flow card is meant to grow past the
+         panel edge, and with a plain `auto` that turned the whole panel
+         into a horizontal scroller: one nudge and the heading, the rail,
+         the clock and the machine all slid left together, each losing its
+         first few characters. The rail inside carries its own scroll. This
+         box only ever moves up and down. */
+      overflow-x: clip;
+      overflow-y: auto;
       opacity: 0;
       transform: translateX(var(--s5));
       transition: opacity 300ms ease, transform 300ms cubic-bezier(0.2, 0, 0, 1);
@@ -186,6 +280,191 @@
     .player-panel .timeline-readout,
     .player-panel .player-alert:not([hidden]) { inline-size: 100%; }
     .player-panel .machine-stage { margin-inline: 0; }
+
+    /* --------------------------------------------------- attached devices */
+
+    /* The mirror of the player panel, on the other side and narrower,
+       because it holds three short facts rather than a machine. It arrives
+       the same way: the track snaps to width and the panel carries its own
+       entrance, which is both cheaper on a Pi and the only thing that works
+       -- a transition on grid-template-columns never progresses. */
+    .devices-panel {
+      min-inline-size: 0;
+      border-inline-end: 1px solid var(--hairline);
+      background: var(--surface);
+      padding: var(--s5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--s4);
+      overflow-x: clip;
+      overflow-y: auto;
+      opacity: 0;
+      transform: translateX(calc(var(--s5) * -1));
+      transition: opacity 300ms ease, transform 300ms cubic-bezier(0.2, 0, 0, 1);
+      /* A closed panel still overflows its zero-width track. Invisible is
+         not gone: on a touchscreen that strip would eat taps meant for the
+         conversation. */
+      pointer-events: none;
+      container-type: inline-size;
+    }
+    .app-shell[data-devices="open"] .devices-panel {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .devices-title {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .device-card {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      background: var(--raise);
+      padding: var(--s4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--s2);
+    }
+
+    .device-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--s2);
+    }
+
+    /* Neither label wraps. "Audio out" broken over two lines reads as a
+       layout fault, and the state beside it is one word by design. */
+    .device-kind {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--ink-3);
+    }
+
+    /* Three readings, three colours, and the difference between them is
+       the point of the panel. Missing is not the same as idle: one means
+       nothing is plugged in, the other means nothing is happening. */
+    .device-state {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--ink-2);
+    }
+    .device-card[data-status="live"] .device-state { color: var(--lift); }
+    .device-card[data-status="missing"] .device-state { color: var(--ink-3); }
+    .device-card[data-status="missing"] { border-style: dashed; }
+
+    .device-name {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.35;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .device-detail {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--ink-3);
+      overflow-wrap: anywhere;
+    }
+    .device-detail:empty { display: none; }
+
+    /* ---- the objects ------------------------------------------------
+       Three instruments, each of which reports its own state by how it
+       is drawn rather than by a figure printed beside it. Every live
+       value arrives as one custom property and moves the object; nothing
+       here is rebuilt from script. */
+
+    /* Fixed stage heights rather than letting each drawing size itself.
+       The lamp's frame is taller than the other two, and left to its own
+       aspect ratio it pushed the whole card below the fold on an 800px
+       screen -- which put the one object worth looking at where nobody
+       would see it. Each SVG now fits its stage instead. */
+    .device-stage {
+      display: grid;
+      place-items: center;
+      block-size: 92px;
+    }
+    .device-stage-tall { block-size: 116px; }
+    .obj {
+      inline-size: 100%;
+      block-size: 100%;
+      max-inline-size: 148px;
+    }
+
+    /* -- microphone. The basket fills from the bottom with the input
+          level, so a room that is talking lights the mesh and a dead
+          microphone stays dark. This replaced a progress bar: the bar
+          was a dashboard part borrowed from somewhere else, and the
+          mesh says the same thing in the object's own language. */
+    .obj-mic { --level: 0; }
+    .mic-level {
+      /* 52 is the basket's height and 60 its lower edge, so the fill
+         grows upward from the bottom of the mesh. */
+      y: calc(60px - var(--level) * 52px);
+      height: calc(var(--level) * 52px);
+      /* Deliberately not eased. This reads ten times a second and an
+         eased height would draw the recent past. */
+    }
+    .mic-yoke { transition: stroke 200ms ease; }
+    /* Holding an utterance open. The shock mount takes the accent, which
+       is the same signal the creature in the middle of the screen is
+       giving at the same moment. */
+    #device-mic[data-status="live"] .mic-yoke { stroke: var(--lift); }
+    #device-mic[data-status="missing"] .obj { opacity: 0.28; }
+
+    /* -- speaker. The dust cap is pushed by the output level. An empty
+          baffle, with no driver in it at all, is how "there is nowhere
+          to send sound" is said: it is a faster read than the word. */
+    .obj-speaker { --out: 0; }
+    .speaker-cap-lit {
+      opacity: var(--out);
+      transition: opacity 90ms linear;
+    }
+    .speaker-driver,
+    .speaker-empty { transition: opacity 200ms ease; }
+    .speaker-empty { opacity: 0; }
+    #device-audio[data-status="missing"] .speaker-driver { opacity: 0; }
+    #device-audio[data-status="missing"] .speaker-empty { opacity: 1; }
+
+    /* -- lamp. The beam is the readout. Opacity and reach both come off
+          --lamp, so 40% is visibly two fifths of a beam and 0 is a dark
+          disk rather than a dim one. */
+    .obj-lamp { --lamp: 0; }
+    .lamp-beam {
+      opacity: var(--lamp);
+      transform-origin: 60px 51px;
+      transform: scaleY(calc(0.45 + var(--lamp) * 0.55));
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+    .lamp-emitter {
+      opacity: calc(0.12 + var(--lamp) * 0.88);
+      transition: opacity 300ms ease;
+    }
+    /* The one place this panel raises its voice. Light is the only thing
+       on it that emits rather than reports, so it is allowed out of its
+       own box: the card itself warms as the lamp comes up. Everything
+       else here stays flat and quiet. */
+    #device-light {
+      transition: box-shadow 300ms ease, border-color 300ms ease;
+      box-shadow: 0 0 calc(var(--card-glow, 0) * 46px)
+        rgba(255, 138, 69, calc(var(--card-glow, 0) * 0.3));
+    }
 
     /* ------------------------------------------------------- the creature */
 
@@ -1130,12 +1409,33 @@
        beside it. The recorder refits itself either way. */
     @media (max-aspect-ratio: 3/4), (max-width: 640px) {
       .app-shell,
-      .app-shell[data-player="open"] {
+      .app-shell[data-devices="open"],
+      .app-shell[data-player="open"],
+      .app-shell[data-devices="open"][data-player="open"] {
         grid-template-columns: minmax(0, 1fr);
       }
-      .app-shell { grid-template-rows: minmax(0, 1fr) 0; }
+      /* One column, three rows: devices above, conversation, player below.
+         The devices panel stays above the conversation because that is
+         where it sits when there is room -- a panel that changes sides as
+         the window narrows reads as a different panel. */
+      .app-shell {
+        grid-template-areas: "devices" "room" "player";
+        grid-template-rows: 0 minmax(0, 1fr) 0;
+      }
+      .app-shell[data-devices="open"] {
+        grid-template-rows: minmax(0, 0.4fr) minmax(0, 1fr) 0;
+      }
       .app-shell[data-player="open"] {
-        grid-template-rows: minmax(0, 1fr) minmax(0, 0.46fr);
+        grid-template-rows: 0 minmax(0, 1fr) minmax(0, 0.46fr);
+      }
+      .app-shell[data-devices="open"][data-player="open"] {
+        grid-template-rows: minmax(0, 0.4fr) minmax(0, 1fr) minmax(0, 0.46fr);
+      }
+      .devices-panel {
+        transform: translateY(calc(var(--s5) * -1));
+        border-inline-end: 0;
+        border-block-end: 1px solid var(--hairline);
+        padding: var(--s4);
       }
       .player-panel { transform: translateY(var(--s5)); }
       .room { padding: var(--s4); }
@@ -1232,7 +1532,182 @@
   </style>
 </head>
 <body>
-  <div class="app-shell" id="app-shell" data-pet="resting" data-gate="held" data-player="closed">
+  <div class="app-shell" id="app-shell" data-pet="resting" data-gate="held" data-player="closed" data-devices="closed">
+
+    <aside class="devices-panel" id="devices-panel" aria-label="Attached devices">
+      <h2 class="devices-title">Attached</h2>
+
+      <!-- Each object is its own readout. There is no bar chart or
+           percentage sitting next to a picture of a thing: the picture is
+           the measurement. A microphone whose grille is dark is not
+           hearing anything, a speaker with no driver in its baffle has
+           nowhere to send sound, and a lamp at 40% throws 40% of a beam.
+           The panel exists so the screen and the desk can be compared
+           across a room, and that only works if the screen shows objects
+           rather than numbers about objects. -->
+
+      <section class="device-card" id="device-mic">
+        <div class="device-head">
+          <span class="device-kind">Microphone</span>
+          <span class="device-state" id="mic-state">Idle</span>
+        </div>
+        <div class="device-stage">
+          <svg class="obj obj-mic" id="mic-meter" viewBox="0 0 120 116" role="img"
+               aria-label="Microphone input level">
+            <defs>
+              <linearGradient id="dv-mic-body" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#4a4340"/>
+                <stop offset="0.34" stop-color="#8d8681"/>
+                <stop offset="0.62" stop-color="#3b3532"/>
+                <stop offset="1" stop-color="#221e1c"/>
+              </linearGradient>
+              <linearGradient id="dv-mic-lit" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0" stop-color="#ff5a36"/>
+                <stop offset="1" stop-color="#ffb055"/>
+              </linearGradient>
+              <!-- The mesh of a condenser basket. Drawn as a pattern so it
+                   survives being scaled with the panel. -->
+              <pattern id="dv-mic-mesh" width="7" height="7"
+                       patternUnits="userSpaceOnUse">
+                <path d="M7 0V7M0 7H7" stroke="#0c0a09" stroke-width="1.4"
+                      fill="none" opacity="0.55"/>
+              </pattern>
+              <clipPath id="dv-mic-basket">
+                <rect x="36" y="8" width="48" height="52" rx="7"/>
+              </clipPath>
+            </defs>
+
+            <!-- Yoke, stem, base: the shock mount this thing sits in. -->
+            <path class="mic-yoke" d="M28 34v18a32 32 0 0 0 64 0V34"
+                  fill="none" stroke="#5c5450" stroke-width="4"
+                  stroke-linecap="round"/>
+            <rect x="55" y="82" width="10" height="14" rx="3" fill="#4a4340"/>
+            <ellipse cx="60" cy="101" rx="27" ry="8" fill="#2a2523"/>
+            <ellipse cx="60" cy="99" rx="27" ry="8" fill="#3b3532"/>
+
+            <g clip-path="url(#dv-mic-basket)">
+              <rect x="36" y="8" width="48" height="52" fill="url(#dv-mic-body)"/>
+              <!-- The level, rising from the bottom of the basket. Height
+                   is driven from --level, so a quiet room leaves the mesh
+                   dark and a voice fills it. -->
+              <rect class="mic-level" x="36" width="48" fill="url(#dv-mic-lit)"/>
+              <rect x="36" y="8" width="48" height="52" fill="url(#dv-mic-mesh)"/>
+            </g>
+            <rect x="36" y="8" width="48" height="52" rx="7" fill="none"
+                  stroke="#6b625d" stroke-width="2"/>
+            <rect x="34" y="58" width="52" height="12" rx="4" fill="#514a46"/>
+            <rect x="34" y="58" width="52" height="4" rx="2" fill="#7d7671"/>
+          </svg>
+        </div>
+        <p class="device-name" id="mic-name">Not opened</p>
+        <p class="device-detail" id="mic-detail"></p>
+      </section>
+
+      <section class="device-card" id="device-audio">
+        <div class="device-head">
+          <span class="device-kind">Audio out</span>
+          <span class="device-state" id="audio-state">Unknown</span>
+        </div>
+        <div class="device-stage">
+          <svg class="obj obj-speaker" viewBox="0 0 120 116" role="img"
+               aria-label="Speaker output level">
+            <defs>
+              <linearGradient id="dv-cab" x1="0" y1="0" x2="0.6" y2="1">
+                <stop offset="0" stop-color="#302a27"/>
+                <stop offset="1" stop-color="#191614"/>
+              </linearGradient>
+              <radialGradient id="dv-cone" cx="0.38" cy="0.32" r="0.85">
+                <stop offset="0" stop-color="#4f4744"/>
+                <stop offset="0.55" stop-color="#2a2523"/>
+                <stop offset="1" stop-color="#141110"/>
+              </radialGradient>
+              <pattern id="dv-cloth" width="5" height="5"
+                       patternUnits="userSpaceOnUse">
+                <circle cx="2.5" cy="2.5" r="1" fill="#0d0b0a" opacity="0.7"/>
+              </pattern>
+            </defs>
+
+            <rect x="10" y="20" width="100" height="76" rx="8"
+                  fill="url(#dv-cab)" stroke="#3d3734" stroke-width="1.5"/>
+            <rect x="17" y="27" width="86" height="62" rx="5"
+                  fill="url(#dv-cloth)"/>
+
+            <!-- The driver. Absent entirely when there is no output
+                 device: an empty baffle says "nowhere to send sound"
+                 faster than the word silent does. -->
+            <g class="speaker-driver">
+              <circle cx="60" cy="58" r="25" fill="url(#dv-cone)"
+                      stroke="#443d39" stroke-width="1.5"/>
+              <circle cx="60" cy="58" r="18" fill="none" stroke="#0f0d0c"
+                      stroke-width="1" opacity="0.8"/>
+              <!-- The dust cap, pushed by the level. -->
+              <circle class="speaker-cap" cx="60" cy="58" r="9"
+                      fill="#5b5350"/>
+              <circle class="speaker-cap-lit" cx="60" cy="58" r="9"
+                      fill="#ff5a36"/>
+            </g>
+            <g class="speaker-empty">
+              <circle cx="60" cy="58" r="25" fill="none" stroke="#332e2b"
+                      stroke-width="1.5" stroke-dasharray="4 5"/>
+            </g>
+          </svg>
+        </div>
+        <p class="device-name" id="audio-name">No sink</p>
+        <p class="device-detail" id="audio-detail"></p>
+      </section>
+
+      <section class="device-card" id="device-light">
+        <div class="device-head">
+          <span class="device-kind">Lamp</span>
+          <span class="device-state" id="light-state">Off</span>
+        </div>
+        <div class="device-stage device-stage-tall">
+          <svg class="obj obj-lamp" id="lamp" viewBox="0 0 120 150" role="img"
+               aria-label="Lamp brightness">
+            <defs>
+              <linearGradient id="dv-shade" x1="0" y1="0" x2="0.3" y2="1">
+                <stop offset="0" stop-color="#6f6763"/>
+                <stop offset="0.5" stop-color="#4a4340"/>
+                <stop offset="1" stop-color="#2e2926"/>
+              </linearGradient>
+              <linearGradient id="dv-beam" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffbe6b" stop-opacity="0.55"/>
+                <stop offset="0.55" stop-color="#ff8a45" stop-opacity="0.16"/>
+                <stop offset="1" stop-color="#ff7a28" stop-opacity="0"/>
+              </linearGradient>
+              <radialGradient id="dv-emit" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#fff0d4"/>
+                <stop offset="0.65" stop-color="#ffb055"/>
+                <stop offset="1" stop-color="#ff7a28"/>
+              </radialGradient>
+            </defs>
+
+            <!-- The flex, running up out of the frame. It reads as hung
+                 from the panel rather than floating in a box. -->
+            <path d="M60 0v34" stroke="#3d3734" stroke-width="2"/>
+
+            <!-- The beam, which is the readout. Its opacity and reach are
+                 both driven from --lamp, so half brightness is visibly
+                 half a beam and zero is no beam at all. -->
+            <g class="lamp-beam">
+              <path d="M44 62 L18 140 H102 L76 62 Z" fill="url(#dv-beam)"/>
+              <ellipse cx="60" cy="140" rx="42" ry="9" fill="#ff9a36"
+                       opacity="0.18"/>
+            </g>
+
+            <!-- The disk shade, lit from inside on its underside. -->
+            <ellipse cx="60" cy="42" rx="34" ry="10" fill="url(#dv-shade)"/>
+            <path d="M26 42v9a34 10 0 0 0 68 0v-9Z" fill="#39332f"/>
+            <ellipse class="lamp-emitter" cx="60" cy="51" rx="30" ry="8"
+                     fill="url(#dv-emit)"/>
+            <ellipse cx="60" cy="51" rx="30" ry="8" fill="none"
+                     stroke="#4a4340" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <p class="device-name" id="light-level">0%</p>
+        <p class="device-detail" id="light-detail"></p>
+      </section>
+    </aside>
 
     <main class="room" aria-label="Conversation">
       <div class="before" id="before"></div>

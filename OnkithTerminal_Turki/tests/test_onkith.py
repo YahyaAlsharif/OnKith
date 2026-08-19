@@ -23,6 +23,7 @@ from app.onkith_music import (
     create_player_page,
     intercept_onkith_command,
     normalize_videos,
+    play_query_from,
     search_youtube,
     verify_results,
     wake_words,
@@ -268,6 +269,33 @@ class VolumeLaneTests(unittest.TestCase):
         # The noun decides, and the screen is read first.
         self.assertEqual(self.lane("Onkith bring up the player"), "SHOW")
         self.assertEqual(self.lane("Onkith bring the volume up"), "LOUDER")
+
+    def test_the_two_panels_do_not_take_each_others_words(self) -> None:
+        # They share every verb, so the noun is the whole of the
+        # distinction. If this ever regresses, one of them silently stops
+        # answering and the other opens twice as often.
+        self.assertEqual(self.lane("Onkith show the devices"), "SHOW_DEVICES")
+        self.assertEqual(self.lane("Onkith hide the hardware"), "HIDE_DEVICES")
+        self.assertEqual(self.lane("Onkith show the player"), "SHOW")
+        self.assertEqual(self.lane("Onkith hide the panel"), "HIDE")
+
+    def test_a_sentence_holding_both_nouns_opens_the_devices(self) -> None:
+        # "Show me the devices panel" carries a noun from each set. The
+        # more specific one has to win or this opens the player.
+        self.assertEqual(
+            self.lane("Onkith show me the devices panel"), "SHOW_DEVICES"
+        )
+
+    def test_the_device_calls_itself_a_device(self) -> None:
+        # Singular "device" is deliberately not a panel noun. This machine
+        # is a device, so half the sentences said to it contain the word.
+        self.assertNotEqual(self.lane("Onkith turn the device off"), "HIDE_DEVICES")
+        self.assertEqual(self.lane("Onkith what device are you"), "ASK")
+
+    def test_asking_about_the_hardware_is_not_a_search(self) -> None:
+        # "Open" is both a screen verb and a play verb, and without the
+        # noun check "open the hardware" would search YouTube for it.
+        self.assertEqual(self.lane("Onkith open the devices"), "SHOW_DEVICES")
 
     def test_a_question_about_volume_is_still_a_question(self) -> None:
         self.assertEqual(self.lane("Onkith why is the volume so low"), "ASK")
@@ -528,6 +556,52 @@ class YouTubeFunctionTests(unittest.TestCase):
         self.assertEqual(
             append_song_to_search_query("one two three four five song"),
             "one two three four five song",
+        )
+
+    def test_a_title_is_read_from_the_verb_not_the_front_of_the_sentence(self):
+        # The assistant lane has no wake word in front of the command, so
+        # a sentence that says anything before the instruction used to be
+        # searched entire: "how are you doing? Play dilemma." looked for
+        # "how are you doing play" and found a music quiz.
+        self.assertEqual(
+            play_query_from("how are you doing? Play dilemma."),
+            "Play dilemma.",
+        )
+        self.assertEqual(
+            append_song_to_search_query(
+                play_query_from("how are you doing? Play dilemma.")
+            ),
+            "dilemma song",
+        )
+
+    def test_the_later_verb_is_the_one_that_meant_it(self) -> None:
+        # Somebody talks, then asks for something. The instruction sits at
+        # the end of a compound sentence, not at the front of it.
+        self.assertEqual(
+            play_query_from("I was playing football, put on Bones"),
+            "put on Bones",
+        )
+
+    def test_a_plain_command_is_unharmed(self) -> None:
+        self.assertEqual(
+            append_song_to_search_query(play_query_from("Onkith, play Bones")),
+            "Bones song",
+        )
+
+    def test_a_verb_with_no_title_behind_it_names_no_song(self) -> None:
+        # "Onkith, play" is not a search for the empty string.
+        self.assertEqual(
+            append_song_to_search_query(play_query_from("Onkith, play")),
+            "",
+        )
+
+    def test_a_sentence_with_no_verb_at_all_is_still_offered(self) -> None:
+        # The model can infer PLAY from a wording that names no verb this
+        # code knows. Handing over what was said beats handing over
+        # nothing at all.
+        self.assertEqual(
+            play_query_from("Onkith, I want to hear Bones"),
+            "I want to hear Bones",
         )
 
     def test_search_requests_music_embeddable_syndicated_results(self) -> None:
@@ -1165,6 +1239,144 @@ class YouTubeFunctionTests(unittest.TestCase):
         self.assertIn("opacity: 1;", hover_label)
         self.assertIn("visibility: visible;", hover_label)
         self.assertIn(":focus-visible::after", hover_label)
+
+    def test_the_two_panels_are_separate_windows_on_the_shell(self) -> None:
+        """Each side retracts on its own, and all four states are drawn.
+
+        The grid tracks cannot be set from two selectors at once, so the
+        combined case has to be written out. Miss it and asking for the
+        second panel silently closes the first.
+        """
+
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "app" / "player_template.html").read_text(encoding="utf-8")
+
+        self.assertIn('data-devices="closed"', page)
+        self.assertIn('id="devices-panel"', page)
+        # Four states, one selector each.
+        self.assertIn(".app-shell {", page)
+        self.assertIn('.app-shell[data-devices="open"] {', page)
+        self.assertIn('.app-shell[data-player="open"] {', page)
+        self.assertIn(
+            '.app-shell[data-devices="open"][data-player="open"] {', page
+        )
+        # Three tracks, so the conversation keeps the middle whichever
+        # panel is up.
+        self.assertIn("grid-template-columns: 0 minmax(0, 1fr) 0;", page)
+
+    def test_the_devices_panel_says_what_is_attached(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "app" / "player_template.html").read_text(encoding="utf-8")
+        script = (
+            root / "assets" / "player" / "player-app-v1.mjs"
+        ).read_text(encoding="utf-8")
+
+        for element in (
+            "mic-name",
+            "mic-meter",
+            "audio-name",
+            "light-level",
+            "lamp",
+        ):
+            with self.subTest(element=element):
+                self.assertIn(f'id="{element}"', page)
+                self.assertIn(f'"{element}"', script)
+
+    def test_each_object_is_its_own_readout(self) -> None:
+        """The drawing is the measurement, not a picture beside one.
+
+        Every live value arrives as one custom property and moves the
+        object. If any of these three stops being driven, the panel
+        quietly becomes three static illustrations, which is worse than
+        no panel: it reports healthy hardware whatever is plugged in.
+        """
+
+        root = Path(__file__).resolve().parents[1]
+        script = (
+            root / "assets" / "player" / "player-app-v1.mjs"
+        ).read_text(encoding="utf-8")
+
+        for driver, topic in (
+            ("--level", "applyInput"),
+            ("--out", "applyLevel"),
+            ("--lamp", "applyLight"),
+        ):
+            with self.subTest(driver=driver):
+                body = script.split(f"function {topic}", maxsplit=1)[1].split(
+                    "\n}", maxsplit=1
+                )[0]
+                self.assertIn(driver, body)
+
+    def test_the_shell_names_its_areas_for_every_breakpoint(self) -> None:
+        """Two panels opening independently is four states, three times over.
+
+        Written as bare column tracks this was already a rule where the
+        combined case gets forgotten and a panel vanishes. Named areas are
+        what keep the three arrangements legible, so each breakpoint has
+        to actually declare one.
+        """
+
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "app" / "player_template.html").read_text(encoding="utf-8")
+
+        self.assertIn('grid-template-areas: "devices room player";', page)
+        self.assertIn('"devices devices"', page)
+        self.assertIn('grid-template-areas: "devices" "room" "player";', page)
+        for area in ("devices", "room", "player"):
+            with self.subTest(area=area):
+                self.assertIn(f"grid-area: {area};", page)
+
+    def test_the_speaker_is_named_by_portaudio_not_by_pulse(self) -> None:
+        """A MacBook with working speakers reported no output device.
+
+        default_sink is a PulseAudio name that exists so a monitor can be
+        derived for metering. It is absent on macOS and absent on a Pi
+        running bare ALSA, on both of which sound comes out perfectly
+        well. Reading it as "the speaker" conflated two questions.
+        """
+
+        from app.audio_output import AudioStack, detect_audio_stack
+
+        empty = AudioStack()
+        self.assertFalse(empty.can_play)
+        self.assertTrue(AudioStack(output_device="Speakers").can_play)
+
+        stack = detect_audio_stack()
+        # This machine has speakers, whatever it is, and no test run
+        # happens on a board with none.
+        self.assertTrue(
+            stack.can_play,
+            f"no output device found; server was {stack.server}",
+        )
+        self.assertNotEqual(stack.output_device, stack.monitor_source)
+
+    def test_the_microphone_meter_is_not_the_speaker_meter(self) -> None:
+        """Two different numbers that would look identical if confused.
+
+        "level" is the output sink's monitor and rises for music. A
+        microphone bar driven from it would show a healthy input every
+        time the device played something, which is the exact opposite of
+        what the panel is for.
+        """
+
+        from app.event_bus import EventBus
+
+        state = EventBus().snapshot()
+        self.assertIn("input", state)
+        self.assertIn("level", state)
+        self.assertNotEqual(state["input"], state["level"])
+
+        script = (
+            Path(__file__).resolve().parents[1]
+            / "assets"
+            / "player"
+            / "player-app-v1.mjs"
+        ).read_text(encoding="utf-8")
+        meter = script.split("function applyInput", maxsplit=1)[1].split(
+            "\n}", maxsplit=1
+        )[0]
+        self.assertIn("micMeter", meter)
+        self.assertNotIn("outputLevel", meter)
 
     def test_player_keeps_track_details_and_one_timeline_together(self) -> None:
         player_root = Path(__file__).resolve().parents[1]

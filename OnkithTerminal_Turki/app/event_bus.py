@@ -61,6 +61,29 @@ class EventBus:
             # nobody has said either way and the screen follows the results
             # on its own.
             "panel": {"open": None},
+            # What is physically attached to this board, and whether the one
+            # panel that shows it is up. Unlike the player there is no
+            # sensible default to follow here: hardware does not come and go
+            # the way search results do, so it stays shut until asked for and
+            # stays as it was left.
+            #
+            # Seeded rather than created on first publish, so a surface that
+            # connects before the microphone has been opened draws the empty
+            # shape rather than nothing at all.
+            "devices": {
+                "open": False,
+                "mic": {"name": None, "id": None, "sample_rate": 0},
+                "audio": {
+                    "server": None,
+                    "sink": None,
+                    "speech": None,
+                    "playback": False,
+                },
+            },
+            # The lamp, published by the light controller as it moves and
+            # seeded here for the same reason: a dark lamp has to be drawable
+            # before anybody has touched one.
+            "light": {"on": False, "brightness": 0, "backend": "none"},
             # Whether the microphone is holding an utterance open right now.
             # A surface cannot work this out for itself: the level topic is
             # the output sink, so it moves for music as readily as for a
@@ -68,6 +91,12 @@ class EventBus:
             # already finished.
             "listening": {"hearing": False},
             "level": {"peak": 0.0, "rms": 0.0},
+            # The microphone, which is a different number from the one
+            # above. "level" is the output sink's monitor and rises for
+            # music; this one rises for a voice in the room. Confusing the
+            # two would make a device with a dead microphone look alive
+            # every time it played something.
+            "input": {"rms": 0.0},
             "tracks": {"index": 0, "items": []},
             "status": {"level": "info", "message": ""},
         }

@@ -53,6 +53,8 @@ Intent = Literal[
     "ASK",
     "SHOW",
     "HIDE",
+    "SHOW_DEVICES",
+    "HIDE_DEVICES",
     "LOUDER",
     "QUIETER",
     "LIGHT_ON",
@@ -180,6 +182,16 @@ _COMMAND_BOUNDARIES = {
 # The noun is what tells the two apart: "close it" stops the track, "close
 # the player" puts the panel away and leaves the track playing.
 _SCREEN_NOUNS = {"player", "panel", "screen", "recorder", "deck"}
+# The second panel needs a noun of its own, because it shares every verb
+# with the first one. "Devices" and "hardware" are the two words a person
+# reaches for, and neither appears in _SCREEN_NOUNS, so "show the devices"
+# and "show the player" cannot be confused for one another.
+#
+# Singular "device" is left out deliberately. This machine calls itself a
+# device throughout, so "hide the device panel" would be ambiguous with
+# every other panel on it, and "turn the device off" is not a request to
+# close a window.
+_DEVICE_NOUNS = {"devices", "hardware"}
 _SHOW_VERBS = {
     "show",
     "shows",
@@ -544,6 +556,13 @@ def _lane_for(words: list[str]) -> Intent:
         # The wake word by itself is somebody getting the device's attention,
         # which is the assistant's to answer.
         return "ASK"
+    # Before the player, because the two panels share every verb and
+    # "show me the devices panel" holds a noun from each set. The more
+    # specific noun has to be read first or that sentence opens the wrong
+    # one.
+    devices = _devices_command(words)
+    if devices is not None:
+        return devices
     # Before the transport, because the verbs overlap and only the noun
     # separates them. "Close it" stops the music; "close the player" puts the
     # panel away and leaves the music running.
@@ -580,6 +599,23 @@ def _screen_command(words: list[str]) -> Intent | None:
         return "SHOW"
     if words[0] in _HIDE_VERBS:
         return "HIDE"
+    return None
+
+
+def _devices_command(words: list[str]) -> Intent | None:
+    """Show or hide the panel that says what is plugged into this board.
+
+    Same shape as the player's, and same insistence on the noun. The verb
+    alone cannot decide: "show" reaches three different things on this
+    device and only the word after it says which.
+    """
+
+    if not any(word in _DEVICE_NOUNS for word in words[:4]):
+        return None
+    if words[0] in _SHOW_VERBS:
+        return "SHOW_DEVICES"
+    if words[0] in _HIDE_VERBS:
+        return "HIDE_DEVICES"
     return None
 
 
@@ -643,6 +679,38 @@ def append_song_to_search_query(command_text: str) -> str:
     if any(_normalise_word(word) == "song" for word in words):
         return query
     return f"{query} song"
+
+
+def play_query_from(transcript: str) -> str:
+    """Lift the title out of a sentence the device did not route itself.
+
+    The deterministic lane never has to look for the verb: the wake word
+    is directly in front of it, so the words after the name are the
+    command and nothing else. This one has no such landmark. The model
+    decided PLAY from a whole utterance, and anything at all may sit in
+    front of the instruction.
+
+    Without this, "how are you doing? Play dilemma." was handed over
+    entire, the first five words became the search, and the device
+    played a music quiz called "Most Popular Songs" instead of Nelly.
+
+    The last verb wins rather than the first. A compound sentence puts
+    the instruction at the end -- somebody talks, then asks for
+    something -- so the later verb is the one that meant it.
+    """
+
+    matches = list(_WORD_RE.finditer(transcript))
+    for match in reversed(matches):
+        if _normalise_word(match.group(0)) not in _LEADING_SEARCH_CONTROL_WORDS:
+            continue
+        title = transcript[match.end() :].strip(" \t\r\n,;:.!?-")
+        if title:
+            return transcript[match.start() :].strip()
+        # A verb with nothing behind it names no song. "Onkith, play"
+        # falls through to whatever else was said rather than searching
+        # for the empty string.
+        break
+    return without_wake_word(transcript).strip()
 
 
 def intercept_onkith_command(transcript: str) -> OnkithInterception:

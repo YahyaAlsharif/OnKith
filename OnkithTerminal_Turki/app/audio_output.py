@@ -33,7 +33,19 @@ class AudioStack:
     """What the output side of this machine actually offers."""
 
     server: str = "unknown"
+    # Two different questions that used to share one answer.
+    #
+    # ``default_sink`` is a PulseAudio name and exists so a monitor source
+    # can be derived from it for metering. It is absent on macOS, and
+    # absent on a Pi running bare ALSA, on both of which sound still comes
+    # out perfectly well. Reading it as "the speaker" reported a MacBook
+    # with working speakers as having no output device at all.
+    #
+    # ``output_device`` is the speaker. It comes from portaudio, which is
+    # already how the microphone is found, and so knows about ALSA cards,
+    # CoreAudio devices and PulseAudio sinks alike.
     default_sink: str | None = None
+    output_device: str | None = None
     monitor_source: str | None = None
     capture_command: list[str] = field(default_factory=list)
     tools: dict[str, str | None] = field(default_factory=dict)
@@ -42,6 +54,10 @@ class AudioStack:
     @property
     def can_meter(self) -> bool:
         return bool(self.capture_command)
+
+    @property
+    def can_play(self) -> bool:
+        return bool(self.output_device)
 
 
 def _run(arguments: list[str], timeout: float = 4.0) -> str | None:
@@ -76,6 +92,34 @@ def _pulse_default_sink() -> str | None:
     return None
 
 
+def _default_output_device() -> str | None:
+    """Name the speaker this machine would actually play through.
+
+    portaudio rather than the sound server, for one reason: it is the same
+    library the microphone is opened with, so it answers on macOS, on a Pi
+    running PipeWire and on a Pi running bare ALSA, where pactl does not
+    exist and the older lookup returned nothing.
+
+    A board with no output at all -- a Pi 5 with no jack, no HDMI attached
+    and only a USB microphone plugged in -- reports index -1 here, and that
+    is the one case where "no output device" is the truth.
+    """
+
+    try:
+        import sounddevice as sd
+
+        index = sd.default.device[1]
+        if index is None or int(index) < 0:
+            return None
+        info = sd.query_devices(int(index), "output")
+    except Exception:
+        # No portaudio, no device, or a stack that refuses to enumerate.
+        # This is a label on a panel; it must never stop the core coming up.
+        return None
+    name = str(info.get("name") or "").strip()
+    return name or None
+
+
 def detect_audio_stack() -> AudioStack:
     """Identify the running sound server and a way to read its output."""
 
@@ -95,6 +139,9 @@ def detect_audio_stack() -> AudioStack:
             )
         }
     )
+    # Asked once, before the branch, because every platform below has a
+    # speaker and only some of them have a sound server that will name it.
+    stack.output_device = _default_output_device()
 
     if platform.system() == "Darwin":
         stack.server = "coreaudio"

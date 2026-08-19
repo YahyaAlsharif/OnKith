@@ -97,7 +97,17 @@ class TerminalUI:
             }:
                 self.live_ui.set_state("error", sticky=2.0)
             if name == "onkith_status":
-                reply = self._onkith_reply(str(data["message"]))
+                message = str(data["message"])
+                # The screen tells the person in the room that nothing
+                # came back, which is what they need. This is the other
+                # half, and it was going nowhere: _onkith_reply returns
+                # None for anything it does not recognise, so the reason
+                # the assistant failed was dropped on the floor and the
+                # only place left to read it was the Groq dashboard.
+                if message.startswith("Assistant reply failed: "):
+                    self.live_ui.warn(message)
+                    return
+                reply = self._onkith_reply(message)
                 if reply is not None:
                     self.live_ui.onkith(reply)
                 return
@@ -301,7 +311,8 @@ class TerminalUI:
             stt_total / audio_duration if audio_duration else float("nan")
         )
         details = pii.raw_model_output
-        tinybert_seconds = float(details.get("tinybert_latency_seconds", 0.0))
+        engine = str(details.get("engine", "")) or "pii"
+        model_seconds = float(details.get("pii_model_latency_seconds", 0.0))
         structured_seconds = float(details.get("structured_latency_seconds", 0.0))
         if self.json_output:
             payload: dict[str, Any] = {
@@ -325,7 +336,8 @@ class TerminalUI:
                     "mask_queue_wait_seconds": (
                         result.mask_queue_wait_seconds
                     ),
-                    "tinybert_seconds": tinybert_seconds,
+                    "pii_engine": engine,
+                    "pii_model_seconds": model_seconds,
                     "structured_seconds": structured_seconds,
                     "pii_seconds": pii.latency_seconds,
                     "endpoint_to_display_seconds": result.total_seconds,
@@ -377,7 +389,7 @@ class TerminalUI:
                 f"RTF={aggregate_rtf:.3f}, "
                 f"Stage5_wait=0.000s, "
                 f"mask_queue_wait={result.mask_queue_wait_seconds:.3f}s, "
-                f"TinyBERT={tinybert_seconds:.3f}s, "
+                f"{engine}={model_seconds:.3f}s, "
                 f"structured={structured_seconds:.3f}s, "
                 f"PII_total={pii.latency_seconds:.3f}s, "
                 f"endpoint_to_display={result.total_seconds:.3f}s, "

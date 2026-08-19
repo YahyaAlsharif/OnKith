@@ -241,7 +241,16 @@ class LightController:
     def _apply(self) -> None:
         with self._lock:
             duty = float(self._brightness) if self._on else 0.0
-            state = {"on": self._on, "brightness": self._brightness}
+            # The backend travels with every update rather than being
+            # announced once at startup. A surface can connect at any
+            # moment, and "the lamp says 0%" means two entirely different
+            # things depending on whether a wire is attached: on a Pi it is
+            # off, on a laptop there was never a lamp.
+            state = {
+                "on": self._on,
+                "brightness": self._brightness,
+                "backend": self._backend.name,
+            }
         try:
             self._backend.set_duty(duty)
         except Exception as error:
@@ -253,6 +262,29 @@ class LightController:
                 self.bus.publish("light", state)
             except Exception:
                 pass
+
+    def announce(self) -> None:
+        """Publish the lamp's state without touching the lamp.
+
+        Deliberately not ``_apply``. That drives the hardware, and opening
+        a PWM channel because a surface happened to connect is exactly what
+        the lazy backend exists to avoid. This is the read-only half: it
+        lets the devices panel draw an unlit lamp, and say whether that is
+        because it is switched off or because no lamp is wired at all.
+        """
+
+        if self.bus is None:
+            return
+        with self._lock:
+            state = {
+                "on": self._on,
+                "brightness": self._brightness,
+                "backend": self._backend.name,
+            }
+        try:
+            self.bus.publish("light", state)
+        except Exception:
+            pass
 
     def close(self) -> None:
         self._backend.close()

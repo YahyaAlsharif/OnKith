@@ -236,6 +236,32 @@ class UIEventMappingTests(unittest.TestCase):
             [("onkith", "Opening Dancing with Monsters")],
         )
 
+    def test_why_the_assistant_failed_reaches_the_screen(self) -> None:
+        """The room is told nothing came back; the operator needs more.
+
+        Every status message the conversation does not recognise is
+        dropped, which is right for the chatty ones and was wrong for
+        this one. A decommissioned model name produced a device that
+        looked offline, and the reason existed only in a web dashboard.
+        """
+        self.terminal.event(
+            "calibration_complete",
+            {"noise_rms": 0.001, "start_threshold": 0.017},
+        )
+        self.live.calls.clear()
+        self.terminal.event(
+            "onkith_status",
+            {
+                "message": (
+                    "Assistant reply failed: ModelGone: Groq does not have "
+                    "a model called llama-3.1-8b-instant."
+                )
+            },
+        )
+        warnings = [call for call in self.live.calls if call[0] == "warn"]
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("llama-3.1-8b-instant", warnings[0][1])
+
     def test_final_ui_receives_exact_masked_text_entities_and_latency(self):
         item = recording(1)
         stt = stt_result(

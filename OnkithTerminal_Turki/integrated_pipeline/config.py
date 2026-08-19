@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,14 @@ MAXIMUM_BUFFER_TOKENS = 256
 MAXIMUM_BUFFER_DURATION_SECONDS = 15.0
 MOONSHINE_SESSION_POLICY = "isolated_cached_resources"
 PII_WORD_POLICY = "whole_word_union"
+#: Which trained classifier masks the transcript. Model V2 (DeBERTa-v3-xsmall,
+#: 63 labels) is the deployed one; "tinybert" is Model V1, kept loadable so the
+#: two can be measured against each other and so a bad night on the Pi is one
+#: config key away from being undone rather than a redeploy.
+PII_ENGINE = "deberta"
+PII_ENGINE_VARIABLE = "ONKITH_PII_ENGINE"
+#: Labels in each ontology. Model V1 had 67, Model V2 has 63.
+PII_LABEL_COUNTS = {"deberta": 63, "tinybert": 67}
 ENABLE_STRUCTURED_PII = True
 LIVE_STAGE5_MODE = "immediate"
 SESSION_DATABASE_FILENAME = "session_transcript.db"
@@ -92,9 +101,22 @@ class PipelineConfig:
         the way somewhere. A street, a building number and a postcode still
         do identify somebody, so they are still masked. That line is the
         judgement here, and it lives in config so it can be moved.
+
+        A clock time is released for the same reason. "Half past four"
+        identifies nobody, and masking it takes every reminder, alarm and
+        "when does it start" with it.
+
+        TITLE is released as a product decision. In this ontology it is
+        the honorific rather than the name of anything - Doctor,
+        Professor, Mrs - so releasing it leaves "Mrs [SURNAME_1]" where
+        the surname still carries the identity. The honorific on its own
+        names nobody, though it does hint at profession or marital
+        status, which is the cost being accepted here.
         """
 
-        configured = self.pii.get("never_mask", ["CITY", "COUNTRY", "TIMEZONE"])
+        configured = self.pii.get(
+            "never_mask", ["CITY", "COUNTRY", "TIMEZONE", "TIME", "TITLE"]
+        )
         return tuple(
             str(name).strip().upper() for name in configured if str(name).strip()
         )
@@ -148,16 +170,117 @@ class PipelineConfig:
         return self.data["storage"]
 
     @property
+    def pii_engine(self) -> str:
+        """Which trained classifier masks the transcript.
+
+        The environment wins over the file so a comparison run, or a
+        rollback at two in the morning, does not require editing tracked
+        configuration and remembering to edit it back.
+        """
+
+        override = os.environ.get(PII_ENGINE_VARIABLE)
+        if override:
+            return override.strip().casefold()
+        declared = self.pii.get("engine")
+        if declared:
+            return str(declared).strip().casefold()
+        # A file written before there were two models has neither key:
+        # everything is flat under "pii". Read which model it describes
+        # from the size of its ontology rather than assuming the current
+        # default, which would reject a file that was correct when it was
+        # written and make the way back the thing that does not work.
+        if not isinstance(self.pii.get("engines"), dict):
+            declared_count = self.pii.get("label_count")
+            for name, count in PII_LABEL_COUNTS.items():
+                if declared_count == count:
+                    return name
+        return PII_ENGINE
+
+    @property
+    def pii_engine_config(self) -> dict[str, Any]:
+        """The active engine's block, or the whole pii block if there is none.
+
+        The fallback is what lets a configuration written before there were
+        two models still load: every key this needs used to live directly
+        under "pii", so a file without an "engines" section is read exactly
+        as it always was.
+        """
+
+        engines = self.pii.get("engines")
+        if not isinstance(engines, dict):
+            return self.pii
+        block = engines.get(self.pii_engine)
+        if not isinstance(block, dict):
+            raise ValueError(
+                f"pii.engine={self.pii_engine!r} has no entry in pii.engines; "
+                f"known engines are {sorted(engines)}"
+            )
+        return block
+
+    @property
+    def pii_model_path(self) -> Path:
+        return (self.root / self.pii_engine_config["artifact"]).resolve()
+
+    @property
+    def pii_tokenizer_path(self) -> Path:
+        return (self.root / self.pii_engine_config["tokenizer"]).resolve()
+
+    @property
+    def pii_label_map_path(self) -> Path:
+        block = self.pii_engine_config
+        # Model V1 called it id2label and shipped a bare map; Model V2 calls
+        # it label_map and wraps the map in a document with the ontology
+        # version beside it. Both are read by the same loader.
+        location = block.get("label_map") or block["id2label"]
+        return (self.root / location).resolve()
+
+    @property
+    def pii_display_name(self) -> str:
+        """What to call the loaded classifier on screen.
+
+        Read from the same block that supplies the artifact path, because
+        the banner used to hold this as a literal and went on saying
+        TinyBERT for a whole session after the model became DeBERTa. A
+        name nobody can contradict is a name that will eventually be
+        wrong.
+        """
+
+        block = self.pii_engine_config
+        return str(
+            block.get("display") or block.get("model") or self.pii_engine
+        )
+
+    @property
+    def pii_model_sha256(self) -> str:
+        """The pinned digest of the packaged model, or "" if none is pinned.
+
+        Model V2 ships one because the deployment copy has to stay
+        byte-identical to the artifact the held-out evaluation measured.
+        Model V1 predates the practice and pins nothing.
+        """
+
+        return str(self.pii_engine_config.get("sha256", ""))
+
+    @property
+    def pii_label_count(self) -> int:
+        return int(
+            self.pii_engine_config.get(
+                "label_count", PII_LABEL_COUNTS.get(self.pii_engine, 0)
+            )
+        )
+
+    # Model V1 names, kept so nothing that predates the second model breaks.
+    @property
     def tinybert_model_path(self) -> Path:
-        return (self.root / self.pii["artifact"]).resolve()
+        return self.pii_model_path
 
     @property
     def tinybert_tokenizer_path(self) -> Path:
-        return (self.root / self.pii["tokenizer"]).resolve()
+        return self.pii_tokenizer_path
 
     @property
     def tinybert_label_map_path(self) -> Path:
-        return (self.root / self.pii["id2label"]).resolve()
+        return self.pii_label_map_path
 
     @property
     def moonshine_config_path(self) -> Path:
@@ -329,7 +452,10 @@ class PipelineConfig:
             "pii.provider": (self.pii["provider"], "CPUExecutionProvider"),
             "pii.context_limit": (int(self.pii["context_limit"]), 512),
             "pii.overflow_stride": (int(self.pii["overflow_stride"]), 128),
-            "pii.label_count": (int(self.pii["label_count"]), 67),
+            "pii.label_count": (
+                self.pii_label_count,
+                PII_LABEL_COUNTS.get(self.pii_engine, self.pii_label_count),
+            ),
             "pii.word_policy": (self.pii_word_policy, PII_WORD_POLICY),
             "pii.structured_enabled": (
                 self.enable_structured_pii,
@@ -346,10 +472,10 @@ class PipelineConfig:
 
         if require_artifacts:
             paths = (
-                self.tinybert_model_path,
-                self.tinybert_tokenizer_path / "tokenizer.json",
-                self.tinybert_tokenizer_path / "tokenizer_config.json",
-                self.tinybert_label_map_path,
+                self.pii_model_path,
+                self.pii_tokenizer_path / "tokenizer.json",
+                self.pii_tokenizer_path / "tokenizer_config.json",
+                self.pii_label_map_path,
                 self.moonshine_config_path,
             )
             missing = [str(path) for path in paths if not path.is_file()]

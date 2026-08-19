@@ -9,6 +9,7 @@ and voice path is unaffected.
 from __future__ import annotations
 
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, Callable
 
@@ -32,6 +33,9 @@ TEMPORARY_PREFIXES = ("onkith-core-", "onkith-mpv-")
 # power-cycled daily accumulates one of these per run forever otherwise,
 # and this one has an SD card rather than a disk.
 STALE_TEMPORARY_HOURS = 6
+# Ten a second. Fast enough that the meter reads as live, slow enough that
+# a real-time audio callback is not encoding JSON on most of its passes.
+INPUT_LEVEL_INTERVAL_SECONDS = 0.1
 
 
 def sweep_stale_temporary_directories(
@@ -155,6 +159,7 @@ class CoreRuntime:
             )
         )
         self.playback_available = False
+        self._input_level_published_at = 0.0
 
     @property
     def surface_url(self) -> str:
@@ -178,6 +183,12 @@ class CoreRuntime:
             self.meter.start()
         elif self.audio_stack.notes:
             self.log(self.audio_stack.notes[0])
+
+        # Only here is any of this settled: playback has either started or
+        # failed, the speech engine has chosen its backend, and the lamp
+        # knows whether it found a chip. Announced before the screen opens
+        # so the first frame it draws is already true.
+        self.announce_devices()
 
         if self.headless:
             self.log("Running headless: no screen is started.")
@@ -315,6 +326,90 @@ class CoreRuntime:
             "panel",
             {"open": None if open_panel is None else bool(open_panel)},
         )
+
+    def set_devices_panel(self, open_panel: bool) -> None:
+        """Show or hide the devices panel.
+
+        No ``None`` here, unlike the player. That third state exists so the
+        player can follow the search results when nobody has an opinion, and
+        there is no equivalent for hardware: a microphone does not arrive
+        and leave, so there is nothing for the screen to follow. It is shut
+        until asked for, then exactly as it was left.
+        """
+
+        self.bus.publish("devices", {"open": bool(open_panel)})
+
+    def announce_devices(self) -> None:
+        """Publish what is attached to this board.
+
+        Read once, at the point where every answer has settled, because
+        none of it changes afterwards. Plugging a speaker in mid-session
+        does not update this, and should not: the panel is a statement of
+        what the process opened at startup, which is the thing somebody
+        debugging silence actually needs to know.
+
+        The microphone is absent here on purpose. Capture belongs to the
+        live runtime rather than the core, and it names its own device
+        once it has opened one.
+        """
+
+        stack = self.audio_stack
+        self.bus.publish(
+            "devices",
+            {
+                "audio": {
+                    "server": stack.server,
+                    # The speaker, not the monitor. A machine can play
+                    # perfectly while exposing nothing to meter.
+                    "sink": stack.output_device or stack.default_sink,
+                    "speech": getattr(self.speech, "backend_name", None),
+                    "playback": bool(self.playback_available),
+                },
+            },
+        )
+        self.light.announce()
+
+    def set_microphone(self, name: str, device_id: int, sample_rate: int) -> None:
+        """Name the microphone the capture lane actually opened.
+
+        Which is not always the one that was asked for, and never the one
+        somebody assumed: adding a USB speaker with a mic in it renumbers
+        every input on the board. The panel showing the opened device by
+        name is how that gets noticed before a demo rather than during one.
+        """
+
+        self.bus.publish(
+            "devices",
+            {
+                "mic": {
+                    "name": str(name),
+                    "id": int(device_id),
+                    "sample_rate": int(sample_rate),
+                }
+            },
+        )
+
+    def set_input_level(self, rms: float) -> None:
+        """The microphone's level, on its way to the devices panel.
+
+        Called from the sounddevice callback, which is a real-time audio
+        thread: it must return in well under one block or capture drops
+        samples. So this is rate limited to ten a second rather than the
+        forty-odd the callback runs at, and rounded, which lets the bus
+        drop a repeat instead of waking every surface to say silence is
+        still silence.
+
+        Publishing itself does not block -- a surface that cannot keep up
+        has its frame dropped rather than the audio thread stalled -- but
+        the JSON encoding is per connection and does not belong in that
+        callback any more often than it has to be.
+        """
+
+        now = time.monotonic()
+        if now - self._input_level_published_at < INPUT_LEVEL_INTERVAL_SECONDS:
+            return
+        self._input_level_published_at = now
+        self.bus.publish("input", {"rms": round(max(0.0, float(rms)), 3)})
 
     def set_gate(self, state: str) -> None:
         """Say what became of the last thing anybody said.

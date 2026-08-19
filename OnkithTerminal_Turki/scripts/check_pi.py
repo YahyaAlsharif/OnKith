@@ -41,11 +41,18 @@ def code_without_prose(path: Path) -> str:
 
     Comments and docstrings go. Ordinary string literals stay, so
     something reached for by name at runtime is still caught.
+
+    Requirements files get the same treatment for the same reason. The
+    line that pins kokoro-onnx has to say why plain kokoro is not
+    allowed, and naming the thing it is not allowed to pull failed the
+    check that the sentence exists to explain.
     """
 
     source = path.read_text(encoding="utf-8")
     if path.suffix != ".py":
-        return source.lower()
+        return "\n".join(
+            line.split("#", 1)[0] for line in source.splitlines()
+        ).lower()
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -122,9 +129,19 @@ def verify_deployment_boundary() -> None:
         for path in ROOT.rglob("*.onnx")
         if ".venv" not in path.parts and "site-packages" not in path.parts
     ]
-    expected = ROOT / "models" / "tinybert_pii" / "model_int8.onnx"
-    if onnx_files != [expected]:
-        raise RuntimeError(f"Expected only {expected}; found {onnx_files}")
+    # Both trained classifiers ship: Model V2 is what runs, Model V1 is the
+    # way back if it is too heavy for the board. Anything else appearing
+    # here is a model that arrived without being decided on.
+    expected = {
+        ROOT / "models" / "deberta_pii" / "model_int8.onnx",
+        ROOT / "models" / "tinybert_pii" / "model_int8.onnx",
+    }
+    unexpected = sorted(str(path) for path in set(onnx_files) - expected)
+    if unexpected:
+        raise RuntimeError(f"Unexpected ONNX models in the tree: {unexpected}")
+    missing = sorted(str(path) for path in expected if not path.is_file())
+    if missing:
+        raise RuntimeError(f"Required ONNX models are missing: {missing}")
 
 
 def verify_lane_ownership() -> None:
@@ -312,7 +329,7 @@ def main() -> int:
         raise RuntimeError("PII smoke was blocked")
     if "rayyan@example.com" in probe.masked_text or "12345678" in probe.masked_text:
         raise RuntimeError("Structured PII smoke leaked a value")
-    print("[OK] Local tokenizer, TinyBERT INT8, and CPUExecutionProvider")
+    print("[OK] Local tokenizer, PII INT8 classifier, and CPUExecutionProvider")
 
     package_version = importlib.metadata.version("moonshine-voice")
     if package_version != "0.0.69":

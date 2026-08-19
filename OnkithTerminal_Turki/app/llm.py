@@ -23,19 +23,46 @@ from datetime import datetime
 from typing import Any, Callable
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+# Groq has withdrawn every Llama model. Both names this file used to carry
+# were decommissioned, and a decommissioned name fails as HTTP 404
+# model_not_found, which reads on the screen as the device being offline.
+# Anything named here has to be checked against the live catalogue:
+#
+#     curl -sH "Authorization: Bearer $GROQ_API_KEY" \
+#          -H "User-Agent: Onkith/1.0" \
+#          https://api.groq.com/openai/v1/models
+#
+# The User-Agent is not decoration. Without one Cloudflare answers 403
+# with "error code: 1010" and never reaches Groq at all.
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 DEFAULT_TIMEOUT_SECONDS = 20.0
 DEFAULT_MAX_TOKENS = 160
 MAX_HISTORY_TURNS = 6
 
-# A compound model answers by searching the web on the server, which costs
-# about 3400 tokens a question against a free tier of 8000 a minute. That
-# is two questions a minute before the device starts refusing people, and
-# it was refusing them roughly every other call while this was measured.
-# The plain model costs a few hundred tokens against a limit of 12000, so
-# it is the thing to fall back to. It cannot search, so it answers from
-# what it knows and from the clock this device gives it.
-DEFAULT_FALLBACK_MODEL = "llama-3.3-70b-versatile"
+# The same family one size down, so a refusal on the large model is
+# answered by something with its own quota rather than by silence. Both
+# were measured at about 0.9s to a spoken-length reply, and both hold the
+# COMMAND wire format. groq/compound can search the web and was the older
+# choice here; it spends about 3400 tokens a question against a free tier
+# of 8000 a minute, which is two questions before the device starts
+# refusing people, so it is not the default.
+DEFAULT_FALLBACK_MODEL = "openai/gpt-oss-20b"
+
+# These models think before they answer, and the thinking is billed
+# against max_tokens. At the default effort a 160-token budget is spent
+# entirely on reasoning and the reply comes back empty, which the
+# assistant reports as "nothing came back". Measured: 0 content tokens
+# without this, a correct one-line answer with it.
+_REASONING_MODELS = ("gpt-oss",)
+REASONING_EFFORT = "low"
+
+
+def reasoning_effort_for(model: str) -> str | None:
+    """None for models that reject the field, which is most of them."""
+
+    if any(family in model for family in _REASONING_MODELS):
+        return REASONING_EFFORT
+    return None
 
 # After a refusal, later questions go straight to the fallback rather than
 # spending a round trip discovering the limit is still there. A minute is
@@ -82,13 +109,16 @@ SYSTEM_PROMPT = (
     "things, do not answer it in words. Reply with exactly one line, "
     "the word COMMAND, a colon, and one name from this list, and "
     "nothing else at all:\n"
-    "  PLAY CLOSE SHOW HIDE LOUDER QUIETER\n"
+    "  PLAY CLOSE SHOW HIDE SHOW_DEVICES HIDE_DEVICES LOUDER QUIETER\n"
     "  LIGHT_ON LIGHT_OFF BRIGHTER DIMMER LIGHT_LEVEL\n"
     "PLAY starts music and CLOSE stops it. SHOW and HIDE are the player "
-    "on screen. LOUDER and QUIETER are the music volume. The rest are "
-    "the lamp, and LIGHT_LEVEL is for a specific brightness such as a "
-    "percentage. Skipping and pausing are not on the list and there is "
-    "no name for them. "
+    "on screen. SHOW_DEVICES and HIDE_DEVICES are a different panel, "
+    "listing what is plugged into this device: its microphone, its "
+    "speaker and its lamp. Asking what is connected, or what the "
+    "microphone is, is asking for that panel. LOUDER and QUIETER are the "
+    "music volume. The rest are the lamp, and LIGHT_LEVEL is for a "
+    "specific brightness such as a percentage. Skipping and pausing are "
+    "not on the list and there is no name for them. "
     "Never write COMMAND in any other situation, never explain it, and "
     "never mention it when you are answering a question. A remark about "
     "music or lights is not an instruction: somebody saying it is dark "
@@ -121,6 +151,8 @@ ASSISTANT_COMMANDS = frozenset(
         "CLOSE",
         "SHOW",
         "HIDE",
+        "SHOW_DEVICES",
+        "HIDE_DEVICES",
         "LOUDER",
         "QUIETER",
         "LIGHT_ON",
@@ -183,6 +215,17 @@ class LLMUnavailable(RuntimeError):
 
 class RateLimited(RuntimeError):
     """Groq refused this model for now. Another one may still answer."""
+
+
+class ModelGone(RuntimeError):
+    """Groq has never heard of this model, so no wait will help.
+
+    Separate from every other failure for the same reason a rate limit
+    is: another model can still answer. Separate from a rate limit
+    because the wait is not what fixes it, and the operator has to be
+    told a name in a config file is wrong rather than left watching a
+    device that looks like it lost its wifi.
+    """
 
 
 @dataclass
@@ -279,16 +322,20 @@ class GroqClient:
         model = self._model_for_now()
         try:
             reply = self._ask(model, text)
-        except RateLimited:
+        except (RateLimited, ModelGone) as refusal:
             if not self.settings.has_fallback or model == self.settings.fallback_model:
                 raise
             self._rate_limited_until = (
                 time.monotonic() + RATE_LIMIT_COOLDOWN_SECONDS
             )
+            reason = (
+                str(refusal)
+                if isinstance(refusal, ModelGone)
+                else f"{model} is rate limited"
+            )
             self.log(
-                f"{model} is rate limited; answering with "
-                f"{self.settings.fallback_model} for the next "
-                f"{int(RATE_LIMIT_COOLDOWN_SECONDS)}s"
+                f"{reason}; answering with {self.settings.fallback_model} "
+                f"for the next {int(RATE_LIMIT_COOLDOWN_SECONDS)}s"
             )
             reply = self._ask(self.settings.fallback_model, text)
 
@@ -297,15 +344,17 @@ class GroqClient:
         return reply
 
     def _ask(self, model: str, text: str) -> str:
-        payload = json.dumps(
-            {
-                "model": model,
-                "messages": self._messages(text),
-                "max_tokens": self.settings.max_tokens,
-                "temperature": self.settings.temperature,
-                "stream": False,
-            }
-        ).encode("utf-8")
+        body: dict[str, Any] = {
+            "model": model,
+            "messages": self._messages(text),
+            "max_tokens": self.settings.max_tokens,
+            "temperature": self.settings.temperature,
+            "stream": False,
+        }
+        effort = reasoning_effort_for(model)
+        if effort is not None:
+            body["reasoning_effort"] = effort
+        payload = json.dumps(body).encode("utf-8")
         request = urllib.request.Request(
             GROQ_URL,
             data=payload,
@@ -328,10 +377,15 @@ class GroqClient:
                 f"Groq returned HTTP {error.code}: "
                 f"{redact(detail, self.settings.api_key)}"
             )
-            # Told apart from every other failure because it is the one
-            # that another model can still answer.
+            # Told apart from every other failure because these are the
+            # ones that another model can still answer.
             if error.code == 429:
                 raise RateLimited(message) from error
+            if error.code == 404 and "model" in detail.lower():
+                raise ModelGone(
+                    f"Groq does not have a model called {model}. "
+                    "Check GROQ_MODEL against the live catalogue."
+                ) from error
             raise RuntimeError(message) from error
         except urllib.error.URLError as error:
             raise RuntimeError(f"Groq is unreachable: {error.reason}") from error

@@ -1,0 +1,88 @@
+{
+  "model": "OnKith Model V2 privacy token classifier",
+  "model_id": "microsoft/deberta-v3-xsmall",
+  "base_model_revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+  "ontology_version": "model_v2.ontology.1",
+  "entity_types": 31,
+  "label_count": 63,
+  "precision": "int8",
+  "provider": "CPUExecutionProvider",
+  "context_limit": 512,
+  "overflow_stride": 128,
+  "decoder": "integrated_pipeline.model_v2_masker.ModelV2OnnxMasker",
+  "canonical_source": "model/DeBERTa-v3-xsmall/artifacts/model_v2/",
+  "files": {
+    "model_int8.onnx": {
+      "canonical": "model/DeBERTa-v3-xsmall/artifacts/model_v2/models/int8/model_int8.onnx",
+      "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+      "size_bytes": 82278782
+    },
+    "tokenizer/tokenizer.json": {
+      "canonical": "model/DeBERTa-v3-xsmall/artifacts/model_v2/tokenizer/tokenizer.json",
+      "sha256": "3557a81100ec95519fb3e5977f67d4fa1775dc82ea0b653015885746007acc67",
+      "size_bytes": 8852151
+    },
+    "tokenizer/tokenizer_config.json": {
+      "canonical": "model/DeBERTa-v3-xsmall/artifacts/model_v2/tokenizer/tokenizer_config.json",
+      "sha256": "357abebf47463a264d4dea3556f8f8cd49661d2e24079b5f6c4460d01ce8cf60",
+      "size_bytes": 382
+    },
+    "config/model_v2_label_map.json": {
+      "canonical": "model/DeBERTa-v3-xsmall/config/model_v2_label_map.json",
+      "sha256": "dece8e29987f5f292794859370bc8a9eac6b689ab0768a9a6aecebdef04d12d3",
+      "size_bytes": 7311
+    }
+  },
+  "release": {
+    "status": "accepted",
+    "accepted_candidate_manifest": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json",
+    "int8_quality_gate": "passed on test, val_original, val_supplementary, combined_validation, ood_dev",
+    "gate_thresholds": {
+      "max_typed_f1_drop": 0.02,
+      "max_leakage_rise": 0.015
+    },
+    "gate_reference": "fp32_onnx production path; both runtimes decoded by the same production decoder",
+    "evidence": [
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_fp32_onnx.json",
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_production_path_int8_onnx.json",
+      "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_ood_final_int8.json"
+    ]
+  },
+  "int8_evaluation": {
+    "note": "Typed entity F1 of the packaged INT8 graph, decoded by the production decoder.",
+    "test": { "rows": 19136, "typed_f1": 0.9527, "leakage": 0.0027 },
+    "val_original": { "rows": 40909, "typed_f1": 0.9588, "leakage": 0.0017 },
+    "val_supplementary": { "rows": 6907, "typed_f1": 0.8849, "leakage": 0.0157 },
+    "combined_validation": { "rows": 47816, "typed_f1": 0.9534, "leakage": 0.0031 },
+    "ood_dev": { "rows": 360, "typed_f1": 0.6882, "leakage": 0.1275 },
+    "ood_final": {
+      "rows": 360,
+      "typed_f1": 0.6244,
+      "leakage": 0.1610,
+      "note": "One-shot frozen holdout, spent once on this exact artifact. Never re-run."
+    }
+  },
+  "held_out_validation": {
+    "source": "model/DeBERTa-v3-xsmall/deberta_vs_tinybert_int8_validation.ipynb",
+    "rows": 40909,
+    "deberta_int8": {
+      "typed_f1": 0.9588,
+      "private_character_leakage": 0.0017,
+      "non_private_overmasking_rate": 0.0029
+    },
+    "tinybert_int8_model_v1": {
+      "typed_f1": 0.9502,
+      "private_character_leakage": 0.0029,
+      "non_private_overmasking_rate": 0.0044
+    }
+  },
+  "cpu_deployment_benchmark": {
+    "entry_points": [
+      "Full_Pipeline_CPU_Benchmark.py",
+      "Full_Pipeline_Audio_Benchmark.py"
+    ],
+    "results": "research_results/cpu_benchmarks/",
+    "note": "Hardware-agnostic Python scripts, no Jupyter required; run them on the Raspberry Pi to produce Pi latency, memory and end-to-end audio evidence."
+  },
+  "physical_pi5_validation": "pending_not_run"
+}

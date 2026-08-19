@@ -227,10 +227,25 @@ Onkith, play Bones by Imagine Dragons     Onkith, louder
 Onkith, stop                              Onkith, quieter
 Onkith, show the player                   Onkith, turn the light on
 Onkith, hide the player                   Onkith, turn the light off
-                                          Onkith, brighter
-Anything else is a question.              Onkith, dimmer
+Onkith, show the devices                  Onkith, brighter
+Onkith, hide the devices                  Onkith, dimmer
                                           Onkith, set the light to 10 percent
+Anything else is a question.
 ```
+
+The two panels share every verb, so the noun is the whole difference:
+"player" is the music, "devices" or "hardware" is the hardware. Singular
+"device" is deliberately not a panel word -- this machine calls itself one
+throughout, and "turn the device off" is not a request to close a window.
+
+The devices panel is the fastest answer to "why is it silent". It names
+the microphone that was actually opened, which is not always the one that
+was asked for -- adding a USB speaker with a mic in it renumbers every
+input on the board -- and shows its live level, the output sink, the
+speech backend, and whether mpv came up. A lamp is drawn rather than
+described, so the screen and the desk can be compared at a glance, and
+"Not wired" is distinguished from 0%: one means no PWM chip was found,
+the other means somebody switched it off.
 
 Anything the device does not place goes to the assistant, which may
 answer with the instruction instead of prose. That is a fallback, not the

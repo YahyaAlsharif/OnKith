@@ -6,7 +6,9 @@ import struct
 import sys
 import threading
 import time
+import os
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -149,6 +151,69 @@ class SpeechEngineTest(unittest.TestCase):
         backend.speak("one two three")
         self.assertEqual(len(messages), 1)
         self.assertIn("No local speech backend", messages[0])
+
+
+class WhichVoiceWins(unittest.TestCase):
+    """Which voice is chosen, and what happens when it is not installed."""
+
+    def test_kokoro_is_the_voice_the_device_ships_with(self) -> None:
+        from app import speech
+
+        self.assertEqual(speech._AUTOMATIC_ORDER[0], "kokoro")
+
+    def test_a_lighter_voice_is_always_behind_it(self) -> None:
+        # Kokoro holds a 310 MB graph and takes a second or two a
+        # sentence on a fast laptop. A board that cannot afford it has to
+        # land on something rather than going mute.
+        from app import speech
+
+        order = speech._AUTOMATIC_ORDER
+        self.assertEqual(order, ("kokoro", "piper", "espeak", "say"))
+        for lighter in ("piper", "espeak", "say"):
+            self.assertIn(lighter, order)
+
+    def test_every_named_voice_can_actually_be_built(self) -> None:
+        from app import speech
+
+        for name in speech._AUTOMATIC_ORDER:
+            with self.subTest(voice=name):
+                self.assertIn(name, speech._BACKEND_BUILDERS)
+
+    def test_mpv_can_play_the_raw_stream_when_nothing_else_will(self) -> None:
+        # The three sinks ahead of it are Linux-only, which left both
+        # neural voices unselectable on a Mac and made them impossible to
+        # hear before they reached the Pi. mpv is not a new dependency:
+        # it already plays every note of music this device makes.
+        from app import speech
+
+        with mock.patch.object(
+            speech.shutil,
+            "which",
+            side_effect=lambda name: "/usr/bin/mpv" if name == "mpv" else None,
+        ):
+            command = speech._raw_player(24000)
+        self.assertIsNotNone(command)
+        self.assertIn("/usr/bin/mpv", command)
+        self.assertIn("--demuxer-rawaudio-rate=24000", command)
+
+    def test_a_machine_with_no_sink_at_all_reports_none(self) -> None:
+        from app import speech
+
+        with mock.patch.object(speech.shutil, "which", return_value=None):
+            self.assertIsNone(speech._raw_player(24000))
+
+    def test_kokoro_without_its_two_files_is_skipped(self) -> None:
+        # Both are required. Half a configuration used to fall through in
+        # silence and the device just sounded wrong.
+        from app import speech
+
+        with mock.patch.dict(
+            os.environ,
+            {"ONKITH_KOKORO_MODEL": "/nowhere/model.onnx"},
+            clear=False,
+        ):
+            os.environ.pop("ONKITH_KOKORO_VOICES", None)
+            self.assertIsNone(speech.build_kokoro_backend())
 
 
 class OutputLevelTest(unittest.TestCase):

@@ -36,7 +36,12 @@
     "maximum_duration_seconds": 15.0
   },
   "wake": {
-    "names": ["onkith", "sada", "sitr", "echo"],
+    "names": [
+      "onkith",
+      "sada",
+      "sitr",
+      "echo"
+    ],
     "spellings": [
       "onkuth",
       "onkoth",
@@ -48,12 +53,15 @@
       "ownkiss",
       "onkis",
       "onkeys",
-      "صدى",
+      "\u0635\u062f\u0649",
       "sitter",
       "setter",
-      "ستر"
+      "\u0633\u062a\u0631"
     ],
-    "never": ["ankit", "ankith"],
+    "never": [
+      "ankit",
+      "ankith"
+    ],
     "fuzzy_minimum_length": 6,
     "edit_distance": 1
   },
@@ -76,17 +84,44 @@
     "busy_timeout_ms": 5000
   },
   "pii": {
-    "model": "TinyBERT-4 token classifier",
-    "artifact": "models/tinybert_pii/model_int8.onnx",
-    "tokenizer": "models/tinybert_pii/tokenizer",
-    "id2label": "models/tinybert_pii/config/id2label.json",
+    "engine": "deberta",
+    "engines": {
+      "deberta": {
+        "model": "OnKith Model V2 - DeBERTa-v3-xsmall token classifier, INT8",
+        "display": "DeBERTa-v3-xsmall INT8",
+        "model_id": "microsoft/deberta-v3-xsmall",
+        "ontology_version": "model_v2.ontology.1",
+        "artifact": "models/deberta_pii/model_int8.onnx",
+        "tokenizer": "models/deberta_pii/tokenizer",
+        "label_map": "models/deberta_pii/config/model_v2_label_map.json",
+        "manifest": "models/deberta_pii/model_manifest.json",
+        "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+        "size_bytes": 82278782,
+        "label_count": 63
+      },
+      "tinybert": {
+        "model": "OnKith Model V1 - TinyBERT-4 token classifier, INT8",
+        "display": "TinyBERT-4 INT8",
+        "artifact": "models/tinybert_pii/model_int8.onnx",
+        "tokenizer": "models/tinybert_pii/tokenizer",
+        "id2label": "models/tinybert_pii/config/id2label.json",
+        "sha256": "9efee1e3a339a7b0fb0e68df414f0aa773456543a5cb7c7cf619974ff6beceee",
+        "size_bytes": 14386813,
+        "label_count": 67
+      }
+    },
     "provider": "CPUExecutionProvider",
     "context_limit": 512,
     "overflow_stride": 128,
-    "label_count": 67,
     "word_policy": "whole_word_union",
     "structured_enabled": true,
-    "never_mask": ["CITY", "COUNTRY", "TIMEZONE"]
+    "never_mask": [
+      "CITY",
+      "COUNTRY",
+      "TIMEZONE",
+      "TIME",
+      "TITLE"
+    ]
   },
   "light": {
     "chip": 0,

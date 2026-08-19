@@ -351,5 +351,59 @@ class BackendDetectionTests(unittest.TestCase):
         self.assertEqual(len(messages), 2)
 
 
+class RecordingBus:
+    """Collect published sections so the panel's inputs can be asserted."""
+
+    def __init__(self) -> None:
+        self.published: list[tuple[str, dict]] = []
+
+    def publish(self, section: str, patch: dict) -> None:
+        self.published.append((section, patch))
+
+
+class LampOnTheScreenTests(unittest.TestCase):
+    """What the devices panel is given to draw."""
+
+    def test_the_backend_travels_with_every_update(self) -> None:
+        # 0% means "switched off" on a Pi and "no lamp exists" on a
+        # laptop, and the panel cannot tell those apart from the number.
+        bus = RecordingBus()
+        light = LightController(bus, {"default_brightness": 70}, backend=RecordingLight())
+        light.on()
+        section, patch = bus.published[-1]
+        self.assertEqual(section, "light")
+        self.assertEqual(patch["backend"], "recording")
+        self.assertTrue(patch["on"])
+        self.assertEqual(patch["brightness"], 70)
+
+    def test_announcing_does_not_touch_the_lamp(self) -> None:
+        # The whole point of the lazy backend is that nothing reaches a
+        # GPIO because a browser connected. announce publishes and stops.
+        bus = RecordingBus()
+        backend = RecordingLight()
+        light = LightController(bus, {}, backend=backend)
+        light.announce()
+        self.assertEqual(backend.duties, [])
+        self.assertEqual(bus.published[-1][0], "light")
+
+    def test_an_unwired_lamp_says_so_rather_than_reading_dark(self) -> None:
+        bus = RecordingBus()
+        light = LightController(bus, {}, backend=NullLight("no chip here"))
+        light.announce()
+        self.assertEqual(bus.published[-1][1]["backend"], "none")
+
+    def test_off_reports_the_level_it_will_return_to(self) -> None:
+        # The controller remembers brightness through an off so that on
+        # comes back to it. The panel has to render that as dark anyway,
+        # which is the surface's job, so the number must survive here.
+        bus = RecordingBus()
+        light = LightController(bus, {"default_brightness": 70}, backend=RecordingLight())
+        light.set_brightness(40)
+        light.off()
+        patch = bus.published[-1][1]
+        self.assertFalse(patch["on"])
+        self.assertEqual(patch["brightness"], 40)
+
+
 if __name__ == "__main__":
     unittest.main()

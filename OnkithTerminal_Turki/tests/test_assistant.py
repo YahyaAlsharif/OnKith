@@ -15,19 +15,26 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.assistant import UNREACHABLE_REPLY, AssistantWorker
+from app.assistant import (
+    MISCONFIGURED_REPLY,
+    UNREACHABLE_REPLY,
+    AssistantWorker,
+)
 from app.event_bus import EventBus
 from app.llm import (
     ASSISTANT_COMMANDS,
+    DEFAULT_FALLBACK_MODEL,
     DEFAULT_MODEL,
     GROQ_URL,
     SYSTEM_PROMPT,
     GroqClient,
     GroqSettings,
     LLMUnavailable,
+    ModelGone,
     RateLimited,
     ambient_context,
     extract_reply,
+    reasoning_effort_for,
     redact,
 )
 from app.omit_ai_live import forward_masked_output
@@ -67,6 +74,161 @@ def groq_rate_limit(model: str) -> urllib.error.HTTPError:
     return urllib.error.HTTPError(
         GROQ_URL, 429, "Too Many Requests", {}, io.BytesIO(body)
     )
+
+
+def groq_model_not_found(model: str) -> urllib.error.HTTPError:
+    """The refusal Groq sends for a name it has withdrawn.
+
+    Copied from the dashboard log of a real run: every Llama model was
+    decommissioned while this device was pointed at one, and the device
+    reported it as being unable to reach the network.
+    """
+
+    body = json.dumps(
+        {
+            "error": {
+                "message": (
+                    f"The model `{model}` does not exist or you do not have "
+                    "access to it."
+                ),
+                "type": "invalid_request_error",
+                "code": "model_not_found",
+            }
+        }
+    ).encode()
+    return urllib.error.HTTPError(
+        GROQ_URL, 404, "Not Found", {}, io.BytesIO(body)
+    )
+
+
+class WithdrawnModelGroq:
+    """404s one named model and answers for anything else."""
+
+    def __init__(self, missing: str, reply: str = "answered") -> None:
+        self.missing = missing
+        self.reply = reply
+        self.asked: list[str] = []
+
+    def __call__(self, request, timeout=None):
+        model = json.loads(request.data)["model"]
+        self.asked.append(model)
+        if model == self.missing:
+            raise groq_model_not_found(model)
+        return groq_response(self.reply)
+
+
+class RecordingGroq:
+    """Answers everything and keeps the request bodies."""
+
+    def __init__(self, reply: str = "answered") -> None:
+        self.reply = reply
+        self.bodies: list[dict] = []
+
+    def __call__(self, request, timeout=None):
+        self.bodies.append(json.loads(request.data))
+        return groq_response(self.reply)
+
+
+class WithdrawnModelTests(unittest.TestCase):
+    """A name Groq has never heard of is not a network fault.
+
+    This cost an evening. The device said "I could not reach the network
+    just then", which sends somebody to check the wifi, and the only
+    place the actual reason existed was the Groq dashboard.
+    """
+
+    def settings(self, **overrides) -> GroqSettings:
+        base = {
+            "api_key": "test-key",
+            "model": "llama-3.1-8b-instant",
+            "fallback_model": "openai/gpt-oss-20b",
+        }
+        base.update(overrides)
+        return GroqSettings(**base)
+
+    def test_a_withdrawn_name_is_told_apart_from_a_transport_failure(
+        self,
+    ) -> None:
+        client = GroqClient(settings=self.settings(fallback_model=""))
+        with patch(
+            "urllib.request.urlopen",
+            WithdrawnModelGroq(missing="llama-3.1-8b-instant"),
+        ):
+            with self.assertRaises(ModelGone) as caught:
+                client.reply_to("what time is it")
+        # Naming it is the point: the fix is one line in .env and nobody
+        # can write that line without being told which line it is.
+        self.assertIn("llama-3.1-8b-instant", str(caught.exception))
+        self.assertIn("GROQ_MODEL", str(caught.exception))
+
+    def test_the_other_model_still_answers(self) -> None:
+        transport = WithdrawnModelGroq(missing="llama-3.1-8b-instant")
+        client = GroqClient(settings=self.settings())
+        with patch("urllib.request.urlopen", transport):
+            self.assertEqual(client.reply_to("what time is it"), "answered")
+        self.assertEqual(
+            transport.asked, ["llama-3.1-8b-instant", "openai/gpt-oss-20b"]
+        )
+
+    def test_a_404_about_anything_else_stays_a_plain_failure(self) -> None:
+        # Only the model_not_found shape may be read as a bad name. A 404
+        # from a proxy or a wrong URL is a different problem and must not
+        # be reported as a configuration error.
+        def transport(request, timeout=None):
+            raise urllib.error.HTTPError(
+                GROQ_URL, 404, "Not Found", {}, io.BytesIO(b"<html>nope</html>")
+            )
+
+        client = GroqClient(settings=self.settings(fallback_model=""))
+        with patch("urllib.request.urlopen", transport):
+            with self.assertRaises(RuntimeError) as caught:
+                client.reply_to("what time is it")
+        self.assertNotIsInstance(caught.exception, ModelGone)
+
+    def test_no_llama_name_survives_as_a_default(self) -> None:
+        # Groq has withdrawn the entire family. A default that 404s is a
+        # device that cannot answer out of the box.
+        self.assertNotIn("llama", DEFAULT_MODEL)
+        self.assertNotIn("llama", DEFAULT_FALLBACK_MODEL)
+
+
+class ReasoningBudgetTests(unittest.TestCase):
+    """The reasoning models spend max_tokens on thinking.
+
+    Measured against the live API: gpt-oss-20b returned 160 completion
+    tokens and empty content at the default effort, which the assistant
+    reports as "nothing came back". The field is rejected outright by
+    every other model on the catalogue, so it cannot simply always be
+    sent.
+    """
+
+    def test_only_the_models_that_accept_it_are_sent_it(self) -> None:
+        self.assertEqual(reasoning_effort_for("openai/gpt-oss-120b"), "low")
+        self.assertEqual(reasoning_effort_for("openai/gpt-oss-20b"), "low")
+        self.assertIsNone(reasoning_effort_for("groq/compound-mini"))
+        self.assertIsNone(reasoning_effort_for("allam-2-7b"))
+
+    def test_the_field_reaches_the_request(self) -> None:
+        transport = RecordingGroq()
+        client = GroqClient(
+            settings=GroqSettings(
+                api_key="test-key", model="openai/gpt-oss-120b"
+            )
+        )
+        with patch("urllib.request.urlopen", transport):
+            client.reply_to("what time is it")
+        self.assertEqual(transport.bodies[0]["reasoning_effort"], "low")
+
+    def test_and_is_absent_for_a_model_that_would_reject_it(self) -> None:
+        transport = RecordingGroq()
+        client = GroqClient(
+            settings=GroqSettings(
+                api_key="test-key", model="groq/compound-mini"
+            )
+        )
+        with patch("urllib.request.urlopen", transport):
+            client.reply_to("what time is it")
+        self.assertNotIn("reasoning_effort", transport.bodies[0])
 
 
 class RateLimitedGroq:
@@ -358,6 +520,9 @@ class GroqClientTest(unittest.TestCase):
 
             def set_panel(self, open_panel) -> None:
                 self.calls.append(("panel", open_panel))
+
+            def set_devices_panel(self, open_panel) -> None:
+                self.calls.append(("devices", open_panel))
 
             def step_volume(self, delta) -> None:
                 self.calls.append(("volume", delta))
@@ -796,12 +961,89 @@ class FailureIsVisibleTest(unittest.TestCase):
         self.assertEqual(roles.count("onkith"), 3)
         self.assertEqual(worker.speech.spoken.count(UNREACHABLE_REPLY), 1)
 
+    def test_a_bad_model_name_is_not_blamed_on_the_network(self) -> None:
+        # The device reached the network perfectly well and was told the
+        # model does not exist. Saying otherwise sends somebody to check
+        # the wifi for a fault that lives in .env.
+        worker = self.worker(FakeLLM(error=ModelGone("no such model")))
+        self.drain(worker)
+        self.assertEqual(worker.speech.spoken, [MISCONFIGURED_REPLY])
+        self.assertNotIn(UNREACHABLE_REPLY, worker.speech.spoken)
+
     def test_an_empty_reply_is_not_dropped_in_silence(self) -> None:
         # A compound model that answers inside its tool results returns
         # exactly this, and it used to leave the question with nothing
         # under it.
         worker = self.worker(FakeLLM(reply=""))
         self.assertIn("onkith", self.drain(worker))
+
+
+class ReplyTimingTest(unittest.TestCase):
+    """How long the round trip took, so the board is not blamed for it.
+
+    Every other latency in the session report is the Pi's. This one is
+    the network's, and reporting them together is the difference between
+    "the device is too slow" and "the wifi is".
+    """
+
+    def worker(self, llm):
+        self.timings: list[tuple[float, bool]] = []
+        return AssistantWorker(
+            llm=llm,
+            speech=RecordingSpeech(),
+            bus=EventBus(),
+            log=lambda m: None,
+            on_reply=lambda seconds, failed: self.timings.append(
+                (seconds, failed)
+            ),
+        )
+
+    def drain(self, worker):
+        worker.start()
+        worker.submit("what time is it", [])
+        worker.queue.join()
+        worker.shutdown()
+
+    def test_an_answered_question_is_timed(self) -> None:
+        self.drain(self.worker(FakeLLM(reply="half past four")))
+        self.assertEqual(len(self.timings), 1)
+        seconds, failed = self.timings[0]
+        self.assertFalse(failed)
+        self.assertGreaterEqual(seconds, 0.0)
+
+    def test_a_failed_round_trip_is_timed_and_marked(self) -> None:
+        # Kept apart from the answers: an outage that times out after
+        # thirty seconds would otherwise read as a slow reply.
+        self.drain(self.worker(FakeLLM(error=RuntimeError("HTTP 429"))))
+        self.assertEqual(len(self.timings), 1)
+        self.assertTrue(self.timings[0][1])
+
+    def test_a_command_that_never_asked_anything_is_not_timed(self) -> None:
+        worker = self.worker(FakeLLM(reply="ignored"))
+        worker.start()
+        worker.note_command("onkith light on", [])
+        worker.queue.join()
+        worker.shutdown()
+        self.assertEqual(self.timings, [])
+
+    def test_a_meter_that_throws_does_not_cost_somebody_their_answer(self) -> None:
+        def broken(seconds, failed):
+            raise RuntimeError("meter is gone")
+
+        speech = RecordingSpeech()
+        worker = AssistantWorker(
+            llm=FakeLLM(reply="half past four"),
+            speech=speech,
+            bus=EventBus(),
+            log=lambda m: None,
+            on_reply=broken,
+        )
+        worker.start()
+        worker.submit("what time is it", [])
+        worker.queue.join()
+        worker.shutdown()
+        self.assertEqual(speech.spoken, ["half past four"])
+        self.assertEqual(worker.errors, [])
 
 
 class AssistantAsAFallbackLaneTest(unittest.TestCase):

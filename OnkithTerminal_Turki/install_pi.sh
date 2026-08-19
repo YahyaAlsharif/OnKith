@@ -112,14 +112,47 @@ PY
 # resolving streams within weeks. Re-run this line to refresh it.
 python -m pip install --upgrade yt-dlp
 
-# Piper is the planned voice. It is installed best-effort because its
-# wheels are not always published for this architecture; a failure here
-# leaves espeak-ng as the voice and everything else working.
+# Kokoro is the voice the device ships with. The ONNX build only: plain
+# `kokoro` pulls torch, which this deployment does not allow.
+#
+# The two model files are downloaded rather than vendored: together they
+# are 337 MB, which does not belong in a git repository, and they live
+# outside the tree so a fresh clone does not fetch them twice.
+VOICES_DIR="${HOME}/onkith-voices"
+KOKORO_RELEASE="https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
+mkdir -p "${VOICES_DIR}"
+if python -m pip install --upgrade "kokoro-onnx==0.6.0"; then
+  for file in kokoro-v1.0.onnx voices-v1.0.bin; do
+    if [ -s "${VOICES_DIR}/${file}" ]; then
+      echo "[OK] ${file} already downloaded."
+    else
+      echo "[..] Downloading ${file} (this is the slow part)."
+      # -f so an HTML error page is not written out as a model file, and
+      # a partial download is removed rather than left to fail later
+      # inside onnxruntime with an opaque protobuf error.
+      curl -fL --retry 3 -o "${VOICES_DIR}/${file}" \
+        "${KOKORO_RELEASE}/${file}" || rm -f "${VOICES_DIR}/${file}"
+    fi
+  done
+fi
+if [ -s "${VOICES_DIR}/kokoro-v1.0.onnx" ] \
+   && [ -s "${VOICES_DIR}/voices-v1.0.bin" ]; then
+  echo "[OK] Kokoro installed. Put these two lines in .env:"
+  echo "         ONKITH_KOKORO_MODEL=${VOICES_DIR}/kokoro-v1.0.onnx"
+  echo "         ONKITH_KOKORO_VOICES=${VOICES_DIR}/voices-v1.0.bin"
+else
+  echo "[WARNING] Kokoro is not usable; falling back to piper or espeak."
+fi
+
+# Piper stays as the lighter fallback. Kokoro holds a 310 MB graph and
+# takes a second or two per sentence on a fast laptop; if this board
+# cannot afford either, ONKITH_TTS=piper in .env switches without any
+# other change. Installed best-effort because its wheels are not always
+# published for this architecture.
 if python -m pip install --upgrade piper-tts; then
-  echo "[OK] piper installed. Download a voice and set ONKITH_PIPER_MODEL."
+  echo "[OK] piper installed as the fallback voice."
 else
   echo "[WARNING] piper-tts did not install on this architecture."
-  echo "[WARNING] Onkith will fall back to espeak-ng. See the README."
   ${SUDO} apt-get install -y espeak-ng || true
 fi
 
@@ -130,7 +163,8 @@ fi
 # ran on did exactly that: piper, piper-tts and espeak-ng all absent, the
 # report otherwise green, and a device that hears and answers and never
 # says a word.
-if command -v piper >/dev/null || command -v piper-tts >/dev/null \
+if [ -s "${VOICES_DIR}/kokoro-v1.0.onnx" ] \
+   || command -v piper >/dev/null || command -v piper-tts >/dev/null \
    || command -v espeak-ng >/dev/null; then
   echo "[OK] A speech backend is installed."
 else

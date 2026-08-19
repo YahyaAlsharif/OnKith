@@ -211,6 +211,24 @@ def _raw_player(sample_rate: int) -> list[str] | None:
     aplay = shutil.which("aplay")
     if aplay:
         return [aplay, "-q", "-f", "S16_LE", "-r", str(sample_rate), "-t", "raw", "-"]
+    # Last, and not a new dependency: mpv already plays every note of
+    # music this device makes, so if it is absent nothing works anyway.
+    # It is here because the three sinks above are all Linux, which left
+    # piper and kokoro unselectable on a Mac and made the neural voices
+    # impossible to hear before they reached the Pi.
+    mpv = shutil.which("mpv")
+    if mpv:
+        return [
+            mpv,
+            "--no-video",
+            "--really-quiet",
+            "--no-terminal",
+            "--demuxer=rawaudio",
+            "--demuxer-rawaudio-format=s16le",
+            f"--demuxer-rawaudio-rate={sample_rate}",
+            "--demuxer-rawaudio-channels=1",
+            "-",
+        ]
     return None
 
 
@@ -267,9 +285,12 @@ _BACKEND_BUILDERS = {
     "espeak": build_espeak_backend,
     "say": build_say_backend,
 }
-# Piper first: it is the planned voice and the lightest on a Pi. Kokoro is
-# the upgrade when the device has headroom for it.
-_AUTOMATIC_ORDER = ("piper", "kokoro", "espeak", "say")
+# Kokoro first: it is the voice the device ships with. Piper stays ahead
+# of espeak as the lighter fallback for a board that cannot hold Kokoro's
+# 310 MB graph beside the recogniser and the classifier, and espeak and
+# say are there so a device with neither model still speaks rather than
+# going silent.
+_AUTOMATIC_ORDER = ("kokoro", "piper", "espeak", "say")
 
 
 def detect_backend(log: LogFunction = lambda message: None) -> SpeechBackend:
