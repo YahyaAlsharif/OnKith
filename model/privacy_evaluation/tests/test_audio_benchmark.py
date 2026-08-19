@@ -1016,25 +1016,34 @@ class ResultSchemaTests(unittest.TestCase):
 
 
 class UnavailableRecogniserTests(unittest.TestCase):
-    def test_the_help_text_names_the_exact_install_and_acquire_commands(self) -> None:
+    def test_the_help_text_names_the_exact_install_command(self) -> None:
         """A teammate on the Pi must not have to guess what is missing."""
 
         help_text = audio.STT_UNAVAILABLE_HELP
-        self.assertIn("nemo-toolkit[asr]==2.5.3", help_text)
-        self.assertIn("torch==2.7.1", help_text)
-        self.assertIn("scripts/acquire_canary.py", help_text)
+        self.assertIn("faster-whisper==1.2.1", help_text)
+        self.assertIn("pip install", help_text)
 
-    def test_the_pinned_versions_in_the_help_match_the_deployment_config(self) -> None:
+    def test_the_pinned_version_in_the_help_matches_the_deployment_config(self) -> None:
         import sys as _sys
 
         _sys.path.insert(0, str(common.PRODUCTION_ROOT))
         from integrated_pipeline.config import PipelineConfig
 
         config = PipelineConfig(root=common.PRODUCTION_ROOT)
-        self.assertIn(f"nemo-toolkit[asr]=={config.canary['nemo_version']}",
-                      audio.STT_UNAVAILABLE_HELP)
-        self.assertIn(f"torch=={config.canary['torch_version']}",
-                      audio.STT_UNAVAILABLE_HELP)
+        self.assertIn(
+            f"faster-whisper=={config.whisper['package_version']}",
+            audio.STT_UNAVAILABLE_HELP,
+        )
+
+    def test_the_help_never_points_at_the_archived_canary_installer(self) -> None:
+        """The Canary acquisition script lives in the archive and is not run.
+
+        Its numbers are frozen; pointing a stuck teammate at it would invite a
+        rerun of the historical baseline.
+        """
+
+        self.assertNotIn("acquire_canary", audio.STT_UNAVAILABLE_HELP)
+        self.assertNotIn("nemo", audio.STT_UNAVAILABLE_HELP.lower())
 
 
 if __name__ == "__main__":

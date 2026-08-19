@@ -32,7 +32,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[1]
-for extra in (ROOT, REPO_ROOT / "FullPipeline_V3"):
+for extra in (ROOT, REPO_ROOT / "FullPipeline_V4"):
     if str(extra) not in sys.path:
         sys.path.insert(0, str(extra))
 
@@ -339,13 +339,13 @@ class MaskerDecodingContractTests(unittest.TestCase):
 
         The old form of this test asserted the opposite - that the production
         adapter kept its own WordPiece word ids - because production was pinned
-        to TinyBERT. FullPipeline_V3 is Model V2 now, so the requirement flips:
+        to TinyBERT. FullPipeline_V4 is Model V2 now, so the requirement flips:
         ``PIIMaskerAdapter`` must delegate here and must never call the shared
         consolidation itself.
         """
 
         source = (
-            REPO_ROOT / "FullPipeline_V3" / "integrated_pipeline" / "pii_adapter.py"
+            REPO_ROOT / "FullPipeline_V4" / "integrated_pipeline" / "pii_adapter.py"
         ).read_text(encoding="utf-8")
         self.assertIn("from .model_v2_masker import ModelV2OnnxMasker", source)
         self.assertNotIn("word_ids", source)

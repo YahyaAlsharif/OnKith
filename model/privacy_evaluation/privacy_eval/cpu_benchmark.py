@@ -153,8 +153,11 @@ class CpuBenchmark:
         self.warnings = WarningLog()
         self.completed: dict[str, bool] = {}
         self.started_utc = common.utc_now()
+        # The engine is part of the run id, so a V4 run can never land in or be
+        # mistaken for one of the frozen Canary folders. The historical Canary
+        # runs carry no engine token and are identified by its absence.
         self.run_id = common.make_run_id(
-            self.started_utc, options.mode, options.device_label
+            self.started_utc, options.mode, options.device_label, prefix="whisper"
         )
         self.run = RunDirectory(self.run_id, options.results_root)
 
@@ -671,28 +674,30 @@ class CpuBenchmark:
             self.warnings.note(f"VAD stage unavailable: {type(exc).__name__}: {exc}")
 
     def _stage_stt(self, audio) -> None:
+        # The stage key names the engine. The frozen Canary runs wrote
+        # "stt_canary" and are never rewritten, so a reader - and the figures
+        # notebook - can tell which recognizer a result folder measured from the
+        # key alone.
         if not self.options.run_full_pipeline:
-            self._record_stage("stt_canary", [], available=False,
+            self._record_stage("stt_whisper", [], available=False,
                                reason="full pipeline disabled")
             return
         try:
-            from integrated_pipeline.canary_adapter import CanaryAdapter, describe_nemo_backend
+            from integrated_pipeline.whisper_adapter import (
+                WhisperAdapter,
+                describe_whisper_backend,
+            )
 
-            backend = describe_nemo_backend()
-            artifact = self.config.canary_model_path
+            backend = describe_whisper_backend()
             if not backend.get("available"):
                 raise RuntimeError(
-                    "NeMo backend unavailable: " + "; ".join(backend.get("errors", ["unknown"]))
-                )
-            if not artifact.is_file():
-                raise FileNotFoundError(
-                    f"{artifact.name} is not present. Fetch it with "
-                    "`python FullPipeline_V3/scripts/acquire_canary.py`."
+                    "faster-whisper backend unavailable: "
+                    + "; ".join(backend.get("errors", ["unknown"]))
                 )
 
-            common.quieten_nemo()
-            canary = CanaryAdapter(self.config)
-            canary.load()
+            common.quieten_stt()
+            whisper = WhisperAdapter(self.config)
+            whisper.load()
 
             def make_segment(index: int):
                 return common.make_canary_segment(
@@ -704,26 +709,61 @@ class CpuBenchmark:
                 )
 
             for index in range(self.options.pipeline_warmup_runs):
-                canary.transcribe_segment(make_segment(index))
+                whisper.transcribe_segment(make_segment(index))
 
             stt_seconds = []
+            transcript = ""
             for index in range(max(3, self.options.pipeline_latency_runs // 4)):
                 started = time.perf_counter()
-                canary.transcribe_segment(make_segment(100 + index))
+                transcript = whisper.transcribe_segment(
+                    make_segment(100 + index)
+                ).text
                 stt_seconds.append(time.perf_counter() - started)
-            canary.close()
+            whisper.close()
 
-            self._record_stage("stt_canary", stt_seconds, extra={
+            self._record_stage("stt_whisper", stt_seconds, extra={
                 "audio_seconds": self.audio_seconds,
                 "real_time_factor": statistics.fmean(stt_seconds) / self.audio_seconds,
-                "model": self.config.canary["model_id"],
+                "engine": "whisper",
+                "model": self.config.whisper["model"],
+                "runtime": self.config.whisper["runtime"],
+                "runtime_version": backend.get("faster_whisper_version"),
+                "device": self.config.whisper["device"],
+                "compute_type": self.config.whisper["compute_type"],
+                "beam_size": self.config.whisper["beam_size"],
+                # The input is `deterministic_speech`: a speech-shaped tone, not
+                # speech. It is identical bytes on every device, which is what
+                # made it a fair cross-device timing probe for Canary.
+                "condition": "synthetic_tone",
+                "probe_transcript": transcript,
+                "representative_of_deployment": False,
+                "note": (
+                    "NOT the deployment cost of this recognizer. The probe is a "
+                    "synthetic tone; Whisper has no words to find in it, decodes "
+                    "against its own prompt and runs until the 30 s window is "
+                    "full, so this real-time factor measures a failure mode "
+                    "rather than transcription. Canary had no such loop, which "
+                    "is why the same probe was a fair timing comparison for it "
+                    "and is not one between the two engines. The live pipeline "
+                    "never submits unvoiced audio: Silero gates it first. For "
+                    "the recognizer cost on real speech, use "
+                    "audio_latency_summary.json from "
+                    "Full_Pipeline_Audio_Benchmark.py, which drives 44 committed "
+                    "WAV clips. This stage is kept because it is still a valid "
+                    "device-to-device comparison for one engine, and because the "
+                    "assembled-utterance estimate below is built from it."
+                ),
             })
             print(f"STT  : mean {statistics.fmean(stt_seconds) * 1000:.0f} ms for "
                   f"{self.audio_seconds:.1f} s "
-                  f"(RTF {self.pipeline_stages['stt_canary']['real_time_factor']:.3f})")
+                  f"(RTF {self.pipeline_stages['stt_whisper']['real_time_factor']:.3f})")
+            print("       synthetic tone, not speech - Whisper decodes against its "
+                  "own prompt here.")
+            print("       The recognizer's cost on real speech is in "
+                  "Full_Pipeline_Audio_Benchmark.py.")
         except Exception as exc:
             reason = f"{type(exc).__name__}: {exc}"
-            self._record_stage("stt_canary", [], available=False, reason=reason)
+            self._record_stage("stt_whisper", [], available=False, reason=reason)
             self.warnings.note(f"STT stage unavailable - {reason}")
             print("STT  : unavailable, the remaining stages still run")
 
@@ -841,7 +881,7 @@ class CpuBenchmark:
 
     def _assemble_pipeline_summary(self) -> None:
         available_audio = [
-            name for name in ("vad_silero", "stt_canary")
+            name for name in ("vad_silero", "stt_whisper")
             if self.pipeline_stages.get(name, {}).get("available")
         ]
         self.pipeline_summary = {
@@ -867,9 +907,28 @@ class CpuBenchmark:
         self.pipeline_summary["full_utterance_estimate_ms"] = (
             audio_mean_ms + self.pipeline_summary["text_path_end_to_end"]["mean_ms"]
         )
-        self.pipeline_summary["full_utterance_estimate_note"] = (
+        unrepresentative = sorted(
+            name for name in available_audio
+            if self.pipeline_stages.get(name, {}).get(
+                "representative_of_deployment", True
+            ) is False
+        )
+        note = (
             "Mean of the available audio stages plus the measured text path. "
             f"Audio stages included: {available_audio or 'none'}."
+        )
+        if unrepresentative:
+            note += (
+                " This estimate is dominated by "
+                f"{', '.join(unrepresentative)}, which measured a synthetic tone "
+                "rather than speech and says so in its own entry; it is a "
+                "device-to-device figure for one recognizer, not a deployment "
+                "latency. The end-to-end cost on real speech is in "
+                "audio_latency_summary.json."
+            )
+        self.pipeline_summary["full_utterance_estimate_note"] = note
+        self.pipeline_summary["full_utterance_estimate_representative"] = (
+            not unrepresentative
         )
         print(f"\nassembled estimate for one {self.audio_seconds:.1f} s utterance: "
               f"{self.pipeline_summary['full_utterance_estimate_ms']:.1f} ms")
@@ -926,6 +985,17 @@ class CpuBenchmark:
         finished_utc = common.utc_now()
         config_payload = {
             "run_id": self.run_id,
+            "benchmark": "cpu_text",
+            # Recorded so the figures notebook can separate this run from the
+            # frozen Canary runs, which predate these keys and default to canary.
+            "pipeline_version": "V4",
+            "pipeline_root": common.relative(common.PRODUCTION_ROOT),
+            "stt_engine": "whisper",
+            "stt_model": self.config.whisper["model"],
+            "stt_runtime": self.config.whisper["runtime"],
+            "stt_device": self.config.whisper["device"],
+            "stt_compute_type": self.config.whisper["compute_type"],
+            "stt_beam_size": self.config.whisper["beam_size"],
             "mode": self.options.mode,
             "smoke_test": self.options.smoke_test,
             "device_label": self.options.device_label or None,

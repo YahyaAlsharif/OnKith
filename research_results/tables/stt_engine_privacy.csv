@@ -1,0 +1,4 @@
+arm,run_id,engine,clips_with_identifiers,clips_released_clean,released_clean_rate,identifiers_rebuilt_by_the_renderer,control_reference_entity_recall,control_reference_character_recall,entity_recall_after_stt__within_engine_only,character_leakage_after_stt__within_engine_only,stt_preservation_rate__within_engine_only
+Canary laptop,20260818T062503Z_windows-amd64_audio_full_workstation,canary,5,3,0.6,2,0.7333333333333333,0.7273809523809524,0.7,0.19567827130852344,0.8666666666666667
+Canary Raspberry Pi 5,20260818T081310Z_linux-aarch64_audio_full,canary,5,3,0.6,2,0.7333333333333333,0.7202380952380952,0.7,0.19567827130852344,0.8666666666666667
+Whisper laptop,20260819T073431Z_windows-amd64_audio-whisper_full_workstation,whisper,5,5,1.0,0,0.7333333333333333,0.7226190476190476,0.26666666666666666,0.24951644100580272,0.5166666666666667

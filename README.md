@@ -23,6 +23,28 @@
 
 ---
 
+> **In progress: V4 has replaced the speech recognizer, and this README has not
+> caught up yet.**
+>
+> The active pipeline is now [`FullPipeline_V4/`](FullPipeline_V4/): V3's
+> architecture with **faster-whisper `base.en`** (CTranslate2, CPU, INT8, beam 5)
+> in place of NVIDIA Canary 180M Flash. Everything downstream of the recognizer -
+> VAD, segmentation, transcript merging, DeBERTa-v3-xsmall INT8 masking, span
+> merging, spoken-digit rendering, storage, UI - is V3's code, unchanged, and a
+> regression test asserts that identical text produces identical masked output on
+> both.
+>
+> The Canary pipeline is preserved verbatim at
+> [`archive/FullPipeline_V3/`](archive/FullPipeline_V3/). Its measurements in
+> [`research_results/`](research_results/) are a frozen baseline and are never
+> regenerated. Links to `FullPipeline_V3/` below therefore point at the archive.
+>
+> **Every performance and accuracy number below the fold is still Canary's.**
+> The Whisper workstation run is done; the Whisper Raspberry Pi run is not. This
+> file, the pipeline READMEs and the results discussion are rewritten in one pass
+> once that run lands, so the numbers change once rather than twice.
+
+
 OnKith is a voice pipeline that runs entirely on a small edge device. It listens,
 transcribes speech locally, removes personally identifiable information from the
 transcript, and only then lets the text go anywhere else. No audio and no raw

@@ -2,7 +2,7 @@
 
 The masker used to live here because production was pinned to TinyBERT and
 could not load a 63-label SentencePiece model at all. That is no longer true:
-``FullPipeline_V3`` *is* Model V2, and the corrected decoder this module used to
+``FullPipeline_V4`` *is* Model V2, and the corrected decoder this module used to
 define now ships inside the pipeline as
 ``integrated_pipeline.model_v2_masker``.
 
@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V3"
+PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
 
 if str(PRODUCTION_ROOT) not in sys.path:
     sys.path.insert(0, str(PRODUCTION_ROOT))

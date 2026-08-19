@@ -22,7 +22,7 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-for extra in (REPO_ROOT / "FullPipeline_V3", REPO_ROOT / "model" / "privacy_evaluation"):
+for extra in (REPO_ROOT / "FullPipeline_V4", REPO_ROOT / "model" / "privacy_evaluation"):
     if str(extra) not in sys.path:
         sys.path.insert(0, str(extra))
 

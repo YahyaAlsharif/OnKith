@@ -7,7 +7,7 @@ a different question, and it is the question a deployed device actually poses:
 
 So it starts from committed WAV files and runs the real production stack -
 
-    audio -> Silero VAD -> Canary STT -> transcript merge / wake-word
+    audio -> Silero VAD -> Whisper STT -> transcript merge / wake-word
           -> inactivity buffer -> DeBERTa-v3-xsmall INT8 -> masking
           -> spoken-digit rendering -> final sanitized text
 
@@ -24,10 +24,13 @@ Three arms, scored on the same clips
     comparable to the text benchmark's numbers.
 
 ``reference_uncased``
-    The same transcript lowercased with punctuation blanked out - what a perfect
-    recognizer would hand over, because the deployment pins Canary to
-    ``pnc: no``. The gap between this arm and ``reference_text`` is the cost of
-    losing case and punctuation alone, with no recognition error involved.
+    The same transcript lowercased with punctuation blanked out. Under V3 this
+    was what a perfect recognizer would hand over, because Canary ran with
+    ``pnc: no``. Whisper punctuates and capitalises, so under V4 this arm is no
+    longer the recognizer's own output shape - it is kept unchanged because it
+    is the arm every Canary run was scored against, and dropping it would end
+    the comparison. The gap between it and ``reference_text`` is still the cost
+    of losing case and punctuation alone, with no recognition error involved.
 
 ``stt``
     The real recognized transcript through the real pipeline. The gap between
@@ -95,11 +98,11 @@ STT_UNAVAILABLE_HELP = """\
 The audio benchmark needs the production speech recognizer. Install it, then run
 this script again - nothing else changes:
 
-    pip install "nemo-toolkit[asr]==2.5.3" "torch==2.7.1"
-    python FullPipeline_V3/scripts/acquire_canary.py
+    pip install "faster-whisper==1.2.1"
 
-The second command downloads the pinned nvidia/canary-180m-flash artifact and
-verifies its SHA-256. Both are CPU-only and work on Raspberry Pi OS (aarch64).
+faster-whisper runs on CTranslate2, not torch, and publishes wheels for Windows
+and for Raspberry Pi OS (aarch64). The base.en weights are fetched once on first
+use and cached; after that the device runs offline.
 Until then the control arms below still run, so the fixtures, the privacy model
 and the memory profile are all validated - only the recognizer is missing."""
 
@@ -461,8 +464,12 @@ class AudioBenchmark:
         self.warnings = WarningLog()
         self.completed: dict[str, bool] = {}
         self.started_utc = common.utc_now()
+        # The engine is part of the run id, so a Whisper run can never land in
+        # or be mistaken for a Canary folder. The historical Canary runs carry no
+        # engine token and are identified by its absence.
         self.run_id = common.make_run_id(
-            self.started_utc, options.mode, options.device_label, prefix="audio"
+            self.started_utc, options.mode, options.device_label,
+            prefix="audio_whisper",
         )
         self.run = RunDirectory(self.run_id, options.results_root)
 
@@ -476,10 +483,11 @@ class AudioBenchmark:
         self.load_seconds: dict[str, float] = {}
 
         self.vad = None
-        self.canary = None
+        self.whisper = None
         self.adapter = None
         self.stt_available = False
         self.stt_reason = ""
+        self.stt_backend: dict[str, Any] | None = None
 
         self.clip_results: list[dict[str, Any]] = []
         self.predictions: list[dict[str, Any]] = []
@@ -522,8 +530,10 @@ class AudioBenchmark:
         print(f"Architecture      : {info['architecture']} ({info['logical_cpus']} logical CPUs)")
         print(f"RAM               : {common.gib(info['total_ram_bytes'])}")
         print(f"Python            : {info['python']}   ONNX Runtime {info['onnxruntime']}")
-        print(f"STT model         : {self.config.canary['model_id']} "
-              f"({self.config.canary['backend']})")
+        print(f"STT model         : {self.config.whisper['model']} "
+              f"({self.config.whisper['runtime']}, {self.config.whisper['device']}, "
+              f"{self.config.whisper['compute_type']}, beam "
+              f"{self.config.whisper['beam_size']})")
         print("Privacy model     : DeBERTa-v3-xsmall INT8")
         print(f"Privacy model SHA : {self.artifact['measured_sha256']}")
         print(f"Audio clips       : {len(self.clips)} "
@@ -571,27 +581,28 @@ class AudioBenchmark:
             print("  STT      skipped (--skip-stt)")
             return
         try:
-            from integrated_pipeline.canary_adapter import CanaryAdapter, describe_nemo_backend
+            from integrated_pipeline.whisper_adapter import (
+                WhisperAdapter,
+                describe_whisper_backend,
+            )
 
-            backend = describe_nemo_backend()
-            artifact = self.config.canary_model_path
+            backend = describe_whisper_backend()
             if not backend.get("available"):
                 raise RuntimeError(
-                    "NeMo backend unavailable: " + "; ".join(backend.get("errors", ["unknown"]))
+                    "faster-whisper backend unavailable: "
+                    + "; ".join(backend.get("errors", ["unknown"]))
                 )
-            if not artifact.is_file():
-                raise FileNotFoundError(
-                    f"the pinned Canary artifact {artifact.name} is not present at "
-                    f"{common.relative(artifact)}"
-                )
-            common.quieten_nemo()
+            common.quieten_stt()
             started = time.perf_counter()
-            self.canary = CanaryAdapter(self.config)
-            self.canary.load()
+            self.whisper = WhisperAdapter(self.config)
+            # Loading includes the one-second warmup decode, exactly as the live
+            # deployment does it, so "STT loaded" means "ready to transcribe".
+            self.whisper.load()
             self.load_seconds["stt"] = time.perf_counter() - started
             self.stage_rss["stt_loaded"] = common.rss_bytes()
             self.stt_available = True
-            print(f"  STT      {self.config.canary['model_id']:24} "
+            self.stt_backend = backend
+            print(f"  STT      whisper {self.config.whisper['model']:16} "
                   f"loaded in {self.load_seconds['stt']:.2f} s")
         except Exception as exc:
             self.stt_reason = f"{type(exc).__name__}: {exc}"
@@ -624,7 +635,7 @@ class AudioBenchmark:
             segment_id=f"audio-benchmark-{clip_id}-0",
         )
         started = time.perf_counter()
-        transcript = self.canary.transcribe_segment(segment)
+        transcript = self.whisper.transcribe_segment(segment)
         return transcript.text, time.perf_counter() - started
 
     def _run_vad(self, audio) -> tuple[float, dict[str, Any]]:
@@ -948,21 +959,93 @@ class AudioBenchmark:
         self.stt_metrics = {
             "run_id": self.run_id,
             "available": True,
-            "model": self.config.canary["model_id"],
-            "backend": self.config.canary["backend"],
-            "decoding": {"strategy": self.config.canary["strategy"],
-                         "beam_size": self.config.canary["beam_size"],
-                         "punctuation_and_capitalisation": self.config.canary["pnc"]},
+            "engine": "whisper",
+            "model": self.config.whisper["model"],
+            "model_id": self.config.whisper["model_id"],
+            "backend": (
+                f"{self.config.whisper['runtime']}_"
+                f"{self.config.whisper['device']}_"
+                f"{self.config.whisper['compute_type']}"
+            ),
+            "runtime": self.config.whisper["runtime"],
+            "runtime_version": (self.stt_backend or {}).get("faster_whisper_version"),
+            "device": self.config.whisper["device"],
+            "compute_type": self.config.whisper["compute_type"],
+            "decoding": {"strategy": "beam",
+                         "beam_size": self.config.whisper["beam_size"],
+                         "language": self.config.whisper["language"],
+                         "punctuation_and_capitalisation": self.config.whisper["pnc"],
+                         "initial_prompt_characters": len(
+                             (self.whisper.initial_prompt if self.whisper else "")
+                         )},
             "note": (
                 "A controlled deployment check on a few dozen clips, not a "
-                "speech-recognition benchmark. The deployment pins pnc=no, so both "
-                "sides of every WER are lowercased and stripped of punctuation."
+                "speech-recognition benchmark. Both sides of every WER are "
+                "lowercased and stripped of punctuation before scoring, which is "
+                "the same definition the Canary runs used - Canary produced "
+                "unpunctuated lowercase text (pnc=no) and Whisper punctuates, so "
+                "normalising both sides is what keeps the two comparable."
             ),
             "overall": aggregate(scored),
             "by_subset": {
                 name: aggregate([r for r in scored if r["subset"] == name])
                 for name in subsets
             },
+        }
+
+        # The engine-comparable number, computed by the module that also scores
+        # the frozen Canary folders from their stored transcripts, so both
+        # engines are judged by one implementation. See stt_comparison.py for
+        # why the raw WER above cannot be compared across engines.
+        from .stt_comparison import digit_preservation, number_normalised_wer
+
+        normalised = [
+            number_normalised_wer(r["reference_transcript"], r["stt_transcript"])
+            for r in scored
+        ]
+        normalised_words = sum(item["reference_words"] for item in normalised)
+        normalised_errors = sum(item["errors"] for item in normalised)
+        digit_rows = [
+            item for item in (
+                digit_preservation(r["reference_transcript"], r["stt_transcript"])
+                for r in scored
+            ) if item
+        ]
+        identifiers = sum(item["identifiers"] for item in digit_rows)
+        exact_identifiers = sum(item["exact"] for item in digit_rows)
+        self.stt_metrics["number_normalised"] = {
+            "definition": (
+                "the same Levenshtein word error rate, after spoken number words "
+                "have been folded to numerals on both the reference and the "
+                "hypothesis. Identical treatment on both sides and for both "
+                "engines, which is what makes Canary and Whisper comparable; the "
+                "raw figure above cannot be, because Canary wrote numbers as "
+                "words and Whisper writes numerals."
+            ),
+            "clips": len(normalised),
+            "reference_words": normalised_words,
+            "aggregate_wer": (
+                normalised_errors / normalised_words if normalised_words else 0.0
+            ),
+            "mean_wer": statistics.fmean(item["wer"] for item in normalised),
+            "median_wer": statistics.median(item["wer"] for item in normalised),
+        }
+        self.stt_metrics["digit_preservation"] = {
+            "definition": (
+                "long numbers (7+ digits) transcribed digit for digit, scored on "
+                "the value rather than the spelling"
+            ),
+            "clips_with_identifiers": len(digit_rows),
+            "identifiers": identifiers,
+            "exact": exact_identifiers,
+            "accuracy": exact_identifiers / identifiers if identifiers else None,
+        }
+        self.stt_metrics["wake_word"] = {
+            "measurable": False,
+            "reason": (
+                "no clip in the committed corpus addresses the device by name, so "
+                "wake-word recognition is not measurable here for any engine"
+            ),
         }
 
         print("\nSpeech recognition")
@@ -974,6 +1057,16 @@ class AudioBenchmark:
             if entry["clips"]:
                 print(f"    {name:20} aggregate {entry['aggregate_wer']:.4f}  "
                       f"median {entry['median_wer']:.4f}  ({entry['clips']} clips)")
+        engine_comparable = self.stt_metrics["number_normalised"]
+        print(f"  number-normalised WER (engine-comparable) "
+              f"{engine_comparable['aggregate_wer']:.4f}   "
+              f"mean {engine_comparable['mean_wer']:.4f}   "
+              f"median {engine_comparable['median_wer']:.4f}")
+        digits = self.stt_metrics["digit_preservation"]
+        if digits["identifiers"]:
+            print(f"  long numbers transcribed exactly  {digits['exact']}/"
+                  f"{digits['identifiers']} ({digits['accuracy']:.1%}) over "
+                  f"{digits['clips_with_identifiers']} clips")
 
     @staticmethod
     def _comparable_arm(pairs) -> dict[str, Any]:
@@ -1187,7 +1280,7 @@ class AudioBenchmark:
                 "identifiers_reconstructed": len(amplified),
                 "cases": amplified,
                 "mechanism": (
-                    "Canary runs with pnc=no, so a spoken number arrives as digit "
+                    "A spoken number can arrive as digit "
                     "words. The privacy model misses some of those - it is the same "
                     "leak the entity outcomes already count - and the display "
                     "renderer, which by design runs after masking, then rewrites the "
@@ -1286,6 +1379,20 @@ class AudioBenchmark:
         config_payload = {
             "run_id": self.run_id,
             "benchmark": "audio_pipeline",
+            # Recorded so the figures notebook can separate this run from the
+            # frozen Canary runs, which predate these keys and default to canary.
+            "pipeline_version": "V4",
+            "pipeline_root": common.relative(common.PRODUCTION_ROOT),
+            "stt_engine": "whisper",
+            "stt_model": self.config.whisper["model"],
+            "stt_model_id": self.config.whisper["model_id"],
+            "stt_runtime": self.config.whisper["runtime"],
+            "stt_runtime_version": (self.stt_backend or {}).get(
+                "faster_whisper_version"
+            ),
+            "stt_device": self.config.whisper["device"],
+            "stt_compute_type": self.config.whisper["compute_type"],
+            "stt_beam_size": self.config.whisper["beam_size"],
             "mode": self.options.mode,
             "smoke_test": self.options.smoke_test,
             "device_label": self.options.device_label or None,
@@ -1418,7 +1525,11 @@ class AudioBenchmark:
             f"- **Clips scored:** {len(self.clip_results)} of {totals['clips']} available "
             f"({selected_seconds:.1f} s of audio, {self.options.mode} mode)",
             f"- **Speech recognizer:** "
-            + (f"{self.config.canary['model_id']}" if self.stt_available
+            + (f"faster-whisper {self.config.whisper['model']} "
+               f"({self.config.whisper['runtime']}, "
+               f"{self.config.whisper['device']}, "
+               f"{self.config.whisper['compute_type']}, "
+               f"beam {self.config.whisper['beam_size']})" if self.stt_available
                else f"UNAVAILABLE - {self.stt_reason}"),
             f"- **Started / finished (UTC):** {config_payload['started_utc'][:19]} -> "
             f"{config_payload['finished_utc'][:19]} "
@@ -1466,6 +1577,28 @@ class AudioBenchmark:
                 f"| Mean WER | {overall['mean_wer']:.4f} |",
                 f"| Median WER | {overall['median_wer']:.4f} |",
                 f"| Reference words | {overall['reference_words']:,} |",
+                "",
+                "The three rows above use the benchmark's standing definition:",
+                "Levenshtein over lowercased, punctuation-stripped words. It is",
+                "comparable across devices for one recognizer and **not** across",
+                "recognizers, because Canary wrote spoken numbers as words and",
+                "Whisper writes numerals. The engine-comparable figure folds",
+                "numbers to numerals on both sides:",
+                "",
+                "| Metric | Value |",
+                "|---|---|",
+                f"| Aggregate WER, number-normalised | "
+                f"{self.stt_metrics['number_normalised']['aggregate_wer']:.4f} |",
+                f"| Mean WER, number-normalised | "
+                f"{self.stt_metrics['number_normalised']['mean_wer']:.4f} |",
+                f"| Long numbers transcribed exactly | "
+                + (f"{self.stt_metrics['digit_preservation']['exact']}/"
+                   f"{self.stt_metrics['digit_preservation']['identifiers']}"
+                   if self.stt_metrics["digit_preservation"]["identifiers"]
+                   else "no identifier-scale numbers in this selection")
+                + " |",
+                "| Wake-word recognition | not measurable: no clip in the corpus "
+                "addresses the device by name |",
                 "",
             ]
             for name, entry in self.stt_metrics["by_subset"].items():
@@ -1679,7 +1812,7 @@ class AudioBenchmark:
         return 0
 
     def close(self) -> None:
-        for component in (self.vad, self.canary):
+        for component in (self.vad, self.whisper):
             try:
                 if component is not None:
                     component.close()
@@ -1707,7 +1840,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="Full_Pipeline_Audio_Benchmark.py",
         description=(
             "OnKith end-to-end audio pipeline benchmark. Runs committed WAV clips "
-            "through the real deployment - Silero VAD, Canary STT, transcript "
+            "through the real deployment - Silero VAD, Whisper STT, transcript "
             "normalisation, DeBERTa-v3-xsmall INT8 masking, spoken-digit rendering - "
             "and records latency, real-time factor, memory, word error rate and how "
             "much private information survives imperfect speech recognition."

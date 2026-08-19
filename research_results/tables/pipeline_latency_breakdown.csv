@@ -1,11 +1,11 @@
 run_id,device,scope,stage,mean_ms
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Neural decode (ONNX + span consolidation),83.057044730504
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Structured regex layer,0.1784132779994252
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,masking_call,Span merge and mask policy,0.07970403648641877
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Silero VAD (3 s synthetic probe),30.357567399914842
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Canary STT (3 s synthetic probe),18400.841480999952
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Transcript merge,0.4549400500309275
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Wake-word normalisation,0.021010099953855388
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Inactivity buffer,0.08510315014973457
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Privacy masking,19.73317884990138
-20260818T082425Z_linux-aarch64_full,Pi 5 Model B Rev 1.0,pipeline,Spoken-digit rendering,0.04286450002837228
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Neural decode (ONNX + span consolidation),380.93363325000064
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Structured regex layer,0.6074238999990484
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Span merge and mask policy,0.28005025000811656
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Silero VAD (3 s synthetic probe),38.48899999993591
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Whisper STT (3 s synthetic probe),2898.7218600001142
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Transcript merge,0.6499749999420601
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Wake-word normalisation,0.052744999948117766
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Inactivity buffer,0.3801200000452809
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Privacy masking,143.7358449999465
+20260819T080341Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Spoken-digit rendering,0.27530000006663613

@@ -1,0 +1,25 @@
+# Windows LOCAL TEST dependencies. NOT the Raspberry Pi deliverable.
+#
+# V3's version of this file was 50 lines: NeMo 2.5.3's core+common+asr
+# dependency set, minus the packages that need a C/C++ compiler on Windows,
+# plus a replacement pin for one of them. V4 does not need any of it, because
+# faster-whisper runs on CTranslate2 and ships wheels for Windows and aarch64.
+#
+# The Pi list is requirements-rpi.txt and is now almost identical to this one;
+# they are kept apart only because the Pi pins exact patch versions of the
+# wheels it must not compile.
+
+numpy==2.0.2
+scipy==1.15.3
+sounddevice==0.5.5
+
+# Runtime used by Silero VAD and the DeBERTa-v3-xsmall PII model
+onnx==1.17.0
+onnxruntime
+
+# Speech recognition. `av` arrives with it and is what resamples audio that a
+# microphone offers at 44.1 or 48 kHz.
+faster-whisper==1.2.1
+
+# Deployment benchmarks only; the live pipeline does not import it.
+psutil==7.0.0

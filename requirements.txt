@@ -2,7 +2,7 @@
 #
 # This is the workstation environment for the training, evaluation and figure
 # notebooks. The production pipeline pins its own, much smaller runtime in
-# FullPipeline_V3/requirements-rpi.txt and requirements-windows.txt.
+# FullPipeline_V4/requirements-rpi.txt and requirements-windows.txt.
 #
 # Required Python version: 3.11.9
 #
@@ -14,7 +14,7 @@
 # grouped_splits, selection, sources, augment_pipeline, label_mapping,
 # data_audit, password_rules, privacy_eval, integrated_pipeline) are NOT pip
 # packages. They live in model/privacy_data_v2, model/privacy_evaluation and
-# FullPipeline_V3, and the notebooks put those directories on sys.path. Never
+# FullPipeline_V4, and the notebooks put those directories on sys.path. Never
 # pip install a similarly named package to satisfy one of them.
 
 torch
@@ -28,6 +28,13 @@ seqeval
 onnx
 onnxruntime
 onnxscript
+
+# Speech recognition for the deployment benchmarks. V4's pipeline runs
+# faster-whisper base.en on CTranslate2; Full_Pipeline_Audio_Benchmark.py and
+# Full_Pipeline_CPU_Benchmark.py import the same adapter the device does, so
+# this has to be present in the environment the benchmarks are run from.
+# Pinned to match FullPipeline_V4/requirements-rpi.txt.
+faster-whisper==1.2.1
 
 # Reached indirectly but imported by name at runtime, so they must be present:
 #   huggingface_hub  - sources.py resolves pinned dataset revisions

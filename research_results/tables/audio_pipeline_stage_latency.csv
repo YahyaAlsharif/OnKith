@@ -1,7 +1,7 @@
 run_id,device,stage,mean_ms,share_of_processing
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Audio load,8.791854636311571,0.0006321080705190691
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Silero VAD,66.1735028181738,0.00475767706771735
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Canary STT,13803.219390636328,0.9924102179681813
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Transcript merge / normalisation,0.15436888634212664,1.109866153733813e-05
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,DeBERTa INT8 masking,30.372479954559655,0.0021836905289200955
-20260818T081310Z_linux-aarch64_audio_full,Pi 5 Model B Rev 1.0,Spoken-digit rendering,0.07243281805296481,5.207703124733034e-06
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Audio load,3.60634999988592,0.0008089615615836007
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Silero VAD,447.6444613635935,0.10041375975997827
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Speech recognition,3841.6491227273004,0.8617428905891149
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Transcript merge / normalisation,0.34567499991763645,7.754039062837163e-05
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa INT8 masking,164.44100227270363,0.036886727575278826
+20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Spoken-digit rendering,0.31259545457115484,7.012012341614547e-05

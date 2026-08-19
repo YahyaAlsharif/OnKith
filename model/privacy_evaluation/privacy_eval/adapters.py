@@ -1,4 +1,4 @@
-"""Thin adapters around the authoritative FullPipeline_V3 privacy components."""
+"""Thin adapters around the authoritative FullPipeline_V4 privacy components."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V3"
+PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
 TINYBERT_ROOT = REPO_ROOT / "model" / "TinyBERT-4" / "artifacts" / "tinybert_pii"
 FP32_ONNX = TINYBERT_ROOT / "onnx_model" / "model_fp32.onnx"
 INT8_ONNX = TINYBERT_ROOT / "onnx_model" / "model_int8.onnx"

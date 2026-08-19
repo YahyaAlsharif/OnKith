@@ -28,7 +28,11 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V3"
+PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
+#: The archived Canary pipeline. Nothing in these benchmarks imports it: the
+#: Canary numbers in research_results/ are frozen and are read from disk, never
+#: regenerated. It is named here so the path is discoverable rather than lore.
+ARCHIVED_CANARY_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
 RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"
 
@@ -567,21 +571,21 @@ def utc_now() -> datetime:
 # --------------------------------------------------------------------------
 
 
-def quieten_nemo() -> None:
-    """Drop NeMo's console logging to errors only.
+def quieten_stt() -> None:
+    """Keep the recognizer's own logging off the benchmark's console.
 
-    ``change_decoding_strategy`` dumps the entire decoder configuration at INFO,
-    which is several screens of YAML. Both benchmarks are meant to be watched
-    over SSH; the decoder settings that matter are verified by
-    ``CanaryAdapter`` and recorded in the result files either way.
+    Both benchmarks are meant to be watched over SSH, and the decoding settings
+    that matter are verified by ``WhisperAdapter`` and recorded in the result
+    files either way.
     """
 
-    try:
-        from nemo.utils import logging as nemo_logging
+    import logging
 
-        nemo_logging.setLevel("ERROR")
-    except Exception:  # pragma: no cover - only affects console noise
-        pass
+    for name in ("faster_whisper", "ctranslate2"):
+        try:
+            logging.getLogger(name).setLevel(logging.ERROR)
+        except Exception:  # pragma: no cover - only affects console noise
+            pass
 
 
 def make_canary_segment(samples, *, session_id: str, utterance_id: str,

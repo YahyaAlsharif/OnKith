@@ -211,7 +211,7 @@ class AdapterTests(unittest.TestCase):
         *is* Model V2 now, and the whole point of the integration is that these
         metrics were measured through the code the deployment runs. A second
         copy of the decoder appearing under privacy_eval/ would silently break
-        that, so assert the import lands in FullPipeline_V3.
+        that, so assert the import lands in FullPipeline_V4.
         """
 
         self.assertEqual(
@@ -223,11 +223,11 @@ class AdapterTests(unittest.TestCase):
         """The deployed pipeline is pinned to the 63-label Model V2 contract."""
 
         source = (
-            REPO_ROOT / "FullPipeline_V3" / "integrated_pipeline" / "pii_adapter.py"
+            REPO_ROOT / "FullPipeline_V4" / "integrated_pipeline" / "pii_adapter.py"
         ).read_text(encoding="utf-8")
         self.assertIn("EXPECTED_LABEL_COUNT = 63", source)
         config = json.loads(
-            (REPO_ROOT / "FullPipeline_V3" / "config" / "live_config.json").read_text(
+            (REPO_ROOT / "FullPipeline_V4" / "config" / "live_config.json").read_text(
                 encoding="utf-8"
             )
         )

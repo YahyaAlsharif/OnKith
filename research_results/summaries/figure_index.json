@@ -157,12 +157,30 @@
     },
     {
       "kind": "figure",
-      "name": "audio_postprocessing_amplification",
+      "name": "stt_engine_accuracy",
       "files": [
-        "audio_postprocessing_amplification.png",
-        "audio_postprocessing_amplification.pdf"
+        "stt_engine_accuracy.png",
+        "stt_engine_accuracy.pdf"
       ],
-      "caption": "The spoken-digit finding: utterances where the privacy model did not mask a spoken number and the display renderer then rendered it as a numeral."
+      "caption": "Word error rate and number handling for both recognizers on the committed audio benchmark. The raw word error rate is shown in grey to expose how much of it is spelling: Canary wrote numbers as words, Whisper writes numerals, and only the number-normalised bars compare the engines. The right panel separates transcribing a long number correctly from keeping it out of the released text - the two are not the same thing, and the engines differ in opposite directions."
+    },
+    {
+      "kind": "figure",
+      "name": "stt_engine_cost",
+      "files": [
+        "stt_engine_cost.png",
+        "stt_engine_cost.pdf"
+      ],
+      "caption": "Real-time factor and end-to-end latency for both recognizers. The dashed line is real time: a bar below it means the device processes speech faster than it arrives. Bars are drawn only for arms that have been measured."
+    },
+    {
+      "kind": "figure",
+      "name": "stt_engine_released_identifiers",
+      "files": [
+        "stt_engine_released_identifiers.png",
+        "stt_engine_released_identifiers.pdf"
+      ],
+      "caption": "The end-to-end privacy question that survives a change of recognizer: after masking and after the display renderer, is an identifier-scale number still legible in what the device released? It needs no alignment against the reference and no gold offsets, which is what makes it comparable across engines where the entity-level metrics are not."
     }
   ],
   "tables": [
@@ -236,7 +254,7 @@
         "cpu_benchmark_runs.csv"
       ],
       "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
-      "rows": 2
+      "rows": 3
     },
     {
       "kind": "table",
@@ -245,7 +263,7 @@
         "cpu_latency_percentiles.csv"
       ],
       "caption": "Latency percentiles of the full masking call, per device.",
-      "rows": 2
+      "rows": 3
     },
     {
       "kind": "table",
@@ -263,7 +281,7 @@
         "deployment_parity.csv"
       ],
       "caption": "Cross-device prediction agreement and metric deltas.",
-      "rows": 1
+      "rows": 2
     },
     {
       "kind": "table",
@@ -272,7 +290,7 @@
         "audio_deployment_summary.csv"
       ],
       "caption": "One row per device: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy.",
-      "rows": 2
+      "rows": 3
     },
     {
       "kind": "table",
@@ -339,21 +357,43 @@
     },
     {
       "kind": "table",
-      "name": "audio_postprocessing_amplification",
+      "name": "stt_engine_comparison",
       "files": [
-        "audio_postprocessing_amplification.csv"
+        "stt_engine_comparison.csv"
       ],
-      "caption": "Spoken numbers the privacy model left unmasked and the display renderer then rewrote into numerals of identifier length. Every value is fictional: telephone numbers come from the NANP 555-01xx range reserved for fiction.",
-      "rows": 2
+      "caption": "Every measured recognizer arm, scored from its saved transcripts by one implementation. Rows for arms that have not been measured are absent rather than zero.",
+      "rows": 3
+    },
+    {
+      "kind": "table",
+      "name": "stt_engine_privacy",
+      "files": [
+        "stt_engine_privacy.csv"
+      ],
+      "caption": "End-to-end privacy per recognizer arm. The released-identifier columns are engine-comparable; the columns suffixed __within_engine_only depend on aligning the reference transcript against the hypothesis word by word, which a change of number spelling breaks, and are reported per engine rather than plotted against each other.",
+      "rows": 3
     }
   ],
   "cpu_benchmark_runs": [
     "20260817T190227Z_windows-amd64_full_workstation",
-    "20260818T082425Z_linux-aarch64_full"
+    "20260818T082425Z_linux-aarch64_full",
+    "20260819T080341Z_windows-amd64_whisper_full_workstation"
   ],
   "audio_benchmark_runs": [
     "20260818T062503Z_windows-amd64_audio_full_workstation",
-    "20260818T081310Z_linux-aarch64_audio_full"
+    "20260818T081310Z_linux-aarch64_audio_full",
+    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation"
   ],
-  "unavailable_inputs": []
+  "recognizer_arms": {
+    "Canary laptop": "20260818T062503Z_windows-amd64_audio_full_workstation",
+    "Canary Raspberry Pi 5": "20260818T081310Z_linux-aarch64_audio_full",
+    "Whisper laptop": "20260819T073431Z_windows-amd64_audio-whisper_full_workstation",
+    "Whisper Raspberry Pi 5": null
+  },
+  "pending_measurements": [
+    "Whisper Raspberry Pi 5"
+  ],
+  "unavailable_inputs": [
+    "Whisper Raspberry Pi 5: not measured yet, held back from the figures"
+  ]
 }
