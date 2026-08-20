@@ -73,14 +73,21 @@ research_results/
     └── <run_id>/     one folder per benchmark run, per device
 ```
 
-`<run_id>` is `<UTC timestamp>_<os>-<arch>[_audio]_<mode>[_<label>]`, for example
-`20260817T190227Z_windows-amd64_full_workstation` or
-`20260818T081500Z_linux-aarch64_audio_full_pi5`. Only characters that are safe on
-every filesystem are used.
+`<run_id>` is `<UTC timestamp>_<os>-<arch>[_<engine token>]_<mode>[_<label>]`,
+for example `20260817T190227Z_windows-amd64_full_workstation`,
+`20260818T081310Z_linux-aarch64_audio_full` or
+`20260820T144757Z_windows-amd64_audio-whisper_full`. Only characters that are
+safe on every filesystem are used.
+
+The engine token is part of the run id so a Whisper run can never land in or be
+mistaken for a Canary folder. `audio` on its own is a V3 Canary audio run;
+`audio-whisper` and `whisper` are V4. Runs written before V4 carry no engine
+token, and its absence is what identifies them rather than a guess.
 
 Both benchmarks write into the same root and are told apart by
 `benchmark_config.json`: audio runs carry `"benchmark": "audio_pipeline"`, and a
-run without that key is a text run.
+run without that key is a text run. `pipeline_version` and `stt_engine` say
+which pipeline produced it.
 
 | Text run writes | Audio run writes |
 |---|---|
@@ -98,9 +105,14 @@ run without that key is a text run.
 
 ## The canonical benchmark runs
 
-Four runs, and only four. Each one is a complete, successful run of a committed
-entry point against the hash-verified deployment artifact, and every figure and
-table in this directory is derived from them.
+Each one is a complete, successful run of a committed entry point against the
+hash-verified deployment artifact, and every figure and table in this directory
+is derived from them. Two pipeline versions are kept side by side, because the
+progression from one recognizer to the other is itself a result.
+
+**Pipeline V3 - NVIDIA Canary 180M Flash.** A frozen historical baseline. These
+runs are never regenerated: the Canary build is superseded and its recognizer is
+not installed anywhere in the current environment.
 
 | Run id | Device | Benchmark |
 |---|---|---|
@@ -108,6 +120,52 @@ table in this directory is derived from them.
 | `20260818T082425Z_linux-aarch64_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows |
 | `20260818T062503Z_windows-amd64_audio_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips |
 | `20260818T081310Z_linux-aarch64_audio_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips |
+
+**Pipeline V4 - faster-whisper `base.en`.** The current deployment.
+
+| Run id | Device | Benchmark | Privacy path |
+|---|---|---|---|
+| `20260819T080341Z_windows-amd64_whisper_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows | superseded by the run below |
+| `20260820T072331Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | before the spoken-address rewrite |
+| `20260819T073431Z_windows-amd64_audio-whisper_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips | superseded by the run below |
+| `20260820T071755Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | before the spoken-address rewrite |
+| `20260820T145035Z_windows-amd64_whisper_full` | development workstation, x86-64 | CPU/text, 2,000 rows | current |
+| `20260820T144757Z_windows-amd64_audio-whisper_full` | development workstation, x86-64 | audio pipeline, 44 clips | current |
+
+### Two things changed on 2026-08-20, and the table above says which runs predate them
+
+**The entity scoring definition.** `locate_entity` in the audio benchmark aligns
+each gold entity from the reference transcript into the recognized one. It used
+to align on raw words and to measure mask coverage over the whitespace-delimited
+region, and both broke on Whisper output specifically: a reference reading
+"twenty seven" matched nothing in a transcript reading "27", and `Carter.` was
+scored at six masked characters out of seven because the sentence full stop was
+counted as part of the surname. Canary emitted neither numerals nor punctuation,
+so neither defect could occur in a V3 run. The effect was to **overstate
+Whisper's privacy failures by roughly a factor of two**. Both are fixed;
+`benchmark_config.json` now carries an `entity_scoring` key naming the
+definition, and a folder without that key was written under the old one.
+
+Older folders do not have to be re-run to be compared.
+`model/privacy_evaluation/privacy_eval/rescore.py` recomputes the whole
+entity-level family for any completed folder on the current definition, from the
+`privacy_input_text` / `masked_text` pair every run saved. It loads no
+recognizer and no model - the predicted spans are exactly recoverable from that
+pair - and it self-checks by replaying each folder's own recorded mask coverage.
+The figures notebook applies it to all four audio arms, so the engine comparison
+is one definition applied to four runs.
+
+**A spoken-address rewrite in the privacy path (V4 only).** Whisper writes
+`billing at example.org`, which is neither the spoken form the transcript
+records nor the written form the model and the structured EMAIL recognizer
+expect, and the result was the domain masked and the local part released.
+`FullPipeline_V4/integrated_pipeline/spoken_form_normalizer.py` rewrites two such
+shapes for the detectors only and projects every span back before masking, so
+the released transcript is unchanged. This one **cannot** be replayed from a
+saved folder: it changes what the masker outputs, which needs the model. Runs
+marked "before the spoken-address rewrite" therefore hold the V4 privacy path as
+it was. Their runtime, memory and word-error figures are unaffected - the
+rewrite is a regex pass over already-recognized text.
 
 Runs that are *not* kept, and why:
 
@@ -129,13 +187,15 @@ figures, but the safer rule is that this directory only ever holds evidence.
 
 | Artifact | Location |
 |---|---|
-| Deployed INT8 ONNX, tokenizer, label map | `FullPipeline_V3/models/deberta_pii/` |
-| Deployment manifest with per-file SHA-256 | `FullPipeline_V3/models/deberta_pii/model_manifest.json` |
+| Deployed INT8 ONNX, tokenizer, label map | `FullPipeline_V4/models/deberta_pii/` |
+| Deployment manifest with per-file SHA-256 | `FullPipeline_V4/models/deberta_pii/model_manifest.json` |
 | Release gate / accepted candidate | `model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json` |
 | Frozen OOD final report (spent once) | `model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_ood_final_int8.json` |
 | Benchmark subset the Pi and the laptop both score | `model/privacy_evaluation/fixtures/deployment_benchmark/` |
 | Audio clips and their manifest | `model/privacy_evaluation/fixtures/audio_benchmark/` |
 | Benchmark runners | `model/privacy_evaluation/privacy_eval/{cpu,audio}_benchmark.py` |
+| Engine-comparable recognition metrics from saved folders | `model/privacy_evaluation/privacy_eval/stt_comparison.py` |
+| Entity-level rescoring of saved folders | `model/privacy_evaluation/privacy_eval/rescore.py` |
 
 Both benchmarks re-hash the INT8 graph and refuse to produce privacy numbers
 unless it matches the deployment records. That is what lets two runs from two
@@ -194,10 +254,20 @@ The audio benchmark needs the production recognizer, which is not in the default
 install:
 
 ```bash
-pip install "nemo-toolkit[asr]==2.5.3" "torch==2.7.1"
-python FullPipeline_V3/scripts/acquire_canary.py
+pip install --requirement FullPipeline_V4/requirements-rpi.txt   # or -windows.txt
 ```
+
+That brings faster-whisper 1.2.1 on CTranslate2. The `base.en` weights are
+fetched once on first use and cached under `~/.cache/huggingface`; nothing is
+committed for them, which is why the deployment config pins the package version,
+the model name and the decoding settings rather than a file hash.
 
 Without it the script verifies the fixtures, runs the VAD and both
 reference-text control arms, records the memory profile, prints exactly what is
 missing, and exits with code 2. It never fabricates a transcript.
+
+V3's recognizer, NVIDIA Canary 180M Flash, needed `nemo-toolkit[asr]==2.5.3`,
+`torch==2.7.1` and a 700 MB `.nemo` artifact fetched by
+`FullPipeline_V3/scripts/acquire_canary.py`. Reproducing the frozen V3 runs
+would need that stack reinstalled. Nothing in this directory requires it: the V3
+numbers are read from the folders those runs wrote.

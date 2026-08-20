@@ -1,22 +1,28 @@
 # OnKith production pipeline (FullPipeline_V4)
 
-> **V4 status note (documentation sync pending).**
+> **This package is FullPipeline_V4.**
 >
-> This package is **FullPipeline_V4**. It is V3's pipeline with one component
-> replaced: the speech recognizer is now **faster-whisper `base.en`** on
-> CTranslate2 (CPU, INT8, beam 5, with a decoding hint built from the device's
-> configured names), in place of NVIDIA Canary 180M Flash. VAD, segmentation,
-> transcript merging, wake-word repair, the inactivity buffer, DeBERTa-v3-xsmall
-> INT8 masking, span merging, spoken-digit rendering, SQLite storage and the
-> terminal UI are V3's code, unchanged.
+> It is V3's pipeline with one component replaced: the speech recognizer is
+> **faster-whisper `base.en`** on CTranslate2 (CPU, INT8, beam 5, with a decoding
+> hint built from the device's configured names), in place of NVIDIA Canary 180M
+> Flash. VAD, segmentation, transcript merging, wake-word repair, the inactivity
+> buffer, DeBERTa-v3-xsmall INT8 masking, span merging, spoken-digit rendering,
+> SQLite storage and the terminal UI are V3's code.
+>
+> V4 adds exactly one thing to the privacy path:
+> [`integrated_pipeline/spoken_form_normalizer.py`](integrated_pipeline/spoken_form_normalizer.py),
+> which rewrites two spoken address forms into their written form for the
+> detectors only and projects every span back before masking. It exists because
+> Whisper writes `billing at example.org`, which is neither the spoken form nor
+> the written form, and the mailbox name was being released while the domain was
+> masked. `model/privacy_evaluation/tests/test_masking_parity_v3_v4.py` runs
+> fixed text through both packages and requires identical output on everything
+> else.
 >
 > The Canary build is preserved verbatim at
-> [`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/), together with the
-> measurements it produced.
->
-> **The prose below still describes V3 and its Canary numbers.** It is rewritten
-> once the Whisper Raspberry Pi run has been done, so that the documentation is
-> updated against measurements rather than twice.
+> [`../FullPipeline_V3/`](../FullPipeline_V3/), together with the
+> measurements it produced. Both are benchmarked on both devices; the comparison
+> is in [`../research_results/`](../research_results/).
 
 **Local speech-to-text and privacy processing for Raspberry Pi 5**
 
@@ -26,7 +32,7 @@ not be used. The Python entry point is still `app.omit_ai_live` and some code
 still says "Omit AI" — that is the project's earlier name, kept so the module
 paths in existing instructions keep working.
 
-It is a local English speech-to-text pipeline built for the **Raspberry Pi 5**. It uses **NVIDIA Canary 180M Flash** for transcription, **Silero VAD** for speech detection, overlap-based segmentation for continuous speech, PII masking, and local SQLite storage.
+It is a local English speech-to-text pipeline built for the **Raspberry Pi 5**. It uses **faster-whisper `base.en`** on CTranslate2 for transcription, **Silero VAD** for speech detection, overlap-based segmentation for continuous speech, PII masking, and local SQLite storage.
 
 Speech recognition and privacy processing run locally. Internet access is only required during setup to download the model and for optional YouTube playback through Onkith.
 
@@ -35,40 +41,54 @@ Speech recognition and privacy processing run locally. Internet access is only r
 The whole package has been run end to end on a Raspberry Pi 5 Model B Rev 1.0
 with 3.95 GiB visible RAM, 64-bit Raspberry Pi OS, Python 3.11.9.
 
-| Measurement | Result |
-|---|---|
-| Peak RSS, full audio pipeline | **2,031 MiB** of 3.95 GiB |
-| Memory after Canary loads | 1,990 MiB |
-| Memory added by the DeBERTa INT8 masker | **28 MiB** |
-| Aggregate WER, 44 committed clips (279.7 s) | 0.0403 |
-| Mean STT real-time factor | **2.022** |
-| Mean full-pipeline real-time factor | **2.041** |
-| Mean end-to-end latency per clip | 13.9 s |
-| STT share of processing time | 99.2% |
-| Privacy masking, mean per clip | 30.4 ms |
-| Privacy model on 2,000 committed rows | typed F1 0.9448, 83.6 ms mean, 11.95 rows/s |
+| Measurement | V4 (Whisper) | V3 (Canary) |
+|---|---|---|
+| Peak RSS, full audio pipeline | **1,155 MiB** of 3.95 GiB | 2,031 MiB |
+| Memory after the recognizer loads | 541 MiB | 1,990 MiB |
+| Memory added by the DeBERTa INT8 masker | **28 MiB** | 28 MiB |
+| Aggregate WER, 44 committed clips (279.7 s) | 0.1841 raw / **0.0903** number-normalised | 0.0403 |
+| Mean STT real-time factor | **0.573** | 2.022 |
+| Mean full-pipeline real-time factor | **0.589** | 2.041 |
+| P90 / P95 full-pipeline RTF | 0.993 / 1.052 | 2.684 / 2.808 |
+| Mean end-to-end latency per clip | **2.8 s** | 13.9 s |
+| STT share of processing time | 96.7% | 99.2% |
+| Privacy masking, mean per clip | 24.9 ms | 30.4 ms |
+| Privacy model on 2,000 committed rows | typed F1 0.9448, 72.6 ms mean | typed F1 0.9448, 83.6 ms mean |
 
-Two conclusions, both important:
+Three conclusions:
 
-* **It fits.** The complete stack runs on a 4 GB Pi 5 without running out of
-  memory, with roughly half the board's RAM to spare.
-* **It is not real-time.** At RTF ≈ 2, the device needs about two seconds of
-  computation per second of speech. Use it for push-to-talk, turn-based
-  interaction and batch utterance processing — not live streaming transcription.
+* **It fits, with room to spare now.** The complete stack peaks at under a third
+  of the board's RAM, against roughly half under V3.
+* **It is real-time, narrowly.** Mean full-pipeline RTF is 0.589 — the first
+  configuration in this repository to process speech faster than it arrives on
+  the target board. P95 is 1.05, so the longest utterances sit at the boundary:
+  this is real-time-capable, not real-time with headroom.
+* **It costs recognition accuracy.** Number-normalised WER roughly doubles
+  against Canary, and 2 of 5 identifier-scale numbers are no longer transcribed
+  digit for digit. That is what the deployment gain was traded for, and it is
+  the largest remaining source of end-to-end privacy failure.
 
-The privacy model is not the bottleneck: it is 0.2% of processing time and 1.4%
-of the resident memory. Reproduce with `python Full_Pipeline_Audio_Benchmark.py`
+The word error rates are only comparable in the number-normalised form. Canary
+ran with `pnc: no` and wrote spoken numbers as words, the way the reference
+transcripts are written; Whisper writes numerals, and the standard metric charges
+eight substitutions for correctly transcribing "five five five, zero one eight
+eight" as `55550188`.
+
+The privacy model is not the bottleneck and never was: 0.9% of V4's processing
+time and 2.4% of resident memory, against 0.2% and 1.4% of V3's much larger
+totals. Reproduce with `python Full_Pipeline_Audio_Benchmark.py`
 and `python Full_Pipeline_CPU_Benchmark.py` from the repository root.
 
 ## Features
 
-* NVIDIA **Canary 180M Flash** speech-to-text
+* **faster-whisper `base.en`** speech-to-text on CTranslate2, CPU, INT8
 * Silero VAD speech detection
 * Automatic startup noise calibration
 * Continuous speech segmentation
 * 14-word overlap transcript merger
 * Live masked transcript preview
 * PII detection and masking
+* Spoken-address rewrite in front of the detectors (V4)
 * Spoken-number normalization
 * Local SQLite transcript storage
 * Optional Onkith commands
@@ -78,36 +98,49 @@ and `python Full_Pipeline_CPU_Benchmark.py` from the repository root.
 
 ## STT Benchmark
 
-### Canary 180M Flash — LibriSpeech
+Measured on the committed 44-clip fixture, on a Raspberry Pi 5 Model B Rev 1.0.
+Both engines are scored from their saved transcripts by one implementation
+(`model/privacy_evaluation/privacy_eval/stt_comparison.py`).
 
-| Metric        |               Result |
-| ------------- | -------------------: |
-| WER           |            **4.90%** |
-| Errors / REF  | **10,300 / 210,269** |
-| Valid samples |  **11,126 / 11,126** |
-| Substitutions |                5,115 |
-| Deletions     |                  465 |
-| Insertions    |                4,720 |
-| Model RTF     |           **0.0784** |
-| Model size    |  **180M parameters** |
+| Metric | **V4 Whisper `base.en`** | V3 Canary 180M Flash |
+| --- | ---: | ---: |
+| Aggregate WER, as each run recorded it | 0.1841 | 0.0403 |
+| Aggregate WER, number-normalised | **0.0903** | **0.0403** |
+| Long numbers transcribed digit for digit | 3 / 5 | 5 / 5 |
+| Mean STT real-time factor, Pi 5 | **0.573** | 2.022 |
+| Model size | 74M parameters | 180M parameters |
 
-> **Note:** The WER and RTF above come from the published LibriSpeech benchmark
-> for this model and are **not** Raspberry Pi 5 runtime measurements. The measured
-> Pi 5 numbers are at the top of this file: aggregate WER 0.0403 and mean STT RTF
-> 2.022 on the committed 44-clip fixture.
+> **Read the number-normalised row, not the raw one.** Canary ran with
+> `pnc: no` and wrote spoken numbers as words, which is the form the reference
+> transcripts use; Whisper writes numerals, and the standard word error rate
+> charges eight substitutions for correctly transcribing "five five five, zero
+> one eight eight" as `55550188`. Folding numbers to numerals on both sides is
+> what makes the comparison about recognition rather than orthography.
+>
+> Canary's published LibriSpeech reference is **4.90%** WER at RTF 0.0784. That
+> is a vendor benchmark on different hardware and a different corpus; it is not
+> comparable to anything in this table and is recorded here only so it is not
+> mistaken for a Pi measurement.
 
 ---
 
 ## Configuration
 
-### Canary Decoder
+### Whisper decoder
 
 ```text
-decoder = beam
-beam_size = 2
-temperature = 1.0
-max_generation_delta = 50
+engine       = faster-whisper 1.2.1
+runtime      = ctranslate2
+model        = base.en  (Systran/faster-whisper-base.en)
+device       = cpu
+compute_type = int8
+beam_size    = 5
+language     = en
 ```
+
+The decoding hint is built from the device's configured names and command shapes
+in `integrated_pipeline/whisper_adapter.py`; set `whisper.initial_prompt` in
+`config/live_config.json` to a string to override it wholesale.
 
 ### VAD & Segmentation
 
@@ -136,13 +169,15 @@ Silero VAD + RMS Gate
         ↓
 Speech Segmentation
         ↓
-Canary 180M Flash
+faster-whisper base.en
         ↓
 14-Word Overlap Merger
         ↓
 Onkith
         ↓
 Stage 5
+        ↓
+Spoken-Address Rewrite (detectors only)
         ↓
 PII Masking
         ↓
@@ -159,22 +194,37 @@ The overlap helps avoid losing words around segment boundaries. After transcript
 
 ## STT Backend
 
-| Setting                      | Value                      |
-| ---------------------------- | -------------------------- |
-| Model                        | `nvidia/canary-180m-flash` |
-| NeMo                         | `2.5.3`                    |
-| PyTorch                      | `2.7.1`                    |
-| Device                       | CPU                        |
-| Precision                    | FP32                       |
-| Batch size                   | 1                          |
-| Language                     | English                    |
-| Decoder                      | Beam search                |
-| Beam size                    | 2                          |
-| Punctuation / capitalization | Off                        |
-| Timestamps                   | Off                        |
-| Model loading                | Once at startup            |
+| Setting                      | Value                               |
+| ---------------------------- | ----------------------------------- |
+| Model                        | `Systran/faster-whisper-base.en`    |
+| faster-whisper               | `1.2.1`                             |
+| Runtime                      | CTranslate2                         |
+| Device                       | CPU                                 |
+| Precision                    | INT8                                |
+| Batch size                   | 1                                   |
+| Language                     | English                             |
+| Decoder                      | Beam search                         |
+| Beam size                    | 5                                   |
+| Punctuation / capitalization | On                                  |
+| Timestamps                   | Off                                 |
+| Model loading                | Once at startup                     |
 
-The Canary model stays loaded in memory while each speech segment is transcribed independently.
+The recognizer stays loaded in memory while each speech segment is transcribed
+independently.
+
+**Punctuation and capitalization are on, and V3's were off.** That is not a
+setting this package chose so much as one Whisper does not offer, and it changes
+what the privacy model is handed: capitalised names, sentence punctuation, and
+numbers written as numerals rather than as digit words. The consequences are
+measured rather than assumed — see
+[`../research_results/README.md`](../research_results/README.md) for what it did
+to the benchmark's own scoring, and `KNOWN_ISSUES.md` for what it does to
+masking.
+
+V3 pinned its recognizer by artifact SHA-256 because the `.nemo` file was fetched
+once and committed. faster-whisper resolves `base.en` through CTranslate2's own
+cache instead, so what `config/live_config.json` pins is the package version, the
+model id and the decoding settings — the things that change what comes out.
 
 ---
 
@@ -315,7 +365,8 @@ Install the project:
 ./install_pi.sh
 ```
 
-The Canary model is downloaded during installation.
+The Whisper `base.en` weights are fetched once by CTranslate2 on first use and
+cached under `~/.cache/huggingface`.
 
 After setup, normal speech recognition can run offline.
 

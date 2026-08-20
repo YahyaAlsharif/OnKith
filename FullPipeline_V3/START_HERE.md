@@ -1,5 +1,17 @@
 # START HERE
 
+> **Superseded. This is Pipeline V3, the Canary build, kept as a baseline.**
+>
+> The current deployment is [`../FullPipeline_V4/`](../FullPipeline_V4/), which
+> is this pipeline with faster-whisper `base.en` in place of NVIDIA Canary 180M
+> Flash. V3 is kept intact — not moved to `../archive/` — because the
+> measurements in [`../research_results/`](../research_results/) are its, and the
+> V3-against-V4 comparison is one of the project's results. Nothing here is
+> maintained, and its numbers are never regenerated.
+>
+> Running it again would need the NeMo stack reinstalled and the 700 MB `.nemo`
+> artifact re-fetched; see `BACKEND_VERSION_DECISION.md`.
+
 Two ways to run this. Pick one.
 
 ---

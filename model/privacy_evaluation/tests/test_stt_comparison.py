@@ -25,6 +25,46 @@ from privacy_eval import stt_comparison as compare
 RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"
 
 
+class FoldIndexTests(unittest.TestCase):
+    """The fold carries token ranges, which is what lets offsets survive it.
+
+    ``locate_entity`` folds both the reference and the hypothesis before
+    aligning them, then needs to know which source tokens each folded token came
+    from so it can point back at the characters. Without the ranges the fold
+    would make the two engines comparable and the entity unlocatable.
+    """
+
+    def test_a_digit_run_reports_the_span_it_consumed(self) -> None:
+        tokens = "call me on five five five zero one four seven".split()
+        self.assertEqual(
+            compare.fold_numbers_with_indices(tokens)[-1], ("5550147", 3, 10)
+        )
+
+    def test_a_compound_consumes_two_tokens(self) -> None:
+        self.assertEqual(
+            compare.fold_numbers_with_indices("she is sixty three".split()),
+            [("she", 0, 1), ("is", 1, 2), ("63", 2, 4)],
+        )
+
+    def test_every_source_token_is_accounted_for_exactly_once(self) -> None:
+        tokens = ("the appointment is on the twelfth of march at half past four "
+                  "and my number is five five five zero one four seven").split()
+        folded = compare.fold_numbers_with_indices(tokens)
+        cursor = 0
+        for _, first, last in folded:
+            self.assertEqual(first, cursor)
+            self.assertGreater(last, first)
+            cursor = last
+        self.assertEqual(cursor, len(tokens))
+
+    def test_the_plain_fold_is_the_same_values(self) -> None:
+        tokens = "she is sixty three and her code is nine nine one".split()
+        self.assertEqual(
+            [value for value, _, _ in compare.fold_numbers_with_indices(tokens)],
+            compare._fold_numbers(tokens),
+        )
+
+
 class NumberNormalisationTests(unittest.TestCase):
     def test_a_spoken_digit_run_becomes_the_number_it_is(self) -> None:
         self.assertEqual(

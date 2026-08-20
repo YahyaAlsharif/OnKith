@@ -1,7 +1,7 @@
 run_id,device,stage,rss_mib
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Baseline process,51.3515625
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,VAD loaded,77.50390625
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,STT loaded,713.828125
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa loaded,1138.55859375
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,All models loaded,1146.265625
-20260819T073431Z_windows-amd64_audio-whisper_full_workstation,workstation,Peak during run,1263.42578125
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Baseline process,52.49609375
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,VAD loaded,77.88671875
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,STT loaded,713.59375
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa loaded,1138.859375
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,All models loaded,1146.48046875
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Peak during run,1269.48828125

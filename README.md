@@ -23,26 +23,24 @@
 
 ---
 
-> **In progress: V4 has replaced the speech recognizer, and this README has not
-> caught up yet.**
+> **Pipeline V4 is the current deployment.**
 >
-> The active pipeline is now [`FullPipeline_V4/`](FullPipeline_V4/): V3's
+> The active pipeline is [`FullPipeline_V4/`](FullPipeline_V4/): V3's
 > architecture with **faster-whisper `base.en`** (CTranslate2, CPU, INT8, beam 5)
 > in place of NVIDIA Canary 180M Flash. Everything downstream of the recognizer -
 > VAD, segmentation, transcript merging, DeBERTa-v3-xsmall INT8 masking, span
-> merging, spoken-digit rendering, storage, UI - is V3's code, unchanged, and a
-> regression test asserts that identical text produces identical masked output on
-> both.
+> merging, spoken-digit rendering, storage, UI - is V3's code, and a regression
+> test runs identical text through both packages and requires identical output.
+> V4 adds exactly one thing to that path, for a measured reason:
+> a small deterministic rewrite of spoken address forms in front of the
+> detectors, described under
+> [the STT-to-privacy interface](#the-stt-to-privacy-interface).
 >
 > The Canary pipeline is preserved verbatim at
-> [`archive/FullPipeline_V3/`](archive/FullPipeline_V3/). Its measurements in
+> [`FullPipeline_V3/`](FullPipeline_V3/). Its measurements in
 > [`research_results/`](research_results/) are a frozen baseline and are never
-> regenerated. Links to `FullPipeline_V3/` below therefore point at the archive.
->
-> **Every performance and accuracy number below the fold is still Canary's.**
-> The Whisper workstation run is done; the Whisper Raspberry Pi run is not. This
-> file, the pipeline READMEs and the results discussion are rewritten in one pass
-> once that run lands, so the numbers change once rather than twice.
+> regenerated: both pipelines have now been measured on both devices, and the
+> comparison between them is one of this repository's results.
 
 
 OnKith is a voice pipeline that runs entirely on a small edge device. It listens,
@@ -107,11 +105,14 @@ microphone (16 kHz mono)
 Silero VAD + energy gate          400 ms pre-roll, endpoint detection,
    │                              overlap-based segmentation of long speech
    ▼
-NVIDIA Canary 180M Flash          on-device speech-to-text, CPU, beam size 2
-   │
+faster-whisper base.en            on-device speech-to-text, CTranslate2,
+   │                              CPU, INT8, beam size 5
    ▼
 transcript merge + normalisation  14-word overlap merge, wake-word handling,
    │                              3.0 s inactivity buffer
+   ▼
+spoken-address rewrite            "billing at example.org" -> the written form,
+   │                              for the detectors only; spans projected back
    ▼
 DeBERTa-v3-xsmall INT8            31 entity types / 63 BIO labels,
    │                              ONNX Runtime, 512-token window, 128 stride
@@ -126,7 +127,7 @@ masked text  ──▶  local SQLite  ──▶  terminal / downstream use
 ```
 
 Everything above the last line runs on the device. The production package is
-[`FullPipeline_V3/`](FullPipeline_V3/).
+[`FullPipeline_V4/`](FullPipeline_V4/).
 
 Three details make the masked output trustworthy rather than merely plausible:
 
@@ -228,20 +229,38 @@ part is reported briefly and factually.
 | First Pi experiment | Moonshine | Audio captured manually so RNNoise denoising could be inserted ahead of the recognizer, using Moonshine's integrated VAD/segmenter ([`archive/moonshine_pi_project/`](archive/moonshine_pi_project/)). |
 | Tuned STT harness | Moonshine v2 Medium Streaming | RNNoise ended up **off**; VAD threshold, pre-roll and endpoint silence tuned by hand. Word error rate recorded across six conditions: **8.73%** on `test-clean`, **12.10%** on direct live-microphone input, and 32.83% in a hard room ([`archive/moonshine-pi-v2/`](archive/moonshine-pi-v2/)). The harness targeted the Pi, but the table does not state which device each row was measured on. |
 | Integrated pipelines V1/V2 | Moonshine v2 Medium Streaming | Speech recognition and TinyBERT masking in one process. |
-| Production | **NVIDIA Canary 180M Flash** | Silero VAD replaces Moonshine's integrated segmentation; overlap segmentation plus a 14-word merger handles long speech. Committed reference: **4.90%** WER on LibriSpeech. |
+| Pipeline V3 | **NVIDIA Canary 180M Flash** | Silero VAD replaces Moonshine's integrated segmentation; overlap segmentation plus a 14-word merger handles long speech. Committed reference: **4.90%** WER on LibriSpeech. |
+| Pipeline V4 | **faster-whisper `base.en`** | Same architecture, different recognizer. Chosen on a measured Raspberry Pi result, not on a WER claim: see below. |
 
 So: several recognizers were run against a real microphone before the project
 converged on Canary. What is *measured in this repository* is that Moonshine's
 live-microphone word error rate was around 12% while Canary's committed
 LibriSpeech reference is 4.90%; those two numbers come from different scripts and
 are not a controlled comparison, and the repository contains no written record of
-the moment the decision was taken. A separate branch (`turki/onkith-terminal`)
-also evaluated Whisper `base.en` on the Pi for a voice-terminal variant; it is
-not part of this pipeline.
+the moment the decision was taken.
 
-The Raspberry Pi benchmark later showed that the recognizer, not the privacy
+The Raspberry Pi benchmark then showed that the recognizer, not the privacy
 model, is what limits the system — which is only interesting because the
-recognizer had already been treated as the replaceable component.
+recognizer had already been treated as the replaceable component. Canary needed
+**2.02× real time** on the Pi 5. That is not a deployment; it is a batch job.
+
+V4 replaces it with faster-whisper `base.en`, and both pipelines have now been
+measured on both devices through the same benchmark. The honest summary is that
+the swap bought deployment feasibility and cost transcription accuracy:
+
+| On the Raspberry Pi 5 | V3 Canary 180M | **V4 Whisper base.en** |
+|---|---:|---:|
+| Mean STT real-time factor | 2.022 | **0.573** |
+| Mean full-pipeline RTF | 2.041 | **0.589** |
+| Peak process RSS | 2,031 MiB | **1,155 MiB** |
+| Aggregate WER, engine-comparable | **0.0403** | 0.0903 |
+
+The word error rates in that last row are number-normalised on both sides.
+Canary wrote spoken numbers as words and Whisper writes numerals, so the raw
+figures (0.0403 against 0.1841) are measuring orthography as much as
+recognition; folding numbers to numerals on both sides is what makes the
+comparison mean anything. Either way **Canary is the more accurate recognizer on
+this corpus**, and V4 is not a claim to the contrary.
 
 ---
 
@@ -311,7 +330,9 @@ two thirds of private characters through.
 ### Privacy model, device against device
 
 Both devices scored the identical committed 2,000-row subset through the
-identical hash-verified INT8 artifact.
+identical hash-verified INT8 artifact. The masking path is unchanged between V3
+and V4, and the benchmark reproduces the same quality figures under both, which
+is the check that the recognizer swap did not disturb anything downstream.
 
 | Metric | Workstation (x86-64, 20 threads) | **Raspberry Pi 5 (4 GB)** |
 |---|---:|---:|
@@ -338,64 +359,203 @@ actually tighter (P99 442 ms against 722 ms). What the Pi pays instead is memory
 
 44 clips, 279.7 s of audio: 12 LibriSpeech dev-clean clips (recognition
 reference) and 32 synthetic privacy clips with gold annotations. Real Silero VAD,
-real Canary STT, the real production INT8 masker. No mocks.
+a real recognizer, the real production INT8 masker. No mocks.
 
-| Metric | Workstation | **Raspberry Pi 5** |
+| Metric | V3 Canary, Pi 5 | **V4 Whisper, Pi 5** |
 |---|---:|---:|
-| Aggregate WER | 0.0403 | **0.0403** |
-| Mean STT real-time factor | 0.646 | **2.022** |
-| Mean full-pipeline RTF | 0.671 | **2.041** |
-| Mean STT latency | 4.54 s | **13.80 s** |
-| Mean end-to-end latency | 4.67 s | **13.91 s** |
-| P50 / P95 end-to-end | 2.95 s / 14.62 s | **9.04 s / 42.96 s** |
-| STT share of processing time | 97.2% | **99.2%** |
-| Peak process RSS | 2,373 MiB | **2,031 MiB** (of 3.95 GiB) |
+| Mean STT real-time factor | 2.022 | **0.573** |
+| Mean full-pipeline RTF | 2.041 | **0.589** |
+| Mean STT latency | 13.80 s | **2.72 s** |
+| Mean end-to-end latency | 13.91 s | **2.82 s** |
+| P50 / P95 end-to-end | 9.04 s / 42.96 s | **2.41 s / 5.13 s** |
+| STT share of processing time | 99.2% | **96.7%** |
+| Peak process RSS | 2,031 MiB | **1,155 MiB** (of 3.95 GiB) |
 
 <p align="center">
   <img src="research_results/figures/audio_pipeline_stage_latency.png" alt="Full audio pipeline stage latency on Raspberry Pi 5" width="100%">
 </p>
 
 **The complete OnKith pipeline runs on a 4 GB Raspberry Pi 5 without running out
-of memory.** Resident memory goes 60 MiB at baseline → 94 MiB with the VAD loaded
-→ 1,990 MiB once Canary is loaded → 2,018 MiB with the privacy model on top. The
-recognizer accounts for essentially all of it; the DeBERTa INT8 masker adds
-**28 MiB**. Peak during the run was 2,031 MiB — roughly half the board's RAM.
+of memory, and under V4 it runs faster than real time.** Resident memory goes
+61 MiB at baseline → 94 MiB with the VAD loaded → 541 MiB once Whisper is loaded
+→ 1,042 MiB with the privacy model on top; peak during the run was 1,155 MiB,
+under a third of the board's RAM. Under V3 the same profile peaked at 2,031 MiB,
+because Canary alone accounted for about 1.9 GiB of it.
 
-**The current recognizer is not real-time on this hardware.** Mean STT RTF is
-2.02, meaning about two seconds of computation per second of speech. The system
-is therefore suitable for push-to-talk, turn-based voice interaction and batch
-utterance processing — **not** for true real-time streaming transcription on the
-tested configuration.
+**This is what the recognizer swap was for.** Mean STT RTF falls from 2.02 to
+**0.57**: from roughly two seconds of computation per second of speech to a
+little over half a second. RTF < 1 is the condition for keeping up with live
+speech, and V4 is the first configuration in this repository to meet it on the
+target device. The P90 is 0.97 and the P95 is 1.03, so the longest clips sit at
+the boundary rather than comfortably inside it — this is real-time-capable, not
+real-time with headroom.
 
-The privacy model is not the bottleneck. DeBERTa INT8 masking averages 30.4 ms
-per clip against 13,803 ms for speech recognition: **0.2% of processing time**.
+The privacy model is not the bottleneck, and was never close to being one. On
+the Pi, DeBERTa INT8 masking averages 24.9 ms per clip against 2,723 ms for
+speech recognition: **0.9% of processing time**. Under V3 the same masker was
+0.2% of a much larger total. Any further end-to-end speed-up has to come from
+the recognizer.
 
 <p align="center">
   <img src="research_results/figures/audio_latency_and_memory.png" alt="End-to-end latency distribution and memory as the stack loads on Raspberry Pi 5" width="100%">
 </p>
 
+### Recognition accuracy: the part that got worse
+
+| Word error rate, 44 clips | V3 Canary | V4 Whisper |
+|---|---:|---:|
+| Aggregate, as each run recorded it | 0.0403 | 0.1841 |
+| Aggregate, number-normalised (engine-comparable) | **0.0403** | 0.0903 |
+| Long numbers transcribed digit for digit | 5/5 | 3/5 |
+
+The raw figures are not comparable between the two engines and the second row is
+the one to read. Canary ran with `pnc: no` and wrote spoken numbers as words,
+which is how the reference transcripts are written; Whisper writes numerals, and
+the standard metric charges eight substitutions for correctly transcribing "five
+five five, zero one eight eight" as `55550188`. Folding numbers to numerals on
+both sides removes that and leaves the real gap: **Whisper is roughly twice as
+error-prone as Canary on this corpus**, and it loses two of the five
+identifier-scale numbers digit for digit.
+
+That is a real cost, it is paid on the clips that matter most, and no amount of
+downstream processing recovers it. `Tomas` transcribed as `To Mars` and `Okonjo`
+as `Dr. Akanja` are gone before the privacy model ever sees them.
+
 ### End-to-end privacy, after imperfect speech recognition
 
-Scored on the 32 privacy-annotated clips, comparing the same sentences reaching
-the model three ways.
+Scored on the 32 privacy-annotated clips. All four arms are scored by one
+implementation and one definition
+(`model/privacy_evaluation/privacy_eval/rescore.py`), which is what makes the
+columns comparable; see [the note on scoring](#the-stt-to-privacy-interface).
 
-| Route to the model | Entity recall | Character recall | Leakage |
-|---|---:|---:|---:|
-| Written reference text (control) | 0.7333 | 0.7202 | 0.2798 |
-| Uncased, unpunctuated reference (control) | 0.8167 | 0.8071 | 0.1929 |
-| **Audio → STT → privacy** | **0.7000** | **0.8043** | **0.1957** |
+| Of 60 annotated entities | V3 Canary | V4 Whisper |
+|---|---:|---:|
+| Survived speech recognition | 51 (85%) | 40 (67%) |
+| **Reached no released text (protected)** | **47 (78%)** | **48 (80%)** |
+| Masked in the form they were spoken | 41 | 33 |
+| Private character recall | 0.8043 | **0.8314** |
+| Private character leakage | 0.1957 | **0.1686** |
+| Clips fully sanitized | 14 of 25 | **16 of 25** |
+| Clips releasing no legible identifier | 3 of 5 | **5 of 5** |
+| Hard-negative false-positive clips | 1 of 7 | 1 of 7 |
 
-Of 60 expected entities, 52 (86.7%) survived speech recognition intact and 42
-(70.0%) were masked end to end. 14 of 25 clips containing private content were
-fully sanitized (56%), and 1 of 7 hard-negative clips produced a false positive.
-Attribution of the 18 that were not protected: **10** privacy-model failures,
-**3** where speech recognition destroyed the entity and nothing was masked, and
-**5** that the recognizer altered but which were masked anyway.
+The V4 column is the workstation run with the spoken-address rewrite in place;
+the V3 column is the frozen Canary run rescored on the same definition. The two
+recognizers reach **the same end-to-end privacy outcome within the resolution of
+a 60-entity corpus**, by different routes: Canary preserves more entities and the
+model masks more of them as spoken, while Whisper destroys more entities outright
+but writes the ones it keeps in forms the model handles at least as well.
 
-These numbers are lower than the text benchmark, and they are supposed to be:
-this is unpunctuated, uncased, digit-word speech from a recognizer running with
-punctuation and capitalisation disabled — the hardest input the model sees, and
-the one that matters in deployment.
+This is not "Whisper improves privacy". A corpus of 60 entities cannot resolve a
+one-entity difference, and the two arms differ in what they get wrong, not in how
+much. What it does say is that the deployment gain did **not** cost end-to-end
+privacy, which is the question the swap had to answer.
+
+The one row that is a clean win is the last measurable one, and it is also the
+only row that depends on no alignment at all: on the five clips whose reference
+carries an identifier-scale number, V4 released **none** of them in legible form
+and V3 released two. The mechanism is not better masking — it is that Canary's
+digit-word spellings evaded the structured recognizer and were then reassembled
+into numerals by the display renderer, which Whisper's numerals do not do.
+See [`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md); the
+renderer is unchanged and the behaviour is suppressed by orthography, not fixed.
+
+Attribution of the 12 entities V4 still leaks: **5** where the recognizer
+destroyed the entity and nothing was masked where it went, and **7**
+privacy-model failures — of which three are numeral dates (`12th of March`,
+`30th of September`, `4th of June`) that the model masks when they are spelled
+out, and two are DATE/TIME misses that occur under both recognizers. The
+recognizer altered a further 15 entities that were masked anyway.
+
+These numbers are lower than the 2,000-row text benchmark, and they are supposed
+to be: this is recognizer output, mis-segmented and misheard, and it is the input
+that matters in deployment rather than the one that flatters the model.
+
+---
+
+## The STT-to-privacy interface
+
+The privacy model was trained on written text. A recognizer does not produce
+written text, and the seam between the two turned out to be the largest single
+source of end-to-end error in V4 — larger than the model, and larger than the
+recognizer's own mistakes. Two distinct problems live there, and they need
+keeping apart because only one of them is a defect in the pipeline.
+
+### 1. A measurement defect, now fixed
+
+The audio benchmark follows each annotated entity from the reference transcript
+into the recognized one by aligning words, then measures what share of that
+region the masker covered. Two details of that alignment were wrong in ways that
+could only ever show up under Whisper:
+
+- **Number spelling.** The reference says "twenty seven" and Whisper writes
+  `27`. No token matched, so an entity that came through the recognizer
+  *perfectly* was booked as destroyed by it, and the region measured for
+  coverage excluded the very numeral it had become.
+- **Sentence punctuation.** The located region was a whitespace-delimited run,
+  so the region for `Carter` in "My name is Alex Carter." was `Carter.` — and a
+  masker that correctly produced `[SURNAME_1].` scored six characters out of
+  seven, a partial failure.
+
+Canary emitted neither numerals nor punctuation, so V3's figures were untouched
+by both. The effect was to **overstate Whisper's privacy failures by roughly a
+factor of two**: the same run folder that reported 16 of 60 entities masked and
+4 of 25 clips clean reports 33 and 14 once the alignment is corrected.
+
+The fix is in `locate_entity`: fold spoken numbers to numerals on both sides
+before aligning, and trim a located region to its alphanumeric core.
+`privacy_eval/rescore.py` applies the corrected definition to any completed run
+folder — including the frozen Canary ones, whose predicted spans turn out to be
+exactly recoverable from the input/output text pair every run saved — so no
+comparison in this repository is one definition against another.
+
+### 2. A real interface gap, now narrowed
+
+Whisper writes a dictated address the way it was spoken:
+
+```
+spoken     : billing at example dot org
+recognized : billing at example.org
+masked     : billing at [URL_1]        <- the local part is released
+```
+
+That is neither the spoken form nor the written form. The structured EMAIL
+recognizer requires an `@`, the model has never seen an address written that
+way, and the result was the domain masked and the mailbox name released in the
+clear. It affected three of the three annotated EMAIL entities, and the same
+shape with "slash" affected the one annotated URL.
+
+`FullPipeline_V4/integrated_pipeline/spoken_form_normalizer.py` rewrites two
+shapes — `<token> at <domain>` and `<domain> slash <path>` — into their written
+form **for the detectors only**. Every span found on the rewritten view is
+projected back onto the original text before anything is masked, so the released
+transcript and everything stored is still exactly what the recognizer produced.
+A span landing inside a rewritten region widens to cover the whole of it, so the
+projection can only ever mask more, never less.
+
+It is deliberately two rules and not a rule engine. Across every text this
+repository holds — the audio corpus, `ood_dev`, `ood_final` and the 2,000-row
+deployment benchmark, 3,072 in total — they fire on four regions, and all four
+are the forms they exist for. The 2,000-row benchmark and the `ood_dev`
+cross-check score **identically** with the stage and without it (typed F1 0.9452,
+`ood_dev` 0.6882), and the audio benchmark's hard-negative false-positive count
+does not move.
+
+### What preprocessing cannot fix
+
+Where the recognizer destroyed the entity, no stage downstream recovers it.
+`Tomas` heard as `To Mars`, `Okonjo` as `Dr. Akanja`, `Leeds` as `leads`: the
+information is gone before the privacy model runs, and a normalizer that "fixed"
+those would be inventing content. Five of V4's twelve remaining leaks are of
+this kind and are counted separately from model failures for exactly that
+reason.
+
+Equally, `12th of March` is ordinary written English. When the model misses it —
+and it does, on three clips where it masks the spelled-out form — that is a
+model false negative, not an interface problem, and the fix belongs in the next
+training generation rather than in a rewrite rule. Both distinctions are kept
+explicit in
+[`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md).
 
 ---
 
@@ -419,14 +579,16 @@ The audio benchmark needs the production recognizer, which is not in the default
 install:
 
 ```bash
-pip install "nemo-toolkit[asr]==2.5.3" "torch==2.7.1"
-python FullPipeline_V3/scripts/acquire_canary.py
+pip install --requirement FullPipeline_V4/requirements-rpi.txt      # or -windows.txt
 ```
 
-`acquire_canary.py` downloads the pinned `nvidia/canary-180m-flash` artifact and
-verifies its SHA-256. Without it the benchmark still verifies the fixtures, runs
-the VAD and both reference-text control arms, records the memory profile, reports
-exactly what is missing, and exits with code 2. It never fabricates a transcript.
+That brings faster-whisper 1.2.1 on CTranslate2. The `base.en` weights are
+fetched once on first use and cached under `~/.cache/huggingface`; nothing is
+committed for them, which is why the deployment config pins the package version,
+the model name and the decoding settings rather than a file hash. Without the
+recognizer the benchmark still verifies the fixtures, runs the VAD and both
+reference-text control arms, records the memory profile, reports exactly what is
+missing, and exits with code 2. It never fabricates a transcript.
 
 Then regenerate the figures on any machine with the repository:
 
@@ -445,20 +607,25 @@ comparison and prediction-parity figures on its own, and writes
 
 ```bash
 python -m pytest model/privacy_evaluation/tests -q     # evaluation harness, fixtures, metrics
-cd FullPipeline_V3 && python -m pytest -q              # production pipeline
+cd FullPipeline_V4 && python -m pytest -q              # production pipeline
 ```
+
+`model/privacy_evaluation/tests/test_masking_parity_v3_v4.py` runs fixed text
+through both pipeline packages in separate interpreters and requires identical
+masked output, spans and rendered text. It is what keeps "V4 is V3 with a
+different recognizer" a checked statement rather than a claim.
 
 ---
 
 ## Running the production pipeline
 
 Quick start below; the full instructions are
-[`FullPipeline_V3/README.md`](FullPipeline_V3/README.md).
+[`FullPipeline_V4/README.md`](FullPipeline_V4/README.md).
 
 ### Windows (development and testing — WSL not required)
 
 ```powershell
-cd FullPipeline_V3
+cd FullPipeline_V4
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip wheel setuptools
@@ -476,18 +643,21 @@ INT8 ONNX, masks the text, and prints the released transcript.
 ### Raspberry Pi OS (64-bit)
 
 ```bash
-cd FullPipeline_V3
+cd FullPipeline_V4
 chmod +x install_pi.sh run_live.sh check_pi.sh
-./install_pi.sh          # installs the pinned runtime and downloads Canary
+./install_pi.sh          # installs the pinned runtime
 
 ./check_pi.sh            # hardware and artifact checks
 ./run_live.sh --list-devices
 ./run_live.sh --device 2
 ```
 
-The Canary weights (~700 MB) are acquired on the device and verified by hash;
-they are deliberately not stored in Git. The DeBERTa INT8 model **is** committed,
-because it is this project's own release artifact and the Pi cannot rebuild it.
+The Whisper `base.en` weights are fetched once by CTranslate2 on first use and
+cached under `~/.cache/huggingface`; they are deliberately not stored in Git. The
+DeBERTa INT8 model **is** committed, because it is this project's own release
+artifact and the Pi cannot rebuild it. V3 instead pinned a 700 MB `.nemo` file by
+SHA-256 and fetched it with `FullPipeline_V3/scripts/acquire_canary.py`; running
+that package again would need the NeMo stack reinstalled.
 
 ---
 
@@ -495,12 +665,15 @@ because it is this project's own release artifact and the Pi cannot rebuild it.
 
 ```text
 OnKith/
-├── FullPipeline_V3/          Production pipeline — the only current one
+├── FullPipeline_V4/          Production pipeline — the current one
 │   ├── app/                  Entry point, audio runtime, live preview, terminal UI
-│   ├── integrated_pipeline/  VAD, Canary adapter, masking, span merge, storage, config
-│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD, Canary manifest
-│   ├── scripts/              Canary acquisition, Pi checks, release packaging
+│   ├── integrated_pipeline/  VAD, Whisper adapter, spoken-form rewrite, masking,
+│   │                         span merge, storage, config
+│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD
+│   ├── scripts/              Pi checks, release packaging
 │   └── tests/                Production regression suite
+├── FullPipeline_V3/          Superseded Canary pipeline, kept intact as the
+│                             baseline its frozen measurements belong to
 ├── model/                    Research: training, data preparation, evaluation
 │   ├── baseline_model/       BiLSTM span baseline and the binary classifier before it
 │   ├── TinyBERT-4/           Model V1 — superseded, kept for provenance
@@ -515,9 +688,12 @@ OnKith/
 └── Research_Paper_Figures.ipynb
 ```
 
-`FullPipeline_V3/` is the deployment package and is self-contained. Everything in
-[`archive/`](archive/) is unmaintained history, kept as evidence of how the design
-evolved — see [`archive/README.md`](archive/README.md).
+`FullPipeline_V4/` is the deployment package and is self-contained.
+`FullPipeline_V3/` is kept beside it rather than in `archive/` because its
+measurements are live evidence in the comparison above, not history. Everything
+in [`archive/`](archive/) is unmaintained — the Moonshine experiments and
+pipelines V1/V2 — kept as evidence of how the design evolved; see
+[`archive/README.md`](archive/README.md).
 
 ---
 
@@ -549,23 +725,44 @@ names, addresses and document numbers.
 
 ## Known limitations
 
-- **Speech recognition is not real-time on a Raspberry Pi 5.** Canary 180M Flash
-  runs at RTF ≈ 2.0 on the tested board. Push-to-talk and turn-based interaction
-  work; live streaming transcription does not.
+- **Real-time on the Pi 5 has little headroom.** V4's mean STT RTF is 0.57 on
+  the tested board, which is what makes live use possible at all — V3's Canary
+  was 2.02 and could not keep up. But P90 is 0.97 and P95 is 1.03, so the longest
+  utterances sit at the boundary. Turn-based interaction is comfortable;
+  continuous streaming under load is not characterised.
+- **The recognizer swap cost transcription accuracy.** Number-normalised
+  aggregate WER goes from 0.0403 under Canary to 0.0903 under Whisper on the
+  44-clip corpus, and two of five identifier-scale numbers are no longer
+  transcribed digit for digit. The deployment gain is real and this is what paid
+  for it.
+- **Speech recognition errors are the largest irreducible privacy failure.** Of
+  the 12 annotated entities V4 still leaks, 5 were destroyed by the recognizer
+  before the privacy model saw them. No preprocessing recovers a name that was
+  never transcribed.
 - **The out-of-distribution gap is material.** Frozen `ood_final` typed F1 is
   0.6244 against 0.9588 on in-distribution validation, and character leakage
   rises from 0.0017 to 0.1610. The model is much weaker on speech-shaped input it
   has not seen.
+- **Numeral dates and times are missed where the spelled-out forms are masked.**
+  `12th of March` and `30th of September` pass through unmasked; the same clips
+  under Canary, which spelled them out, were masked. This is a model false
+  negative on ordinary written English, not an interface problem, and the fix is
+  training data rather than a rewrite rule. Three of V4's twelve remaining leaks.
+- **The spoken-address rewrite can absorb the word before " at ".** Nothing
+  distinguishes an email local part from an ordinary word by shape, so
+  `Look at example.com` becomes `Look@example.com` and `Look` is masked with the
+  domain. It can only ever mask more of a sentence that already contains a domain
+  the model would have masked anyway, it fires on no such case in any corpus this
+  repository holds, and the hard-negative and text-benchmark scores do not move —
+  but it is a real, accepted overmask.
 - **Spoken-form numeric identifiers can evade masking, and the display layer can
-  reassemble them.** The recognizer runs with punctuation and capitalisation off,
-  so numbers arrive as digit words ("five five five zero one four seven"). If the
-  privacy model misses one — phrasing and cue structure decide this — the
-  render-time digit normaliser then rewrites the surviving words as `5550147`.
-  This reproduced identically on the workstation and the Pi, on 2 of 60 entities,
-  and also on a spoken card-style number. No new information is leaked: the digit
-  words were already in the released text. But the compact, copyable form is
-  worse, and hardening this is future work, not a fix applied during a release
-  freeze. Storage and downstream processing keep the original text; the
+  reassemble them.** Under V3, numbers arrived as digit words and the render-time
+  digit normaliser rewrote any that survived masking as `5550147` — 2 of 60
+  entities, reproduced identically on the workstation and the Pi. V4 records zero
+  of these, and that is not a fix: Whisper writes numerals itself, so a surviving
+  identifier is already compact in the released text rather than being assembled
+  downstream. The renderer is unchanged and would do the same to any digit-word
+  run reaching it. Storage and downstream processing keep the original text; the
   reconstruction reaches the terminal display only.
 - **Structured recognition is cue-dependent.** The regex layer fires on explicit
   cues ("my phone number is", "call me at"). An identifier introduced differently
@@ -581,17 +778,21 @@ names, addresses and document numbers.
 - **Repeated mentions get different placeholder numbers.** One person named twice
   becomes `[GIVENNAME_1]` and `[GIVENNAME_2]`. Nothing leaks, but the stored
   transcript reads as two people. Documented in
-  [`FullPipeline_V3/KNOWN_ISSUES.md`](FullPipeline_V3/KNOWN_ISSUES.md).
+  [`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md).
 - **English only, 64-bit ARM only, single speaker assumed.** No diarisation.
 
 ## Future work
 
-- A lighter or faster recognizer, so the pipeline reaches RTF < 1 on a Pi 5 and
-  true streaming becomes possible.
-- Spoken-number normalisation **before** privacy classification, so digit-word
-  identifiers reach the model in the form it handles best.
+- Recover the recognition accuracy V4 traded away — a larger Whisper variant or
+  a distilled model that keeps RTF < 1 on a Pi 5 — and re-measure both halves.
+- Numeral date and time forms in the next training generation, which is where
+  three of V4's remaining leaks are.
 - Re-screening the text after every post-masking transformation, so a render-time
   step can never reassemble something the privacy layer declined to protect.
+- Re-run the Raspberry Pi audio benchmark with the spoken-address rewrite in
+  place. Its runtime, memory and word-error figures already stand; what is not
+  yet measured on that board is the end-to-end privacy outcome with that stage,
+  and nothing in this repository estimates it from the workstation run.
 - A broader natural-speech privacy dataset — the current audio privacy set is
   synthetic by necessity.
 - Further OOD robustness work: `ood_final` is spent, so the next generation needs
@@ -607,12 +808,14 @@ names, addresses and document numbers.
 
 | Component | Model | Licence |
 |---|---|---|
-| Speech-to-text | [`nvidia/canary-180m-flash`](https://huggingface.co/nvidia/canary-180m-flash) | CC BY 4.0 |
+| Speech-to-text | [`Systran/faster-whisper-base.en`](https://huggingface.co/Systran/faster-whisper-base.en), a CTranslate2 conversion of [`openai/whisper-base.en`](https://huggingface.co/openai/whisper-base.en) | MIT |
+| Previous speech-to-text | [`nvidia/canary-180m-flash`](https://huggingface.co/nvidia/canary-180m-flash) | CC BY 4.0 |
 | Privacy detection | Fine-tuned from [`microsoft/deberta-v3-xsmall`](https://huggingface.co/microsoft/deberta-v3-xsmall) | MIT |
 | Previous privacy model | Fine-tuned from [TinyBERT](https://huggingface.co/huawei-noah/TinyBERT_General_4L_312D) | Apache 2.0 |
 | Voice activity detection | [Silero VAD](https://github.com/snakers4/silero-vad) | MIT |
 | Earlier speech-to-text | [Moonshine](https://github.com/moonshine-ai/moonshine) | see upstream |
 | Inference runtime | [ONNX Runtime](https://onnxruntime.ai/) | MIT |
+| Speech inference runtime | [CTranslate2](https://github.com/OpenNMT/CTranslate2) via [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | MIT |
 
 **Datasets**
 

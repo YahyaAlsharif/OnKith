@@ -29,10 +29,11 @@ from typing import Any, Iterable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
-#: The archived Canary pipeline. Nothing in these benchmarks imports it: the
-#: Canary numbers in research_results/ are frozen and are read from disk, never
+#: The superseded Canary pipeline, kept at the repository root beside V4 so the
+#: progression is readable. Nothing in these benchmarks imports it: the Canary
+#: numbers in research_results/ are frozen and are read from disk, never
 #: regenerated. It is named here so the path is discoverable rather than lore.
-ARCHIVED_CANARY_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
+CANARY_V3_ROOT = REPO_ROOT / "FullPipeline_V3"
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
 RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"
 

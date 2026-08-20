@@ -78,8 +78,10 @@ _FILLER = {"and"}
 _ORDINAL_SUFFIX = re.compile(r"^(\d+)(st|nd|rd|th)$")
 
 
-def _fold_numbers(tokens: Sequence[str]) -> list[str]:
-    """Fold spoken number words into numerals, leaving everything else alone.
+def fold_numbers_with_indices(
+    tokens: Sequence[str],
+) -> list[tuple[str, int, int]]:
+    """Fold spoken number words into numerals, keeping the source token range.
 
     Three shapes, which is all this corpus contains:
 
@@ -91,14 +93,21 @@ def _fold_numbers(tokens: Sequence[str]) -> list[str]:
 
     "and" is dropped between number words only: "five five five and zero one" is
     one number read with a pause, not two numbers joined by a conjunction.
+
+    Each output element is ``(value, first, last + 1)`` over ``tokens``, so a
+    caller holding character offsets for the input tokens can carry them across
+    the fold. ``locate_entity`` needs exactly that: the fold is what lets a gold
+    entity written "one forty two" be found in a transcript that says "142", and
+    the offsets are what let its mask coverage be measured afterwards.
     """
 
-    output: list[str] = []
+    output: list[tuple[str, int, int]] = []
     digit_run: list[str] = []
+    run_start = 0
 
-    def flush() -> None:
+    def flush(end: int) -> None:
         if digit_run:
-            output.append("".join(digit_run))
+            output.append(("".join(digit_run), run_start, end))
             digit_run.clear()
 
     index = 0
@@ -110,17 +119,21 @@ def _fold_numbers(tokens: Sequence[str]) -> list[str]:
         if ordinal:
             token = ordinal.group(1)
         if token.isdigit():
+            if not digit_run:
+                run_start = index
             digit_run.append(token)
             index += 1
             continue
 
         if token in _DECADES:
-            flush()
-            output.append(_DECADES[token])
+            flush(index)
+            output.append((_DECADES[token], index, index + 1))
             index += 1
             continue
 
         if token in _UNITS:
+            if not digit_run:
+                run_start = index
             digit_run.append(str(_UNITS[token]))
             index += 1
             continue
@@ -128,24 +141,26 @@ def _fold_numbers(tokens: Sequence[str]) -> list[str]:
         if token in _TENS:
             following = tokens[index + 1] if index + 1 < len(tokens) else ""
             if following in _UNITS and _UNITS[following] != 0:
-                flush()
-                output.append(str(_TENS[token] + _UNITS[following]))
+                flush(index)
+                output.append(
+                    (str(_TENS[token] + _UNITS[following]), index, index + 2)
+                )
                 index += 2
             else:
-                flush()
-                output.append(str(_TENS[token]))
+                flush(index)
+                output.append((str(_TENS[token]), index, index + 1))
                 index += 1
             continue
 
         if token in _TEENS:
-            flush()
-            output.append(str(_TEENS[token]))
+            flush(index)
+            output.append((str(_TEENS[token]), index, index + 1))
             index += 1
             continue
 
         if token in _ORDINALS:
-            flush()
-            output.append(str(_ORDINALS[token]))
+            flush(index)
+            output.append((str(_ORDINALS[token]), index, index + 1))
             index += 1
             continue
 
@@ -157,12 +172,18 @@ def _fold_numbers(tokens: Sequence[str]) -> list[str]:
                 index += 1
                 continue
 
-        flush()
-        output.append(token)
+        flush(index)
+        output.append((token, index, index + 1))
         index += 1
 
-    flush()
+    flush(len(tokens))
     return output
+
+
+def _fold_numbers(tokens: Sequence[str]) -> list[str]:
+    """``fold_numbers_with_indices`` without the token ranges."""
+
+    return [value for value, _, _ in fold_numbers_with_indices(tokens)]
 
 
 def normalise_numbers(text: str) -> str:
@@ -468,23 +489,25 @@ def paired_clip_rows(left: Mapping[str, Any], right: Mapping[str, Any]
 # --------------------------------------------------------------------------
 #
 # The benchmark's ``entity_recall_after_stt`` family follows each gold entity
-# from the reference transcript into the recognized one by aligning words. That
-# alignment is sound when both sides spell numbers the same way and it breaks
-# when they do not: Whisper writes "555-0147." where the reference says "five
-# five five, zero one four seven", the seven reference tokens match nothing, and
-# the entity is booked as "altered by the recognizer" even in clips where the
-# released text shows it was masked perfectly. Those figures are therefore valid
-# within one engine and are **not** comparable across engines on this corpus.
+# from the reference transcript into the recognized one by aligning words. Until
+# ``locate_entity`` learned to fold spoken numbers and to trim sentence
+# punctuation off a located region, that alignment broke whenever the two sides
+# spelled a number differently: Whisper writes "555-0147." where the reference
+# says "five five five, zero one four seven", the seven reference tokens matched
+# nothing, and the entity was booked as "altered by the recognizer" in clips
+# where the released text shows it was masked perfectly.
 #
-# Recomputing that family for the frozen Canary runs is not possible from what
-# they saved: the predicted character spans were never written to disk, only the
-# per-entity outcomes derived from them, and rerunning Canary is out of the
-# question.
+# Both defects are fixed, and ``privacy_eval.rescore`` recomputes that family for
+# any completed run folder - the frozen Canary ones included - so the comparison
+# below is one definition applied to two recognizers rather than two definitions
+# applied to one folder each. It does that without a recognizer and without a
+# model: the predicted spans were never written to disk, but they are exactly
+# recoverable from the ``privacy_input_text`` / ``masked_text`` pair that every
+# run did save.
 #
-# What every run did save is the text the device would actually have released.
-# Asking whether an identifier-scale number is still legible in it needs no
-# alignment, no gold offsets and no model - and it is the question the product
-# claim rests on.
+# The measure below is kept alongside it, because it needs no alignment, no gold
+# offsets and no reconstruction at all - only the text the device would actually
+# have released - and it is the question the product claim rests on.
 
 
 def released_identifier_leak(row: Mapping[str, Any]) -> dict[str, Any] | None:

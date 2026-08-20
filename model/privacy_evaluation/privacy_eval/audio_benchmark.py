@@ -84,6 +84,21 @@ PRESERVATION_THRESHOLD = 0.5
 #: make a single trailing space a failure.
 FULL_MASK_THRESHOLD = 0.999
 
+#: Which definition of the per-entity outcomes a run folder holds, stamped into
+#: ``benchmark_config.json``.
+#:
+#: ``2026-08-20.number-folded-trimmed``
+#:     ``locate_entity`` aligns both sides on number-folded tokens and trims the
+#:     located region to its alphanumeric core. Before this, a reference reading
+#:     "twenty seven" matched nothing in a transcript reading "27", and a masker
+#:     that left the full stop of "Carter." standing was scored at 6/7. Both
+#:     misattributed Whisper output; Canary emitted neither numerals nor
+#:     punctuation, so V3's figures barely move under it.
+#:
+#: A folder written before the fix carries no key at all. ``privacy_eval.rescore``
+#: recomputes one to this definition from what the folder saved.
+ENTITY_SCORING_VERSION = "2026-08-20.number-folded-trimmed"
+
 # Identifier scale, borrowed from the deployment's own structured recognizer
 # (``StructuredPIIConfig.phone_min_digits``): a run of this many digits is a
 # telephone number, an account or a card, not a quantity.
@@ -240,6 +255,18 @@ def word_error_rate(reference: str, hypothesis: str) -> dict[str, Any]:
     }
 
 
+def _spoken_form_rules() -> tuple[str, ...]:
+    """The rewrite rules the deployment applies before detection, by name.
+
+    Imported here rather than at module scope: the pipeline package is only on
+    ``sys.path`` once ``benchmark_common.ensure_import_paths`` has run.
+    """
+
+    from integrated_pipeline.spoken_form_normalizer import rules
+
+    return tuple(rules())
+
+
 def _covered_characters(spans: Iterable[Mapping[str, Any]]) -> set[int]:
     covered: set[int] = set()
     for span in spans:
@@ -293,6 +320,52 @@ def reconstructed_digit_runs(masked_text: str, final_text: str,
     return runs
 
 
+def _fold_tokens(tokens: Sequence[tuple[str, int, int]]
+                 ) -> list[tuple[str, int, int]]:
+    """``tokenise_with_offsets`` output with spoken numbers folded to numerals.
+
+    The character offsets are carried across the fold, so a folded token still
+    points at the text that produced it: "five five five zero one four seven"
+    becomes one ``5550147`` token spanning all seven words.
+    """
+
+    from .stt_comparison import fold_numbers_with_indices
+
+    return [
+        (value, tokens[first][1], tokens[last - 1][2])
+        for value, first, last in fold_numbers_with_indices(
+            [token for token, _, _ in tokens]
+        )
+    ]
+
+
+def informative_bounds(text: str, start: int | None, end: int | None
+                       ) -> tuple[int | None, int | None]:
+    """Shrink a located region to the characters that can carry information.
+
+    ``tokenise_with_offsets`` splits on whitespace, so its tokens carry whatever
+    punctuation was attached to the word: the region located for ``Carter`` in
+    "My name is Alex Carter." is ``Carter.``, full stop included. A masker
+    replaces the name and leaves the sentence punctuation exactly where it was,
+    which is correct, and measuring coverage over the untrimmed region booked
+    that as a partial failure at six characters out of seven. Canary ran with
+    ``pnc: no`` and emitted no punctuation at all, so the defect only became
+    visible under Whisper.
+
+    Only the edges are trimmed. Punctuation *inside* an entity belongs to it -
+    the dots in ``alex.carter@example.com``, the hyphen in ``555-0147`` - and
+    stays in the region and in the denominator.
+    """
+
+    if start is None or end is None or end <= start:
+        return start, end
+    while start < end and not text[start].isalnum():
+        start += 1
+    while end > start and not text[end - 1].isalnum():
+        end -= 1
+    return (start, end) if end > start else (None, None)
+
+
 def locate_entity(reference: str, span: Mapping[str, Any], hypothesis: str) -> dict[str, Any]:
     """Follow one gold entity from the reference transcript into the recognized one.
 
@@ -302,10 +375,19 @@ def locate_entity(reference: str, span: Mapping[str, Any], hypothesis: str) -> d
     matched are the part of the entity that survived; where nothing matched, the
     region the recognizer produced *instead* is returned, because that is the
     text the privacy model actually had to mask.
+
+    Both sides are aligned on number-folded tokens. The reference transcripts
+    write numbers the way they are spoken and Whisper writes numerals, so
+    without the fold "twenty seven" and "27" share no token, an entity that came
+    through the recognizer intact is booked as destroyed by it, and the region
+    located for the entity excludes the very numeral it became. Canary wrote
+    numbers as words, so the fold changes almost nothing for the V3 runs; it is
+    what makes the two engines comparable. The located region is then trimmed to
+    its informative core - see ``informative_bounds``.
     """
 
-    ref_tokens = tokenise_with_offsets(reference)
-    hyp_tokens = tokenise_with_offsets(hypothesis)
+    ref_tokens = _fold_tokens(tokenise_with_offsets(reference))
+    hyp_tokens = _fold_tokens(tokenise_with_offsets(hypothesis))
     entity_indices = [
         index for index, (_, start, end) in enumerate(ref_tokens)
         if start < int(span["end"]) and end > int(span["start"])
@@ -336,8 +418,9 @@ def locate_entity(reference: str, span: Mapping[str, Any], hypothesis: str) -> d
     chosen = mapped or fallback
     if chosen:
         first, last = min(chosen), max(chosen)
-        char_start = hyp_tokens[first][1]
-        char_end = hyp_tokens[last][2]
+        char_start, char_end = informative_bounds(
+            hypothesis, hyp_tokens[first][1], hyp_tokens[last][2]
+        )
     else:
         char_start = char_end = None
 
@@ -491,6 +574,11 @@ class AudioBenchmark:
 
         self.clip_results: list[dict[str, Any]] = []
         self.predictions: list[dict[str, Any]] = []
+        # Every spoken address form the pre-detection view rewrote, so a run
+        # folder records what the detectors were shown and not only what the
+        # recognizer produced.
+        self.spoken_form_edits: list[dict[str, Any]] = []
+        self.spoken_form_clips: list[str] = []
         self.failures: list[dict[str, Any]] = []
         self.control_metrics: dict[str, Any] = {}
         self.privacy_scored_clips: list[str] = []
@@ -748,6 +836,13 @@ class AudioBenchmark:
             record["predicted_entities"] = len(stt_spans)
             masked_text = result.masked_text
 
+            edits = list((result.raw_model_output or {}).get("spoken_form_edits") or [])
+            record["spoken_form_edits"] = edits
+            if edits:
+                self.spoken_form_clips.append(clip_id)
+                self.spoken_form_edits.extend({"clip_id": clip_id, **edit}
+                                              for edit in edits)
+
             started = time.perf_counter()
             final_text = normalize_spoken_digits(masked_text)
             record["postprocessing_latency_ms"] = (time.perf_counter() - started) * 1000.0
@@ -761,6 +856,7 @@ class AudioBenchmark:
             record["privacy_latency_ms"] = None
             record["postprocessing_latency_ms"] = None
             record["predicted_entities"] = None
+            record["spoken_form_edits"] = []
             record["masked_text"] = None
             record["final_masked_output"] = None
             record["reconstructed_identifiers"] = []
@@ -1397,6 +1493,17 @@ class AudioBenchmark:
             "smoke_test": self.options.smoke_test,
             "device_label": self.options.device_label or None,
             "entry_point": "Full_Pipeline_Audio_Benchmark.py",
+            # Which definition produced the per-entity outcomes in this folder.
+            # A run written before the alignment fix carries no such key, and
+            # its ``entities`` blocks are not comparable with these; use
+            # ``privacy_eval.rescore`` to put an older folder on this footing.
+            "entity_scoring": ENTITY_SCORING_VERSION,
+            "spoken_form_normalisation": {
+                "stage": "pre-detection view inside PIIMaskerAdapter.mask_text",
+                "rules": list(_spoken_form_rules()),
+                "clips_rewritten": self.spoken_form_clips,
+                "edits": self.spoken_form_edits,
+            },
             "clips_selected": [clip["clip_id"] for clip in self.clips],
             "clips_scored": len(self.clip_results),
             "subset_filter": self.options.subset,
@@ -1606,6 +1713,33 @@ class AudioBenchmark:
                     lines.append(f"- `{name}`: aggregate WER {entry['aggregate_wer']:.4f} "
                                  f"over {entry['clips']} clips")
             lines.append("")
+
+            lines += [
+                "### Spoken address forms rewritten before detection",
+                "",
+                "The recognizer writes an address the way it was spoken - "
+                "`billing at example.org`. Neither the privacy model nor the "
+                "structured EMAIL recognizer has seen one written that way, and "
+                "the result was the domain masked and the local part released. "
+                "`integrated_pipeline/spoken_form_normalizer.py` rewrites two "
+                "such shapes into their written form for the detectors only; "
+                "every span is projected back before anything is masked, so the "
+                "released transcript is still the transcript.",
+                "",
+            ]
+            if self.spoken_form_edits:
+                lines += ["| Clip | Rule | Recognized | Shown to the detectors |",
+                          "|---|---|---|---|"]
+                for edit in self.spoken_form_edits:
+                    lines.append(
+                        f"| {edit['clip_id']} | `{edit['rule']}` | "
+                        f"`{edit['original']}` | `{edit['normalised']}` |"
+                    )
+                lines += ["", f"{len(self.spoken_form_edits)} rewrite(s) across "
+                              f"{len(set(self.spoken_form_clips))} clip(s).", ""]
+            else:
+                lines += ["No clip in this selection contained a spoken address "
+                          "form, so the stage was a no-op.", ""]
         else:
             lines += [
                 "## Speech recognition",

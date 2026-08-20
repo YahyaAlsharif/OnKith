@@ -2,13 +2,22 @@
 
 V4 is V3 with faster-whisper in place of Canary. Everything after the recognizer
 is meant to be the same code, and "meant to be" is not evidence. This runs the
-same fixed text through the archived V3 privacy path and through V4's, and
-requires the masked output, the consolidated spans and the rendered final text
-to be identical.
+same fixed text through V3's privacy path and through V4's, and requires the
+masked output, the consolidated spans and the rendered final text to be
+identical.
+
+V4 has exactly one deliberate addition, and it is why the parity is asserted on
+these texts specifically: ``spoken_form_normalizer`` rewrites a spoken address -
+"billing at example.org" - into the written form before the detectors see it,
+because Whisper produces that shape and neither the model nor the structured
+EMAIL pattern was trained or written for it. None of ``PROBE_TEXTS`` contains a
+spoken address, so on every one of them V3 and V4 must still agree exactly; the
+rewrite's own behaviour is pinned in
+``FullPipeline_V4/tests/test_spoken_form_normalizer.py``.
 
 **No speech recognizer is loaded on either side.** The probe imports the masker,
 the merger, the wake-word repair, the buffer and the digit renderer, and nothing
-else; running it against ``archive/FullPipeline_V3`` cannot start Canary. The
+else; running it against ``FullPipeline_V3`` cannot start Canary. The
 Canary measurements in ``research_results/`` are frozen and are never
 regenerated.
 
@@ -28,7 +37,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PROBE = REPO_ROOT / "model" / "privacy_evaluation" / "scripts" / "masking_parity_probe.py"
 V4_ROOT = REPO_ROOT / "FullPipeline_V4"
-V3_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
+V3_ROOT = REPO_ROOT / "FullPipeline_V3"
 
 
 def run_probe(root: Path) -> dict:

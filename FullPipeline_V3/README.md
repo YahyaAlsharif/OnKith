@@ -1,10 +1,21 @@
 # OnKith production pipeline (FullPipeline_V3)
 
+> **Superseded. This is Pipeline V3, the Canary build, kept as a baseline.**
+>
+> The current deployment is [`../FullPipeline_V4/`](../FullPipeline_V4/), which
+> is this pipeline with faster-whisper `base.en` in place of NVIDIA Canary 180M
+> Flash. V3 is kept intact — not moved to `../archive/` — because the
+> measurements in [`../research_results/`](../research_results/) are its, and the
+> V3-against-V4 comparison is one of the project's results. Nothing here is
+> maintained, and its numbers are never regenerated.
+>
+> Running it again would need the NeMo stack reinstalled and the 700 MB `.nemo`
+> artifact re-fetched; see `BACKEND_VERSION_DECISION.md`.
+
 **Local speech-to-text and privacy processing for Raspberry Pi 5**
 
-This is the **current** OnKith deployment package and the only maintained one.
-Earlier integrated pipelines live under [`../archive/`](../archive/) and should
-not be used. The Python entry point is still `app.omit_ai_live` and some code
+This was the OnKith deployment package until V4 replaced its recognizer.
+Earlier integrated pipelines live under [`../archive/`](../archive/). The Python entry point is still `app.omit_ai_live` and some code
 still says "Omit AI" — that is the project's earlier name, kept so the module
 paths in existing instructions keep working.
 

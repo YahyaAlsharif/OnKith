@@ -157,6 +157,15 @@
     },
     {
       "kind": "figure",
+      "name": "audio_postprocessing_amplification",
+      "files": [
+        "audio_postprocessing_amplification.png",
+        "audio_postprocessing_amplification.pdf"
+      ],
+      "caption": "The spoken-digit finding: utterances where the privacy model did not mask a spoken number and the display renderer then rendered it as a numeral. Shown for both recognizers, because the V4 count is zero by change of orthography rather than by a change to the renderer."
+    },
+    {
+      "kind": "figure",
       "name": "stt_engine_accuracy",
       "files": [
         "stt_engine_accuracy.png",
@@ -180,7 +189,7 @@
         "stt_engine_released_identifiers.png",
         "stt_engine_released_identifiers.pdf"
       ],
-      "caption": "The end-to-end privacy question that survives a change of recognizer: after masking and after the display renderer, is an identifier-scale number still legible in what the device released? It needs no alignment against the reference and no gold offsets, which is what makes it comparable across engines where the entity-level metrics are not."
+      "caption": "End-to-end privacy per recognizer. Left: the measure that survives a change of recognizer without any alignment - after masking and after the display renderer, is an identifier-scale number still legible in what the device released? Right: the share of annotated entities that reached no released text, recomputed for all four arms by privacy_eval.rescore so that one scoring definition is applied throughout."
     }
   ],
   "tables": [
@@ -254,7 +263,7 @@
         "cpu_benchmark_runs.csv"
       ],
       "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
-      "rows": 3
+      "rows": 5
     },
     {
       "kind": "table",
@@ -263,7 +272,7 @@
         "cpu_latency_percentiles.csv"
       ],
       "caption": "Latency percentiles of the full masking call, per device.",
-      "rows": 3
+      "rows": 4
     },
     {
       "kind": "table",
@@ -281,7 +290,7 @@
         "deployment_parity.csv"
       ],
       "caption": "Cross-device prediction agreement and metric deltas.",
-      "rows": 2
+      "rows": 3
     },
     {
       "kind": "table",
@@ -289,8 +298,8 @@
       "files": [
         "audio_deployment_summary.csv"
       ],
-      "caption": "One row per device: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy.",
-      "rows": 3
+      "caption": "One row per device and recognizer: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy. The privacy columns are recomputed for every run on the current scoring definition by privacy_eval.rescore, so a folder written before the alignment fix is not compared against one written after it. The word error rate is each run's own raw figure and is not comparable between recognizers; stt_engine_comparison.csv carries the number-normalised one.",
+      "rows": 4
     },
     {
       "kind": "table",
@@ -357,12 +366,21 @@
     },
     {
       "kind": "table",
+      "name": "audio_postprocessing_amplification",
+      "files": [
+        "audio_postprocessing_amplification.csv"
+      ],
+      "caption": "Spoken numbers the privacy model left unmasked and the display renderer then rewrote into numerals of identifier length, per recognizer arm. Every value is fictional: telephone numbers come from the NANP 555-01xx range reserved for fiction.",
+      "rows": 4
+    },
+    {
+      "kind": "table",
       "name": "stt_engine_comparison",
       "files": [
         "stt_engine_comparison.csv"
       ],
       "caption": "Every measured recognizer arm, scored from its saved transcripts by one implementation. Rows for arms that have not been measured are absent rather than zero.",
-      "rows": 3
+      "rows": 4
     },
     {
       "kind": "table",
@@ -370,30 +388,33 @@
       "files": [
         "stt_engine_privacy.csv"
       ],
-      "caption": "End-to-end privacy per recognizer arm. The released-identifier columns are engine-comparable; the columns suffixed __within_engine_only depend on aligning the reference transcript against the hypothesis word by word, which a change of number spelling breaks, and are reported per engine rather than plotted against each other.",
-      "rows": 3
+      "caption": "End-to-end privacy per recognizer arm. The entity- and character-level columns are recomputed for every arm by privacy_eval.rescore on one definition - spoken numbers folded on both sides, located regions trimmed to their alphanumeric core - so they are comparable across engines; the released-identifier columns need no alignment at all. pipeline_has_spoken_form_stage says whether the run included the spoken-address rewrite in front of the detectors.",
+      "rows": 4
     }
   ],
   "cpu_benchmark_runs": [
     "20260817T190227Z_windows-amd64_full_workstation",
     "20260818T082425Z_linux-aarch64_full",
-    "20260819T080341Z_windows-amd64_whisper_full_workstation"
+    "20260819T080341Z_windows-amd64_whisper_full_workstation",
+    "20260820T072331Z_linux-aarch64_whisper_full",
+    "20260820T145843Z_windows-amd64_whisper_full_workstation"
   ],
   "audio_benchmark_runs": [
     "20260818T062503Z_windows-amd64_audio_full_workstation",
     "20260818T081310Z_linux-aarch64_audio_full",
-    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation"
+    "20260820T071755Z_linux-aarch64_audio-whisper_full",
+    "20260820T145659Z_windows-amd64_audio-whisper_full_workstation"
   ],
   "recognizer_arms": {
     "Canary laptop": "20260818T062503Z_windows-amd64_audio_full_workstation",
     "Canary Raspberry Pi 5": "20260818T081310Z_linux-aarch64_audio_full",
-    "Whisper laptop": "20260819T073431Z_windows-amd64_audio-whisper_full_workstation",
-    "Whisper Raspberry Pi 5": null
+    "Whisper laptop": "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+    "Whisper Raspberry Pi 5": "20260820T071755Z_linux-aarch64_audio-whisper_full"
   },
-  "pending_measurements": [
-    "Whisper Raspberry Pi 5"
-  ],
+  "pending_measurements": [],
   "unavailable_inputs": [
-    "Whisper Raspberry Pi 5: not measured yet, held back from the figures"
+    "20260819T080341Z_windows-amd64_whisper_full_workstation: superseded by a later text run on the same device with the same recognizer; kept on disk, out of the figures",
+    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation: superseded by a later audio run on the same device with the same recognizer; kept on disk, out of the figures",
+    "Whisper Raspberry Pi 5: measured before the spoken-address rewrite; its end-to-end privacy figures predate that change and its runtime figures do not"
   ]
 }

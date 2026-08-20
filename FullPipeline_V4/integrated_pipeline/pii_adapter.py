@@ -26,6 +26,9 @@ from .span_merger import (
     decision_to_dict,
     merge_pii_spans,
 )
+from .spoken_form_normalizer import NormalisedText
+from .spoken_form_normalizer import describe as describe_spoken_forms
+from .spoken_form_normalizer import normalise_spoken_forms, project_offsets
 from .structured_pii import StructuredPIIRecognizer
 
 #: Model V2 ontology: 31 entity types, 63 BIO labels.
@@ -39,6 +42,22 @@ def _sha256(path: Path, chunk_bytes: int = 1024 * 1024) -> str:
         for chunk in iter(lambda: stream.read(chunk_bytes), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _project_candidate(view: NormalisedText, text: str,
+                       span: SpanCandidate) -> SpanCandidate:
+    """Move one span off the normalised view and back onto the transcript."""
+
+    start, end = project_offsets(view, span.start_char, span.end_char)
+    return SpanCandidate(
+        entity_type=span.entity_type,
+        start_char=start,
+        end_char=end,
+        text=text[start:end],
+        source=span.source,
+        confidence=span.confidence,
+        metadata={**span.metadata, "spoken_form_projected": True},
+    )
 
 
 class PIIMaskerAdapter:
@@ -170,16 +189,34 @@ class PIIMaskerAdapter:
         assert self._masker is not None
         started = time.perf_counter()
 
+        # V4 only. The recognizer writes an address the way it was spoken -
+        # "billing at example.org" - and neither the model nor the structured
+        # EMAIL pattern has seen one written that way, so the domain was masked
+        # and the local part released. The rewrite is a view for the detectors;
+        # every span it produces is projected back before anything is masked, so
+        # the released transcript is still the transcript, character for
+        # character. See spoken_form_normalizer.py.
+        view = normalise_spoken_forms(text)
+        detect_text = view.text
+
         model_started = time.perf_counter()
-        decoding = self._masker.decode(text)
+        decoding = self._masker.decode(detect_text)
         model_latency = time.perf_counter() - model_started
         model_spans: list[SpanCandidate] = decoding.spans
 
         structured_started = time.perf_counter()
         structured_spans = [
-            span.as_candidate() for span in self._structured.find_spans(text)
+            span.as_candidate() for span in self._structured.find_spans(detect_text)
         ]
         structured_latency = time.perf_counter() - structured_started
+
+        if view.changed:
+            model_spans = [
+                _project_candidate(view, text, span) for span in model_spans
+            ]
+            structured_spans = [
+                _project_candidate(view, text, span) for span in structured_spans
+            ]
 
         merged = merge_pii_spans(
             text, model_spans, structured_spans, mask_policy=self.mask_policy
@@ -197,6 +234,7 @@ class PIIMaskerAdapter:
                 "label_count": len(self._id2label),
                 "word_policy": PII_WORD_POLICY,
                 "structured_enabled": True,
+                "spoken_form_edits": describe_spoken_forms(view),
                 "mask_policy": merged.mask_policy,
                 "policy_exempt_span_count": merged.policy_exempt_span_count,
                 "pii_model_latency_seconds": model_latency,

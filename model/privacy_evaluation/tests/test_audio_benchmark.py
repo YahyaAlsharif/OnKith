@@ -216,13 +216,62 @@ class EntityAlignmentTests(unittest.TestCase):
         self.assertEqual(location["preserved_tokens"], 0)
 
     def test_alignment_is_not_confused_by_a_repeated_word(self) -> None:
+        span = {"label": "SURNAME", "text": "Carter",
+                "start": self.REFERENCE.index("Carter"),
+                "end": self.REFERENCE.index("Carter") + len("Carter")}
+        hypothesis = "call alex carter carter on five five five zero one four seven"
+        location = audio.locate_entity(self.REFERENCE, span, hypothesis)
+        self.assertEqual(location["preservation_ratio"], 1.0)
+        self.assertEqual(location["hypothesis_surface"], "carter")
+
+    def test_a_gold_span_inside_a_digit_run_locates_the_whole_numeral(self) -> None:
+        """The fold makes a read-aloud number one token, and it is indivisible.
+
+        "five five five" is the first three digits of one seven-digit number.
+        Once both sides are folded there is no such thing as three sevenths of a
+        numeral, and the region the privacy model had to mask is the whole run.
+        """
+
         span = {"label": "TELEPHONENUM", "text": "five five five",
                 "start": self.REFERENCE.index("five five five"),
                 "end": self.REFERENCE.index("five five five") + len("five five five")}
         hypothesis = "call alex carter on five five five zero one four seven"
         location = audio.locate_entity(self.REFERENCE, span, hypothesis)
         self.assertEqual(location["preservation_ratio"], 1.0)
-        self.assertEqual(location["hypothesis_surface"], "five five five")
+        self.assertEqual(location["hypothesis_surface"],
+                         "five five five zero one four seven")
+
+    def test_a_spoken_number_is_found_where_the_recognizer_wrote_a_numeral(self) -> None:
+        """The V4 defect this fixes: Whisper writes "5550147", Canary wrote words."""
+
+        span = {"label": "TELEPHONENUM", "text": "five five five zero one four seven",
+                "start": self.REFERENCE.index("five five five"),
+                "end": self.REFERENCE.index("five five five")
+                + len("five five five zero one four seven")}
+        location = audio.locate_entity(self.REFERENCE, span, "Call Alex Carter on 5550147.")
+        self.assertEqual(location["preservation_ratio"], 1.0)
+        self.assertEqual(location["hypothesis_surface"], "5550147")
+
+    def test_sentence_punctuation_is_not_part_of_the_entity(self) -> None:
+        """A masker leaves the full stop standing, and that is not a leak."""
+
+        reference = "My name is Alex Carter."
+        span = {"label": "SURNAME", "text": "Carter",
+                "start": reference.index("Carter"),
+                "end": reference.index("Carter") + len("Carter")}
+        location = audio.locate_entity(reference, span, "My name is Alex Carter.")
+        self.assertEqual(location["hypothesis_surface"], "Carter")
+
+    def test_punctuation_inside_an_entity_is_kept(self) -> None:
+        """Only the edges are trimmed: the hyphen in a number carries the number."""
+
+        reference = "Call me back on five five five, zero one four seven."
+        span = {"label": "TELEPHONENUM", "text": "five five five, zero one four seven",
+                "start": reference.index("five five five"),
+                "end": reference.index("five five five")
+                + len("five five five, zero one four seven")}
+        location = audio.locate_entity(reference, span, "Call me back on 555-0147.")
+        self.assertEqual(location["hypothesis_surface"], "555-0147")
 
 
 class FailureAttributionTests(unittest.TestCase):
