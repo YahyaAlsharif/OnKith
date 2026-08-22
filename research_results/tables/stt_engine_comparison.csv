@@ -1,5 +1,0 @@
-arm,run_id,engine,pipeline_version,stt_model,device,clips,aggregate_wer_raw,mean_wer_raw,aggregate_wer_number_normalised,median_wer_number_normalised,identifiers_scored,identifiers_transcribed_exactly,clips_with_identifiers,clips_released_without_an_identifier
-Canary laptop,20260818T062503Z_windows-amd64_audio_full_workstation,canary,V3,nvidia/canary-180m-flash,workstation,44,0.040673017354845784,0.04858991242282638,0.04207920792079208,0.0,5,5,5,3
-Canary Raspberry Pi 5,20260818T081310Z_linux-aarch64_audio_full,canary,V3,nvidia/canary-180m-flash,Pi 5 Model B Rev 1.0,44,0.040673017354845784,0.04858991242282638,0.04207920792079208,0.0,5,5,5,3
-Whisper laptop,20260820T145659Z_windows-amd64_audio-whisper_full_workstation,whisper,V4,base.en,workstation,44,0.16536979383989467,0.19636330410986155,0.0853960396039604,0.0,5,3,5,5
-Whisper Raspberry Pi 5,20260820T071755Z_linux-aarch64_audio-whisper_full,whisper,V4,base.en,Pi 5 Model B Rev 1.0,44,0.16994172162090806,0.19963870517938026,0.09034653465346534,0.0,5,3,5,5

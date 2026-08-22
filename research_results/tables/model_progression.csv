@@ -1,4 +1,0 @@
-model,generation,precision,metric,value,precision_value,recall_value,evaluation,comparable_to_span_metrics,private_character_leakage,non_private_overmasking_rate
-BiLSTM baseline,v0,fp32,token-level binary F1,0.6050639541409112,0.5532639517116076,0.6675655842964594,own validation split,False,,
-TinyBERT-4 INT8,v1,int8,typed entity F1,0.9502,,,"shared held-out validation, 40,909 rows",True,0.0029,0.0044
-DeBERTa-v3-xsmall INT8,v2,int8,typed entity F1,0.9588,,,"shared held-out validation, 40,909 rows",True,0.0017,0.0029

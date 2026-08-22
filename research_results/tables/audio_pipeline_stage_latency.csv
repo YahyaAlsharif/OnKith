@@ -1,7 +1,0 @@
-run_id,device,stage,mean_ms,share_of_processing
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Audio load,1.0230500000612996,0.0005961320751574566
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Silero VAD,105.21512727266533,0.06130894106373264
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Speech recognition,1587.4755545455214,0.9250233092578587
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Transcript merge / normalisation,0.20456136365448235,0.00011919807458587448
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa INT8 masking,22.109927272739778,0.012883472778348134
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Spoken-digit rendering,0.11832272722048484,6.894675031719944e-05
