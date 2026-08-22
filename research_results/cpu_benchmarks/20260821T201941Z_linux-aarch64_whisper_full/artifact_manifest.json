@@ -1,0 +1,49 @@
+{
+  "run_id": "20260821T201941Z_linux-aarch64_whisper_full",
+  "model": {
+    "name": "OnKith Model V2 privacy token classifier",
+    "model_id": "microsoft/deberta-v3-xsmall",
+    "ontology_version": "model_v2.ontology.1",
+    "entity_types": 31,
+    "label_count": 63,
+    "precision": "int8",
+    "provider": "CPUExecutionProvider",
+    "context_limit": 512,
+    "overflow_stride": 128,
+    "decoder": "integrated_pipeline.model_v2_masker.ModelV2OnnxMasker"
+  },
+  "files": {
+    "model_int8.onnx": {
+      "path": "FullPipeline_V4/models/deberta_pii/model_int8.onnx",
+      "size_bytes": 82278782,
+      "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8"
+    },
+    "tokenizer/tokenizer.json": {
+      "path": "FullPipeline_V4/models/deberta_pii/tokenizer/tokenizer.json",
+      "size_bytes": 8339976,
+      "sha256": "8196ef6e837c3ed355ae78bf29a244a33f4dc4179a7c364aedeb0cd6433e9948"
+    },
+    "tokenizer/tokenizer_config.json": {
+      "path": "FullPipeline_V4/models/deberta_pii/tokenizer/tokenizer_config.json",
+      "size_bytes": 367,
+      "sha256": "f97251732626f2e58534d9d3da01057984d7fa59b4e2c7940b186d80b50fb10d"
+    },
+    "config/model_v2_label_map.json": {
+      "path": "FullPipeline_V4/models/deberta_pii/config/model_v2_label_map.json",
+      "size_bytes": 6976,
+      "sha256": "91c4954103a28fcf23b831aaddd0119bc6ef9cc82fd8c941260bdbd5d913c7c7"
+    }
+  },
+  "identity_checks": {
+    "live_config.pii.sha256": true,
+    "model_manifest.files.model_int8.onnx.sha256": true,
+    "label_map.ontology_version": true,
+    "label_map.num_labels": true,
+    "accepted_int8_candidate.model.int8_sha256": true,
+    "accepted_int8_candidate.accepted": true
+  },
+  "identity_verified": true,
+  "accepted_candidate_manifest": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json",
+  "accepted_candidate_manifest_sha256": "3a298b9150e96d44b63e88a4e77ce8ed03bcfb3a70bb666fa4ac509edff6bcb4",
+  "frozen_ood_final_spent": true
+}

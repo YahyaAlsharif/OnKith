@@ -1,0 +1,49 @@
+{
+  "run_id": "20260818T062503Z_windows-amd64_audio_full_workstation",
+  "model": {
+    "name": "OnKith Model V2 privacy token classifier",
+    "model_id": "microsoft/deberta-v3-xsmall",
+    "ontology_version": "model_v2.ontology.1",
+    "entity_types": 31,
+    "label_count": 63,
+    "precision": "int8",
+    "provider": "CPUExecutionProvider",
+    "context_limit": 512,
+    "overflow_stride": 128,
+    "decoder": "integrated_pipeline.model_v2_masker.ModelV2OnnxMasker"
+  },
+  "files": {
+    "model_int8.onnx": {
+      "path": "FullPipeline_V3/models/deberta_pii/model_int8.onnx",
+      "size_bytes": 82278782,
+      "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8"
+    },
+    "tokenizer/tokenizer.json": {
+      "path": "FullPipeline_V3/models/deberta_pii/tokenizer/tokenizer.json",
+      "size_bytes": 8852151,
+      "sha256": "3557a81100ec95519fb3e5977f67d4fa1775dc82ea0b653015885746007acc67"
+    },
+    "tokenizer/tokenizer_config.json": {
+      "path": "FullPipeline_V3/models/deberta_pii/tokenizer/tokenizer_config.json",
+      "size_bytes": 382,
+      "sha256": "357abebf47463a264d4dea3556f8f8cd49661d2e24079b5f6c4460d01ce8cf60"
+    },
+    "config/model_v2_label_map.json": {
+      "path": "FullPipeline_V3/models/deberta_pii/config/model_v2_label_map.json",
+      "size_bytes": 7311,
+      "sha256": "dece8e29987f5f292794859370bc8a9eac6b689ab0768a9a6aecebdef04d12d3"
+    }
+  },
+  "identity_checks": {
+    "live_config.pii.sha256": true,
+    "model_manifest.files.model_int8.onnx.sha256": true,
+    "label_map.ontology_version": true,
+    "label_map.num_labels": true,
+    "accepted_int8_candidate.model.int8_sha256": true,
+    "accepted_int8_candidate.accepted": true
+  },
+  "identity_verified": true,
+  "accepted_candidate_manifest": "model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json",
+  "accepted_candidate_manifest_sha256": "619ae0d21e7d5efd7b525e781a2c8799523d13279d27f194dd9e77991c2f9e79",
+  "frozen_ood_final_spent": true
+}

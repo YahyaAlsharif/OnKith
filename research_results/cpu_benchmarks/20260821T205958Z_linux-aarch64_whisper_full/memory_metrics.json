@@ -1,0 +1,8 @@
+{
+  "run_id": "20260821T205958Z_linux-aarch64_whisper_full",
+  "psutil_available": false,
+  "baseline_rss_bytes": null,
+  "model_file_bytes": 82278782,
+  "tokenizer_bytes": 8339976,
+  "peak_rss_source": "sampled during the evaluation loop"
+}
