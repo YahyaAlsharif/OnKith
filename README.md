@@ -36,8 +36,8 @@
 > detectors, described under
 > [the STT-to-privacy interface](#the-stt-to-privacy-interface).
 >
-> The Canary pipeline is preserved verbatim at
-> [`FullPipeline_V3/`](FullPipeline_V3/). Its measurements in
+> The Canary pipeline implementation and artifacts are preserved at
+> [`archive/FullPipeline_V3/`](archive/FullPipeline_V3/). Its measurements in
 > [`research_results/`](research_results/) are a frozen baseline and are never
 > regenerated: both pipelines have now been measured on both devices, and the
 > comparison between them is one of this repository's results.
@@ -440,8 +440,10 @@ columns comparable; see [the note on scoring](#the-stt-to-privacy-interface).
 | Hard-negative false-positive clips | 1 of 7 | 1 of 7 |
 
 The V4 column is the workstation run with the spoken-address rewrite in place;
-the V3 column is the frozen Canary run rescored on the same definition. The two
-recognizers reach **the same end-to-end privacy outcome within the resolution of
+the V3 column is the frozen Canary run rescored on the same definition. Faris's
+current-path Pi rerun independently reports 0.8300 character recall and the same
+16 of 25 fully sanitized clips, although that environment could not re-measure
+VAD or memory. The two recognizers reach **the same end-to-end privacy outcome within the resolution of
 a 60-entity corpus**, by different routes: Canary preserves more entities and the
 model masks more of them as spoken, while Whisper destroys more entities outright
 but writes the ones it keeps in forms the model handles at least as well.
@@ -656,7 +658,7 @@ The Whisper `base.en` weights are fetched once by CTranslate2 on first use and
 cached under `~/.cache/huggingface`; they are deliberately not stored in Git. The
 DeBERTa INT8 model **is** committed, because it is this project's own release
 artifact and the Pi cannot rebuild it. V3 instead pinned a 700 MB `.nemo` file by
-SHA-256 and fetched it with `FullPipeline_V3/scripts/acquire_canary.py`; running
+SHA-256 and fetched it with `archive/FullPipeline_V3/scripts/acquire_canary.py`; running
 that package again would need the NeMo stack reinstalled.
 
 ---
@@ -672,8 +674,6 @@ OnKith/
 │   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD
 │   ├── scripts/              Pi checks, release packaging
 │   └── tests/                Production regression suite
-├── FullPipeline_V3/          Superseded Canary pipeline, kept intact as the
-│                             baseline its frozen measurements belong to
 ├── model/                    Research: training, data preparation, evaluation
 │   ├── baseline_model/       BiLSTM span baseline and the binary classifier before it
 │   ├── TinyBERT-4/           Model V1 — superseded, kept for provenance
@@ -683,17 +683,18 @@ OnKith/
 │   └── data/                 Source-corpus builders (outputs stay local)
 ├── research_results/         Benchmark runs, figures, tables, summaries
 ├── archive/                  Superseded pipelines and STT experiments
+│   └── FullPipeline_V3/      Frozen Canary baseline and implementation
 ├── Full_Pipeline_CPU_Benchmark.py
 ├── Full_Pipeline_Audio_Benchmark.py
 └── Research_Paper_Figures.ipynb
 ```
 
-`FullPipeline_V4/` is the deployment package and is self-contained.
-`FullPipeline_V3/` is kept beside it rather than in `archive/` because its
-measurements are live evidence in the comparison above, not history. Everything
-in [`archive/`](archive/) is unmaintained — the Moonshine experiments and
-pipelines V1/V2 — kept as evidence of how the design evolved; see
-[`archive/README.md`](archive/README.md).
+`FullPipeline_V4/` is the deployment package and is self-contained. The V3
+Canary implementation is frozen at
+[`archive/FullPipeline_V3/`](archive/FullPipeline_V3/); its saved measurements
+remain live comparison evidence even though the implementation is historical.
+Everything in [`archive/`](archive/) is unmaintained and kept to show how the
+design evolved; see [`archive/README.md`](archive/README.md).
 
 ---
 
@@ -789,10 +790,10 @@ names, addresses and document numbers.
   three of V4's remaining leaks are.
 - Re-screening the text after every post-masking transformation, so a render-time
   step can never reassemble something the privacy layer declined to protect.
-- Re-run the Raspberry Pi audio benchmark with the spoken-address rewrite in
-  place. Its runtime, memory and word-error figures already stand; what is not
-  yet measured on that board is the end-to-end privacy outcome with that stage,
-  and nothing in this repository estimates it from the workstation run.
+- Repeat the complete Raspberry Pi audio profile with `onnx` and `psutil`
+  installed. The current-path Pi run measured STT and privacy with the
+  spoken-address rewrite, but could not re-measure VAD or memory; those figures
+  still come from the earlier complete V4 run on the same board.
 - A broader natural-speech privacy dataset — the current audio privacy set is
   synthetic by necessity.
 - Further OOD robustness work: `ood_final` is spent, so the next generation needs

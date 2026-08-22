@@ -10,8 +10,8 @@
 > SQLite storage and the terminal UI are V3's code, plus one addition described
 > in `README.md`.
 >
-> The Canary build is preserved verbatim at
-> [`../FullPipeline_V3/`](../FullPipeline_V3/), together with the
+> The Canary implementation and artifacts are preserved at
+> [`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/), together with the
 > measurements it produced. Both have now been benchmarked on a Raspberry Pi 5;
 > the comparison is in [`../research_results/`](../research_results/).
 
@@ -150,13 +150,12 @@ Still open:
   a real room does to it, are not characterised.
 - **thermals and sustained load.** The benchmark is a few minutes of work; a
   throttling Pi is not measured.
-- **end-to-end privacy on the Pi with the spoken-address rewrite.** The Pi audio
-  run predates that stage. Its runtime, memory and word-error figures stand -
-  the rewrite is a regex pass over already-recognized text - but the privacy
-  outcome with it in place has not been measured on that board. Rerun
-  `python Full_Pipeline_Audio_Benchmark.py` there to fill it in. Nothing in this
-  repository estimates it from the workstation run.
+- **one complete current-path Pi profile.** The current-path Pi audio run
+  measured the spoken-address rewrite, STT and privacy, reporting 0.8300 private
+  character recall and 16 of 25 privacy clips fully sanitized. That environment
+  lacked `onnx` and `psutil`, so VAD and memory still come from the earlier
+  complete V4 run on the same board.
 
 `PI5_VALIDATION_REPORT.md` and `BACKEND_VERSION_DECISION.md` in
-[`../FullPipeline_V3/`](../FullPipeline_V3/) are the V3 records and describe the
+[`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/) are the V3 records and describe the
 NeMo stack, not this one.

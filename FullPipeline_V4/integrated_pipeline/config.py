@@ -37,7 +37,7 @@ PII_LABEL_COUNT = 63
 # through CTranslate2's own model cache instead, so what is pinned here is the
 # package version, the model name and the decoding settings - the things that
 # change what comes out. The archived Canary build is in
-# FullPipeline_V3/.
+# archive/FullPipeline_V3/.
 WHISPER_ENGINE = "faster-whisper"
 WHISPER_RUNTIME = "ctranslate2"
 WHISPER_MODEL = "base.en"

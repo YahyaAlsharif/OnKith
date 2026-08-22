@@ -1,7 +1,7 @@
 """Whisper-to-DeBERTa live privacy pipeline (V4).
 
 V3's architecture with faster-whisper ``base.en`` in place of Canary. The
-archived Canary build is in ``FullPipeline_V3/``.
+archived Canary build is in ``archive/FullPipeline_V3/``.
 """
 
 from .config import (

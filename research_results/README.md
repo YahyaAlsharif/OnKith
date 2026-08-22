@@ -126,11 +126,13 @@ not installed anywhere in the current environment.
 | Run id | Device | Benchmark | Privacy path |
 |---|---|---|---|
 | `20260819T080341Z_windows-amd64_whisper_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows | superseded by the run below |
-| `20260820T072331Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | before the spoken-address rewrite |
+| `20260820T072331Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | complete memory baseline |
 | `20260819T073431Z_windows-amd64_audio-whisper_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips | superseded by the run below |
-| `20260820T071755Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | before the spoken-address rewrite |
-| `20260820T145035Z_windows-amd64_whisper_full` | development workstation, x86-64 | CPU/text, 2,000 rows | current |
-| `20260820T144757Z_windows-amd64_audio-whisper_full` | development workstation, x86-64 | audio pipeline, 44 clips | current |
+| `20260820T071755Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | complete runtime/memory baseline; before spoken-address rewrite |
+| `20260820T145843Z_windows-amd64_whisper_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows | current complete workstation run |
+| `20260820T145659Z_windows-amd64_audio-whisper_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips | current complete workstation run |
+| `20260821T201653Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | current privacy path; VAD and memory unavailable |
+| `20260822T122249Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | latest repeat; memory unavailable |
 
 ### Two things changed on 2026-08-20, and the table above says which runs predate them
 
@@ -174,14 +176,14 @@ Runs that are *not* kept, and why:
   the full runs invites it to be read as one. Rerun it locally whenever you want
   it - the output just should not be committed.
 - **Runs where a stage was unavailable.** An audio run without the speech
-  recognizer installed produces `stt_available: false`, no word error rate, no
-  real-time factor and no memory profile. One such Raspberry Pi attempt was made
-  before the NeMo stack was installed on the device; it was committed by mistake
-  and has been removed. The valid Pi audio run, made minutes later on the same
-  board with the full stack, is the one listed above.
+  recognizer installed produces `stt_available: false`, no word error rate and no
+  end-to-end STT result. The `20260821T201401Z` Pi attempt records exactly that
+  failure and is not comparison evidence. The valid `20260821T201653Z` rerun on
+  the same board reached Whisper and the current privacy path, but lacked `onnx`
+  and `psutil`, so it does not replace the earlier complete V4 VAD/memory profile.
 
-The figures notebook already refuses to put an incomplete run into the comparison
-figures, but the safer rule is that this directory only ever holds evidence.
+The figures notebook excludes STT-unavailable runs from deployment comparisons,
+but the safer rule is that this directory only ever holds evidence.
 
 ## What is canonical
 
@@ -268,6 +270,6 @@ missing, and exits with code 2. It never fabricates a transcript.
 
 V3's recognizer, NVIDIA Canary 180M Flash, needed `nemo-toolkit[asr]==2.5.3`,
 `torch==2.7.1` and a 700 MB `.nemo` artifact fetched by
-`FullPipeline_V3/scripts/acquire_canary.py`. Reproducing the frozen V3 runs
+`archive/FullPipeline_V3/scripts/acquire_canary.py`. Reproducing the frozen V3 runs
 would need that stack reinstalled. Nothing in this directory requires it: the V3
 numbers are read from the folders those runs wrote.

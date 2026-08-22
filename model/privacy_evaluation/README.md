@@ -29,7 +29,7 @@ The runner reports five deliberately separate stages:
 2. `int8_model` — the same model-only path with the deployed INT8 graph.
 3. `structured` — the frozen regex recognizer without a neural model.
 4. `structured_supplemental` — frozen plus current spoken-number supplements.
-5. `production` — whatever `FullPipeline_V3/config/live_config.json` currently
+5. `production` — whatever `FullPipeline_V4/config/live_config.json` currently
    points at, plus the frozen structured recognizer, the supplemental
    recognizer, and the fail-closed wrapper. Since the Model V2 migration that is
    the DeBERTa-v3-xsmall INT8 stack.
@@ -100,9 +100,9 @@ Pi latency.
 - OOD fixtures do not provide a token-level gold standard. Historical token
   metrics remain frozen in `baselines/tinybert_iid_baseline.json`.
 
-`FullPipeline_V3` is imported read-only. The archived Moonshine pipelines are not
-the combined-production reference because the current runtime uses Canary 180M,
-immediate Stage 5, and the supplemental PII wrapper.
+`FullPipeline_V4` is the combined-production reference. The masking-parity test
+also imports `archive/FullPipeline_V3` read-only so identical text can be checked
+against the historical Canary package without loading either recognizer.
 
 ### The TinyBERT arms are frozen records, not re-runnable
 
@@ -200,7 +200,7 @@ the measured figure is 98.35% with a typed-F1 difference of −0.00039.
 ### Audio benchmark — the whole system, from sound
 
 `privacy_eval/audio_benchmark.py` drives 44 committed WAV clips through the real
-deployment: Silero VAD, Canary STT, transcript normalisation, INT8 masking,
+deployment: Silero VAD, Whisper STT, transcript normalisation, INT8 masking,
 spoken-digit rendering. If the recognizer is not installed it says exactly what is
 missing, runs everything that does not depend on it, and exits with code 2. It
 never fabricates a transcript.

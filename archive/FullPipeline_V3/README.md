@@ -2,10 +2,10 @@
 
 > **Superseded. This is Pipeline V3, the Canary build, kept as a baseline.**
 >
-> The current deployment is [`../FullPipeline_V4/`](../FullPipeline_V4/), which
+> The current deployment is [`../../FullPipeline_V4/`](../../FullPipeline_V4/), which
 > is this pipeline with faster-whisper `base.en` in place of NVIDIA Canary 180M
-> Flash. V3 is kept intact — not moved to `../archive/` — because the
-> measurements in [`../research_results/`](../research_results/) are its, and the
+> Flash. V3 is kept intact in the archive because the measurements in
+> [`../../research_results/`](../../research_results/) are its, and the
 > V3-against-V4 comparison is one of the project's results. Nothing here is
 > maintained, and its numbers are never regenerated.
 >
@@ -15,7 +15,7 @@
 **Local speech-to-text and privacy processing for Raspberry Pi 5**
 
 This was the OnKith deployment package until V4 replaced its recognizer.
-Earlier integrated pipelines live under [`../archive/`](../archive/). The Python entry point is still `app.omit_ai_live` and some code
+Earlier integrated pipelines live beside this snapshot under [`../`](../). The Python entry point is still `app.omit_ai_live` and some code
 still says "Omit AI" — that is the project's earlier name, kept so the module
 paths in existing instructions keep working.
 

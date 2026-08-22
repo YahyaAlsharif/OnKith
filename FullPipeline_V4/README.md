@@ -19,8 +19,8 @@
 > fixed text through both packages and requires identical output on everything
 > else.
 >
-> The Canary build is preserved verbatim at
-> [`../FullPipeline_V3/`](../FullPipeline_V3/), together with the
+> The Canary implementation and artifacts are preserved at
+> [`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/), together with the
 > measurements it produced. Both are benchmarked on both devices; the comparison
 > is in [`../research_results/`](../research_results/).
 
@@ -67,6 +67,11 @@ Three conclusions:
   against Canary, and 2 of 5 identifier-scale numbers are no longer transcribed
   digit for digit. That is what the deployment gain was traded for, and it is
   the largest remaining source of end-to-end privacy failure.
+
+Faris's current-path Pi rerun also exercised the spoken-address rewrite and
+reported 0.8300 private-character recall with 16 of 25 privacy clips fully
+sanitized. Its environment lacked `onnx` and `psutil`, so the complete VAD and
+memory figures above remain sourced from the earlier V4 run on the same board.
 
 The word error rates are only comparable in the number-normalised form. Canary
 ran with `pnc: no` and wrote spoken numbers as words, the way the reference
@@ -347,7 +352,7 @@ The original STT transcript is still used for storage, PII detection, and Onkith
 From a clone of the repository:
 
 ```bash
-cd FullPipeline_V3
+cd FullPipeline_V4
 ```
 
 (A packaged release ZIP built by `scripts/build_release_zip.py` unpacks to the
@@ -468,13 +473,19 @@ Speech-to-text and PII processing remain local.
 ## Current Limitations
 
 * English-only speech recognition
-* Punctuation and capitalization are currently disabled
+* Whisper emits punctuation and capitalization; this changes the surface passed
+  to the privacy layer compared with V3
 * Live microphone input must be 16 kHz
 * PII detection may produce false positives or false negatives
 * Raw transcripts are stored locally in SQLite
 * YouTube playback requires internet access and API quota
-* **Speech recognition is not real-time on a Raspberry Pi 5** (measured RTF ≈ 2.0). Push-to-talk and turn-based use work; live streaming transcription does not
-* **Spoken numeric identifiers can survive masking and then be rendered as digits.** With `pnc: no` the recognizer emits digit words. If the privacy model misses one, `app/digit_normalizer.py` — which runs *after* masking, by design, for display only — can rewrite the surviving words into a numeral such as `5550147`. No new information is released, but the compact form is worse. Measured on 2 of 60 entities in the audio benchmark, identically on the workstation and the Pi
+* **Real-time operation has limited headroom on a Raspberry Pi 5.** Mean
+  full-pipeline RTF is 0.589, but P95 is 1.052, so the longest benchmark clips
+  sit just beyond real time
+* **Post-masking rendering is not re-screened.** V3 demonstrated that surviving
+  digit words could be rebuilt into compact identifiers after masking. V4
+  measured zero such reconstructions because Whisper emits numerals directly,
+  not because the renderer was made safe; see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)
 * Repeated mentions of one person receive different placeholder numbers — see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)
 
 ---

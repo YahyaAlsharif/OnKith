@@ -29,8 +29,9 @@ ARTIFACT_ROOT = MODEL_DIR / "artifacts" / "preflight"
 DEBERTA_FP32 = ARTIFACT_ROOT / "onnx_model" / "model_fp32.onnx"
 DEBERTA_INT8 = ARTIFACT_ROOT / "onnx_model" / "model_int8.onnx"
 DEBERTA_TOKENIZER = ARTIFACT_ROOT / "tokenizer"
-TINYBERT_INT8 = REPO_ROOT / "FullPipeline_V3" / "models" / "tinybert_pii" / "model_int8.onnx"
-TINYBERT_TOKENIZER = REPO_ROOT / "FullPipeline_V3" / "models" / "tinybert_pii" / "tokenizer"
+TINYBERT_ROOT = REPO_ROOT / "model" / "TinyBERT-4" / "artifacts" / "tinybert_pii"
+TINYBERT_INT8 = TINYBERT_ROOT / "onnx_model" / "model_int8.onnx"
+TINYBERT_TOKENIZER = TINYBERT_ROOT / "tokenizer"
 OUTPUT = ARTIFACT_ROOT / "metrics" / "final_benchmark.json"
 
 
@@ -171,7 +172,7 @@ def main() -> None:
         "repetitions": DEFAULT_THREAD_REPETITIONS,
         "intra_op_num_threads": 0,
         "inter_op_num_threads": 0,
-        "note": "0 means ONNX Runtime default selection, matching FullPipeline_V3",
+        "note": "0 means ONNX Runtime default selection, matching production defaults",
         "models": model_benchmark(
             {"deberta_int8": DEBERTA_INT8},
             DEFAULT_THREAD_REPETITIONS,

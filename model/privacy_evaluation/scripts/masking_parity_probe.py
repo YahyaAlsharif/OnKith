@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run one pipeline's downstream privacy path over fixed text and print JSON.
 
-Point it at ``FullPipeline_V4`` or at ``FullPipeline_V3`` and it does the
+Point it at ``FullPipeline_V4`` or at ``archive/FullPipeline_V3`` and it does the
 same thing on either: transcript merge, wake-word repair, inactivity buffer,
 DeBERTa-v3-xsmall INT8 masking, span consolidation, spoken-digit rendering. The
 output is a JSON document, so two roots can be diffed.
@@ -135,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "root",
         type=Path,
-        help="pipeline package root, e.g. FullPipeline_V4 or FullPipeline_V3",
+        help="pipeline package root, e.g. FullPipeline_V4 or archive/FullPipeline_V3",
     )
     args = parser.parse_args(argv)
     root = args.root if args.root.is_absolute() else (REPO_ROOT / args.root)

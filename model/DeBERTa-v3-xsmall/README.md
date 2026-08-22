@@ -21,13 +21,13 @@ Model V2 is **trained, accepted and deployed**.
 | INT8 quality gate over all five views | **passed** |
 | Accepted candidate manifest | `artifacts/model_v2/metrics/accepted_int8_candidate.json`, `accepted: true` |
 | Frozen OOD final benchmark | **spent**, `artifacts/model_v2/metrics/evaluation_ood_final_int8.json` |
-| Production migration | performed, `FullPipeline_V3/models/deberta_pii/` |
+| Production migration | performed, `FullPipeline_V4/models/deberta_pii/` |
 
 Deployed INT8 typed entity F1: test 0.9527, original validation 0.9588, supplementary validation 0.8849, combined validation 0.9534, OOD dev 0.6882, frozen OOD final 0.6244. Quantization costs at most 0.0182 typed F1 (on OOD dev), against a gate of 0.02.
 
 ### The corrected gate
 
-The gate in section 26 of the training notebook compared a training-side FP32 decode against an INT8 decode that fed SentencePiece `word_ids()` into `consolidate_predictions_to_words`. That grouped trailing punctuation into entity spans and reported INT8 typed F1 around 0.59 - a decoder defect measured as quantization loss. The decoder was fixed (see `FullPipeline_V3/integrated_pipeline/model_v2_masker.py`), both runtimes were re-scored through the one production path by [`deployment/evaluate_onnx_production_path.py`](deployment/evaluate_onnx_production_path.py), and the candidate manifest was re-issued from those reports by:
+The gate in section 26 of the training notebook compared a training-side FP32 decode against an INT8 decode that fed SentencePiece `word_ids()` into `consolidate_predictions_to_words`. That grouped trailing punctuation into entity spans and reported INT8 typed F1 around 0.59 - a decoder defect measured as quantization loss. The decoder was fixed (see `FullPipeline_V4/integrated_pipeline/model_v2_masker.py`), both runtimes were re-scored through the one production path by [`deployment/evaluate_onnx_production_path.py`](deployment/evaluate_onnx_production_path.py), and the candidate manifest was re-issued from those reports by:
 
 ```powershell
 .\.venv\Scripts\python.exe model\DeBERTa-v3-xsmall\deployment\finalize_int8_candidate.py --check   # recompute and print, write nothing
@@ -44,7 +44,7 @@ Both have been run on a **Raspberry Pi 5 Model B Rev 1.0 (4 GB)**. On the commit
 
 The second notebook is separated for one reason: the frozen OOD final set can be spent exactly once, and a benchmark that sits inside a development notebook eventually gets run by accident. Nothing in the main notebook can load or score the frozen annotations, so no **Run All**, no re-run of a cell, and no smoke test can burn the final holdout.
 
-Model V2 removes `ALLERGIES`, `USERNAME`, and `WEIGHT`; `HEIGHT` remains absent; `PASSWORD` is the only addition, giving 31 entity types and 63 BIO labels. That migration has since been performed: the live contract in `FullPipeline_V3` is 63 labels, and the 67-label TinyBERT contract survives only in the archived pipelines under `archive/`.
+Model V2 removes `ALLERGIES`, `USERNAME`, and `WEIGHT`; `HEIGHT` remains absent; `PASSWORD` is the only addition, giving 31 entity types and 63 BIO labels. That migration has since been performed: the live contract in `FullPipeline_V4` is 63 labels, and the 67-label TinyBERT contract survives only in the archived pipelines under `archive/`.
 
 ## Environment
 
@@ -57,7 +57,7 @@ Model V2 removes `ALLERGIES`, `USERNAME`, and `WEIGHT`; `HEIGHT` remains absent;
 
 Always install with the interpreter-specific form above rather than a bare `pip install`, so packages land in the environment the kernel actually uses.
 
-The notebook imports local OnKith modules by bare name - `ontology`, `records`, `manifest`, `pools`, `dedup`, `grouped_splits`, `selection`, `sources`, `augment_pipeline`, `label_mapping`, `data_audit`, `password_rules`, `privacy_eval`. These are **files in this repository**, not PyPI packages: the first code cell walks up to the repository root and puts `model/privacy_data_v2`, `model/privacy_evaluation` and `FullPipeline_V3` on `sys.path`. That runs before any of them is imported, so a fresh kernel started from any directory inside the repository resolves them. Never `pip install` a similarly named package to silence one of these imports. `.vscode/settings.json` mirrors the same three paths into `python.analysis.extraPaths` so Pylance agrees with the runtime.
+The notebook imports local OnKith modules by bare name - `ontology`, `records`, `manifest`, `pools`, `dedup`, `grouped_splits`, `selection`, `sources`, `augment_pipeline`, `label_mapping`, `data_audit`, `password_rules`, `privacy_eval`. These are **files in this repository**, not PyPI packages: the first code cell walks up to the repository root and puts `model/privacy_data_v2`, `model/privacy_evaluation` and `FullPipeline_V4` on `sys.path`. That runs before any of them is imported, so a fresh kernel started from any directory inside the repository resolves them. Never `pip install` a similarly named package to silence one of these imports. `.vscode/settings.json` mirrors the same three paths into `python.analysis.extraPaths` so Pylance agrees with the runtime.
 
 ## Required first step
 
@@ -191,12 +191,12 @@ the SHA-256s; the INT8 graphs must never be modified, re-exported or re-quantize
 
 Ignored artifacts are regenerated by rerunning the Saudi builder and then the main notebook. `deployment_summary.json` records binary sizes and hashes so an ignored required binary cannot disappear unnoticed.
 
-After the real INT8 quality gate and a separate reviewed TinyBERT-to-Model-V2 migration, manually copy the accepted INT8 graph, tokenizer, label map, and deployment config into `FullPipeline_V3/models/` and stage them in that release. Do not copy smoke artifacts. The later migration must also change the live label-count contract from 67 to 63 and rerun the FullPipeline regression suite.
+After the real INT8 quality gate and a separate reviewed model migration, manually copy the accepted INT8 graph, tokenizer, label map, and deployment config into `FullPipeline_V4/models/` and stage them in that release. Do not copy smoke artifacts. A label-contract change must also update the live label count and rerun the FullPipeline regression suite.
 
-The reviewed release transfer is intentionally explicit. The transfer that was actually performed targeted `FullPipeline_V3\models\deberta_pii`, which is the path pinned in `FullPipeline_V3/config/live_config.json`; use that name rather than the illustrative one below if you repeat it:
+The reviewed release transfer is intentionally explicit. The original transfer targeted V3, whose snapshot now lives under `archive/FullPipeline_V3`; the maintained target is the path pinned in `FullPipeline_V4/config/live_config.json`:
 
 ```powershell
-$target = "FullPipeline_V3\models\deberta_pii"
+$target = "FullPipeline_V4\models\deberta_pii"
 New-Item -ItemType Directory -Force -Path "$target\tokenizer", "$target\config"
 Copy-Item "model\DeBERTa-v3-xsmall\artifacts\model_v2\models\int8\model_int8.onnx" "$target\model_int8.onnx"
 Copy-Item "model\DeBERTa-v3-xsmall\artifacts\model_v2\tokenizer\*" "$target\tokenizer\"

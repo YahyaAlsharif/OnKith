@@ -300,7 +300,7 @@ def build(write: bool) -> int:
             else "unavailable - fp32_onnx production-path numbers substituted"
         ),
         "decoder": PRODUCTION_DECODER,
-        "decoder_module": "FullPipeline_V3/integrated_pipeline/model_v2_masker.py",
+        "decoder_module": "FullPipeline_V4/integrated_pipeline/model_v2_masker.py",
         "note": (
             "Section 26 of the training notebook compared a training-side FP32 decode "
             "with an INT8 decode that passed SentencePiece word ids into "
@@ -406,7 +406,7 @@ def update_deployment_summary(
     )
     summary["production_migration"] = {
         "status": "PERFORMED",
-        "deployment_package": "FullPipeline_V3/models/deberta_pii/",
+        "deployment_package": "FullPipeline_V4/models/deberta_pii/",
         "note": (
             "The packaged INT8 graph, tokenizer and label map are byte-identical to the "
             "canonical artifacts above; PIIMaskerAdapter.verify_artifact enforces the hash."

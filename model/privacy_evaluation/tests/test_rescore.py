@@ -30,7 +30,10 @@ def audio_run_folders() -> list[Path]:
         if not config.is_file():
             continue
         payload = json.loads(config.read_text(encoding="utf-8"))
-        if payload.get("benchmark") == "audio_pipeline":
+        # A committed failed attempt is still useful environment evidence, but
+        # it has no STT predictions to reconstruct or rescore.
+        if (payload.get("benchmark") == "audio_pipeline"
+                and payload.get("stt_available")):
             folders.append(directory)
     return folders
 
@@ -83,7 +86,7 @@ class SpanRecoveryTests(unittest.TestCase):
 
 
 class StoredRunTests(unittest.TestCase):
-    """The guard, run against every audio folder the repository holds."""
+    """The guard, run against every completed audio folder in the repository."""
 
     def setUp(self) -> None:
         self.folders = audio_run_folders()

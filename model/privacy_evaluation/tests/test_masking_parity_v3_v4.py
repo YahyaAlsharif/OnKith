@@ -17,7 +17,7 @@ rewrite's own behaviour is pinned in
 
 **No speech recognizer is loaded on either side.** The probe imports the masker,
 the merger, the wake-word repair, the buffer and the digit renderer, and nothing
-else; running it against ``FullPipeline_V3`` cannot start Canary. The
+else; running it against ``archive/FullPipeline_V3`` cannot start Canary. The
 Canary measurements in ``research_results/`` are frozen and are never
 regenerated.
 
@@ -37,7 +37,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PROBE = REPO_ROOT / "model" / "privacy_evaluation" / "scripts" / "masking_parity_probe.py"
 V4_ROOT = REPO_ROOT / "FullPipeline_V4"
-V3_ROOT = REPO_ROOT / "FullPipeline_V3"
+V3_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
 
 
 def run_probe(root: Path) -> dict:
