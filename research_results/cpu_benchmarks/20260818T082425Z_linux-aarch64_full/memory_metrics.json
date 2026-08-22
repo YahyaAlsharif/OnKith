@@ -1,0 +1,18 @@
+{
+  "run_id": "20260818T082425Z_linux-aarch64_full",
+  "psutil_available": true,
+  "baseline_rss_bytes": 62652416,
+  "process_rss_bytes": 1868972032,
+  "process_vms_bytes": 5396955136,
+  "process_peak_rss_bytes": 2509684736,
+  "peak_rss_source": "sampled during the evaluation loop",
+  "system_total_bytes": 4245815296,
+  "system_available_bytes": 2205925376,
+  "system_used_percent": 48.0,
+  "process_peak_rss_bytes_os": 2509684736,
+  "model_file_bytes": 82278782,
+  "tokenizer_bytes": 8339976,
+  "rss_after_model_load_bytes": 857079808,
+  "privacy_stack_resident_bytes": 794427392,
+  "privacy_stack_resident_note": "RSS immediately after PIIMaskerAdapter.load() minus the RSS before it. This is the whole privacy stack, not the graph alone: the ONNX session, the SentencePiece tokenizer, and the transformers import chain that AutoTokenizer pulls in. On a 4 GB device that import chain, not the 78 MiB INT8 file, is the larger cost."
+}

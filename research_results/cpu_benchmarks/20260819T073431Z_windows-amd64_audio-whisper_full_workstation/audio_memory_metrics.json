@@ -1,0 +1,26 @@
+{
+  "run_id": "20260819T073431Z_windows-amd64_audio-whisper_full_workstation",
+  "psutil_available": true,
+  "baseline_rss_bytes": 53846016,
+  "stage_rss_bytes": {
+    "baseline": 53846016,
+    "vad_loaded": 81268736,
+    "stt_loaded": 748503040,
+    "privacy_loaded": 1193865216,
+    "all_models_loaded": 1201946624
+  },
+  "process_rss_bytes": 1202941952,
+  "process_vms_bytes": 3913334784,
+  "process_peak_rss_bytes": 1324797952,
+  "peak_rss_source": "sampled during the benchmark loop",
+  "system_total_bytes": 16802603008,
+  "system_available_bytes": 6332686336,
+  "system_used_percent": 62.3,
+  "process_peak_rss_bytes_os": 1324797952,
+  "model_load_seconds": {
+    "vad": 0.4691030000003593,
+    "stt": 6.9170888000007835,
+    "privacy": 25.30069689999982
+  },
+  "stage_rss_note": "RSS sampled after each model finished loading, then the peak sampled after every clip. The target device has about 4 GB; nothing here establishes that the whole system fits until this benchmark has been run on the Raspberry Pi itself."
+}
