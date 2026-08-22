@@ -1,0 +1,6 @@
+model,precision,bytes,mib,source,note
+DeBERTa-v3-xsmall,FP32 ONNX,282974651,269.86565685272217,model/DeBERTa-v3-xsmall/artifacts/model_v2/models/fp32/model_fp32.onnx,"reference graph, not deployed"
+DeBERTa-v3-xsmall,INT8 ONNX,82278782,78.46716117858887,FullPipeline_V3/models/deberta_pii/model_int8.onnx,deployed
+TinyBERT-4,FP32 ONNX,57141381,54.49426746368408,recorded in saved metrics,previous generation
+TinyBERT-4,INT8 ONNX,14386813,13.72033405303955,model/TinyBERT-4/artifacts/tinybert_pii/onnx_model/model_int8.onnx,previous deployment
+BiLSTM baseline,FP32 PyTorch,15278923,14.57111644744873,model/artifacts/pii_masking_bilstm.pt,first baseline

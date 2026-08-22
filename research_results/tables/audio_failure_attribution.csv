@@ -1,0 +1,5 @@
+run_id,device,outcome,entities,share
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Protected,33,0.55
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,"STT altered, masked anyway",15,0.25
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Privacy-model failure,7,0.11666666666666667
+20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,"STT-caused, nothing masked",5,0.08333333333333333
