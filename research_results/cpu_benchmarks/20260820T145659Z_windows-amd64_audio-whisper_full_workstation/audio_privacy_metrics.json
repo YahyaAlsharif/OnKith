@@ -1,0 +1,632 @@
+{
+  "run_id": "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+  "benchmark": "controlled end-to-end deployment benchmark",
+  "not_a_replacement_for": [
+    "model_v2 held-out test",
+    "combined validation",
+    "ood_dev",
+    "frozen ood_final"
+  ],
+  "clips_scored": 44,
+  "stt_available": true,
+  "thresholds": {
+    "preservation_ratio": 0.5,
+    "full_mask_coverage": 0.999
+  },
+  "control_arms": {
+    "reference_text": {
+      "rows": 32,
+      "rows_with_pii": 25,
+      "typed_entity": {
+        "precision": 0.5344827586206896,
+        "recall": 0.5166666666666667,
+        "f1": 0.5254237288135593,
+        "support": 60,
+        "predicted": 58,
+        "true_positives": 31
+      },
+      "binary_entity": {
+        "precision": 0.6206896551724138,
+        "recall": 0.6,
+        "f1": 0.6101694915254238,
+        "support": 60,
+        "predicted": 58,
+        "true_positives": 36
+      },
+      "private_character_recall": 0.7049689440993789,
+      "private_character_leakage": 0.29503105590062106,
+      "private_characters": 966,
+      "non_private_overmasking_rate": 0.036775106082036775,
+      "overmasked_characters": 26,
+      "hard_negative_rows": 7,
+      "hard_negative_false_positive_rate": 0.14285714285714285,
+      "per_label": {
+        "ACCOUNTNUM": {
+          "precision": 1.0,
+          "recall": 0.3333333333333333,
+          "f1": 0.5,
+          "support": 3,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "AGE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2,
+          "predicted": 2,
+          "true_positives": 2
+        },
+        "AMOUNT": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "BANKNAME": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "BUILDINGNUM": {
+          "precision": 0.3333333333333333,
+          "recall": 0.3333333333333333,
+          "f1": 0.3333333333333333,
+          "support": 3,
+          "predicted": 3,
+          "true_positives": 1
+        },
+        "CITY": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 3,
+          "predicted": 3,
+          "true_positives": 3
+        },
+        "CREDITCARDNUMBER": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "DATE": {
+          "precision": 0.25,
+          "recall": 0.16666666666666666,
+          "f1": 0.2,
+          "support": 6,
+          "predicted": 4,
+          "true_positives": 1
+        },
+        "DRIVERLICENSENUM": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "EMAIL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "GIVENNAME": {
+          "precision": 0.6,
+          "recall": 0.75,
+          "f1": 0.6666666666666665,
+          "support": 8,
+          "predicted": 10,
+          "true_positives": 6
+        },
+        "IDCARDNUM": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "support": 1,
+          "predicted": 2,
+          "true_positives": 1
+        },
+        "ORGANISATION": {
+          "precision": 0.2857142857142857,
+          "recall": 1.0,
+          "f1": 0.4444444444444445,
+          "support": 2,
+          "predicted": 7,
+          "true_positives": 2
+        },
+        "PASSWORD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "SOCIALNUM": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0,
+          "predicted": 2,
+          "true_positives": 0
+        },
+        "STREET": {
+          "precision": 0.2,
+          "recall": 0.6666666666666666,
+          "f1": 0.30769230769230765,
+          "support": 3,
+          "predicted": 10,
+          "true_positives": 2
+        },
+        "SURNAME": {
+          "precision": 0.8571428571428571,
+          "recall": 0.6666666666666666,
+          "f1": 0.75,
+          "support": 9,
+          "predicted": 7,
+          "true_positives": 6
+        },
+        "TELEPHONENUM": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 4,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "TIME": {
+          "precision": 1.0,
+          "recall": 0.6,
+          "f1": 0.7499999999999999,
+          "support": 5,
+          "predicted": 3,
+          "true_positives": 3
+        },
+        "TITLE": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "support": 1,
+          "predicted": 2,
+          "true_positives": 1
+        },
+        "URL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "ZIPCODE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        }
+      },
+      "boundary_correct_type_confusions": {
+        "ACCOUNTNUM->IDCARDNUM": 1,
+        "SURNAME->GIVENNAME": 1,
+        "PASSWORD->STREET": 1,
+        "BANKNAME->ORGANISATION": 1,
+        "ACCOUNTNUM->STREET": 1
+      },
+      "comparable": {
+        "expected_entities": 60,
+        "entities_fully_masked": 44,
+        "entity_recall": 0.7333333333333333,
+        "character_recall": 0.7226190476190476,
+        "character_leakage": 0.2773809523809524,
+        "definition": "per-entity character coverage, whitespace excluded; identical to the end-to-end arm, so the two are directly comparable"
+      }
+    },
+    "reference_uncased": {
+      "rows": 32,
+      "rows_with_pii": 25,
+      "typed_entity": {
+        "precision": 0.5,
+        "recall": 0.48333333333333334,
+        "f1": 0.4915254237288135,
+        "support": 60,
+        "predicted": 58,
+        "true_positives": 29
+      },
+      "binary_entity": {
+        "precision": 0.6206896551724138,
+        "recall": 0.6,
+        "f1": 0.6101694915254238,
+        "support": 60,
+        "predicted": 58,
+        "true_positives": 36
+      },
+      "private_character_recall": 0.7929606625258799,
+      "private_character_leakage": 0.20703933747412007,
+      "private_characters": 966,
+      "non_private_overmasking_rate": 0.03768844221105527,
+      "overmasked_characters": 30,
+      "hard_negative_rows": 7,
+      "hard_negative_false_positive_rate": 0.14285714285714285,
+      "per_label": {
+        "ACCOUNTNUM": {
+          "precision": 1.0,
+          "recall": 0.3333333333333333,
+          "f1": 0.5,
+          "support": 3,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "AGE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2,
+          "predicted": 2,
+          "true_positives": 2
+        },
+        "AMOUNT": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "BANKNAME": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "BUILDINGNUM": {
+          "precision": 0.25,
+          "recall": 0.3333333333333333,
+          "f1": 0.28571428571428575,
+          "support": 3,
+          "predicted": 4,
+          "true_positives": 1
+        },
+        "CITY": {
+          "precision": 0.6666666666666666,
+          "recall": 0.6666666666666666,
+          "f1": 0.6666666666666666,
+          "support": 3,
+          "predicted": 3,
+          "true_positives": 2
+        },
+        "CREDITCARDNUMBER": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "DATE": {
+          "precision": 0.2,
+          "recall": 0.16666666666666666,
+          "f1": 0.1818181818181818,
+          "support": 6,
+          "predicted": 5,
+          "true_positives": 1
+        },
+        "DRIVERLICENSENUM": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "EMAIL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "GIVENNAME": {
+          "precision": 0.5833333333333334,
+          "recall": 0.875,
+          "f1": 0.7000000000000001,
+          "support": 8,
+          "predicted": 12,
+          "true_positives": 7
+        },
+        "IDCARDNUM": {
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1,
+          "predicted": 3,
+          "true_positives": 1
+        },
+        "ORGANISATION": {
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 2,
+          "predicted": 6,
+          "true_positives": 2
+        },
+        "PASSWORD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 2,
+          "true_positives": 0
+        },
+        "STREET": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3,
+          "predicted": 7,
+          "true_positives": 0
+        },
+        "SURNAME": {
+          "precision": 0.8333333333333334,
+          "recall": 0.5555555555555556,
+          "f1": 0.6666666666666667,
+          "support": 9,
+          "predicted": 6,
+          "true_positives": 5
+        },
+        "TELEPHONENUM": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6666666666666666,
+          "support": 4,
+          "predicted": 2,
+          "true_positives": 2
+        },
+        "TIME": {
+          "precision": 1.0,
+          "recall": 0.6,
+          "f1": 0.7499999999999999,
+          "support": 5,
+          "predicted": 3,
+          "true_positives": 3
+        },
+        "TITLE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1,
+          "predicted": 1,
+          "true_positives": 1
+        },
+        "URL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        },
+        "ZIPCODE": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1,
+          "predicted": 0,
+          "true_positives": 0
+        }
+      },
+      "boundary_correct_type_confusions": {
+        "SURNAME->GIVENNAME": 3,
+        "ACCOUNTNUM->IDCARDNUM": 1,
+        "ZIPCODE->IDCARDNUM": 1,
+        "TELEPHONENUM->STREET": 1,
+        "ACCOUNTNUM->STREET": 1
+      },
+      "comparable": {
+        "expected_entities": 60,
+        "entities_fully_masked": 49,
+        "entity_recall": 0.8166666666666667,
+        "character_recall": 0.8071428571428572,
+        "character_leakage": 0.19285714285714284,
+        "definition": "per-entity character coverage, whitespace excluded; identical to the end-to-end arm, so the two are directly comparable"
+      }
+    }
+  },
+  "privacy_scored_clips": [
+    "benign_001",
+    "benign_002",
+    "benign_003",
+    "benign_004",
+    "benign_005",
+    "benign_006",
+    "benign_007",
+    "privacy_001",
+    "privacy_002",
+    "privacy_003",
+    "privacy_004",
+    "privacy_005",
+    "privacy_006",
+    "privacy_007",
+    "privacy_008",
+    "privacy_009",
+    "privacy_010",
+    "privacy_011",
+    "privacy_012",
+    "privacy_013",
+    "privacy_014",
+    "privacy_015",
+    "privacy_016",
+    "privacy_017",
+    "privacy_018",
+    "privacy_019",
+    "privacy_020",
+    "privacy_021",
+    "privacy_022",
+    "privacy_023",
+    "privacy_024",
+    "privacy_025"
+  ],
+  "privacy_scoring_note": "Only clips annotated for private information are scored here. The LibriSpeech subset is read prose containing person names with no gold annotation, so its detections are neither credited nor counted against the model; it measures recognition only.",
+  "end_to_end": {
+    "expected_entities": 60,
+    "entities_preserved_by_stt": 40,
+    "stt_preservation_rate": 0.6666666666666666,
+    "entities_fully_masked": 33,
+    "entity_recall_after_stt": 0.55,
+    "entity_recall_among_preserved": 0.825,
+    "character_recall_after_stt": 0.8313725490196079,
+    "character_leakage_after_stt": 0.1686274509803921,
+    "outcomes": {
+      "masked": 33,
+      "partially_masked": 2,
+      "leaked_privacy_model": 5,
+      "stt_altered_masked": 15,
+      "stt_altered_leaked": 5
+    },
+    "fully_sanitized_clips": 16,
+    "fully_sanitized_clip_rate": 0.64,
+    "clips_with_any_leakage": 9,
+    "clips_with_any_leakage_rate": 0.36,
+    "hard_negative_clips": 7,
+    "hard_negative_false_positive_clips": 1,
+    "hard_negative_false_positive_rate": 0.14285714285714285,
+    "by_entity_type": {
+      "ACCOUNTNUM": {
+        "expected": 3,
+        "preserved_by_stt": 3,
+        "masked": 3
+      },
+      "AGE": {
+        "expected": 2,
+        "preserved_by_stt": 2,
+        "masked": 2
+      },
+      "AMOUNT": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "BANKNAME": {
+        "expected": 1,
+        "preserved_by_stt": 1,
+        "masked": 1
+      },
+      "BUILDINGNUM": {
+        "expected": 3,
+        "preserved_by_stt": 2,
+        "masked": 2
+      },
+      "CITY": {
+        "expected": 3,
+        "preserved_by_stt": 2,
+        "masked": 2
+      },
+      "CREDITCARDNUMBER": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "DATE": {
+        "expected": 6,
+        "preserved_by_stt": 6,
+        "masked": 2
+      },
+      "DRIVERLICENSENUM": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "EMAIL": {
+        "expected": 3,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "GIVENNAME": {
+        "expected": 8,
+        "preserved_by_stt": 6,
+        "masked": 6
+      },
+      "IDCARDNUM": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "ORGANISATION": {
+        "expected": 2,
+        "preserved_by_stt": 2,
+        "masked": 1
+      },
+      "PASSWORD": {
+        "expected": 1,
+        "preserved_by_stt": 1,
+        "masked": 1
+      },
+      "STREET": {
+        "expected": 3,
+        "preserved_by_stt": 3,
+        "masked": 3
+      },
+      "SURNAME": {
+        "expected": 9,
+        "preserved_by_stt": 5,
+        "masked": 5
+      },
+      "TELEPHONENUM": {
+        "expected": 4,
+        "preserved_by_stt": 1,
+        "masked": 1
+      },
+      "TIME": {
+        "expected": 5,
+        "preserved_by_stt": 5,
+        "masked": 3
+      },
+      "TITLE": {
+        "expected": 1,
+        "preserved_by_stt": 1,
+        "masked": 1
+      },
+      "URL": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      },
+      "ZIPCODE": {
+        "expected": 1,
+        "preserved_by_stt": 0,
+        "masked": 0
+      }
+    }
+  },
+  "postprocessing_amplification": {
+    "identifier_digits": 7,
+    "clips_affected": 0,
+    "identifiers_reconstructed": 0,
+    "cases": [],
+    "mechanism": "A spoken number can arrive as digit words. The privacy model misses some of those - it is the same leak the entity outcomes already count - and the display renderer, which by design runs after masking, then rewrites the surviving words into a numeral. No new information escapes; the information that escaped becomes machine readable.",
+    "scope": "Display only. app/digit_normalizer.py is documented as a render-time transform: storage, Onkith and the preview's own arithmetic keep the original text, so the reconstruction reaches the terminal and the JSON display_text field, not the database."
+  },
+  "failure_attribution": {
+    "stt_caused": 5,
+    "stt_caused_but_still_masked": 15,
+    "privacy_model_caused": 7,
+    "protected": 33,
+    "postprocessing_amplified": 0,
+    "interpretation": "stt_caused: the entity did not survive recognition and nothing was masked where it went. privacy_model_caused: the entity was recognizable in the transcript and the model did not mask it, or masked only part of it. Both are end-to-end leaks; only the second is a privacy-model defect. postprocessing_amplified counts a third thing, and it is not a fourth kind of leak: a leak already counted above that the render step rewrote into a numeral, which is why it is reported separately rather than added to the totals."
+  }
+}

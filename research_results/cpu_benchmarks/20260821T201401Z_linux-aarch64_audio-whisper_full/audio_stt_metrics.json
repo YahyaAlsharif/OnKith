@@ -1,0 +1,6 @@
+{
+  "run_id": "20260821T201401Z_linux-aarch64_audio-whisper_full",
+  "available": false,
+  "reason": "RuntimeError: faster-whisper backend unavailable: faster_whisper import failed: ModuleNotFoundError: No module named 'faster_whisper'; ctranslate2 import failed: ModuleNotFoundError: No module named 'ctranslate2'",
+  "how_to_enable": "The audio benchmark needs the production speech recognizer. Install it, then run\nthis script again - nothing else changes:\n\n    pip install \"faster-whisper==1.2.1\"\n\nfaster-whisper runs on CTranslate2, not torch, and publishes wheels for Windows\nand for Raspberry Pi OS (aarch64). The base.en weights are fetched once on first\nuse and cached; after that the device runs offline.\nUntil then the control arms below still run, so the fixtures, the privacy model\nand the memory profile are all validated - only the recognizer is missing."
+}
