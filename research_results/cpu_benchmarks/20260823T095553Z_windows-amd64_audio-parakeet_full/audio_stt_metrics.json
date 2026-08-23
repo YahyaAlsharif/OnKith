@@ -1,0 +1,97 @@
+{
+  "run_id": "20260823T095553Z_windows-amd64_audio-parakeet_full",
+  "available": true,
+  "engine": "parakeet",
+  "model": "parakeet-tdt_ctc-110m",
+  "model_id": "nvidia/parakeet-tdt_ctc-110m",
+  "revision": "431a349f3051ab85c22b9b7a2741b5fe77065665",
+  "checkpoint_sha256": "1e6b5c3bcaa390b479bd8112512ede515d2ef5b61495568f2c266d6d5e680c3a",
+  "backend": "nemo_cpu_fp32",
+  "runtime": "nemo",
+  "runtime_version": "2.5.3",
+  "torch_version": "2.7.1",
+  "device": "cpu",
+  "compute_type": "fp32",
+  "decoding": {
+    "strategy": "greedy_batch",
+    "decoder_family": "TDT",
+    "greedy_max_symbols": 10,
+    "temperature": 1.0,
+    "active_decoder": {
+      "decoder_family": "TDT",
+      "decoder_type": "rnnt",
+      "strategy": "greedy_batch",
+      "greedy_max_symbols": 10,
+      "temperature": 1.0,
+      "timestamps": false,
+      "preserve_alignments": false,
+      "implementation": "GreedyBatchedTDTInfer",
+      "loss_name": "tdt",
+      "tdt_duration_values": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "note": "A controlled deployment check on a few dozen clips, not a speech-recognition benchmark. Both sides of every WER are lowercased and stripped of punctuation before scoring, which is the same definition the Canary and Whisper runs used - Canary produced unpunctuated lowercase text (pnc=no) while Whisper and Parakeet punctuate, so normalising both sides is what keeps the three comparable.",
+  "overall": {
+    "clips": 44,
+    "reference_words": 869,
+    "aggregate_wer": 0.06444188722669736,
+    "mean_wer": 0.06511092760879476,
+    "median_wer": 0.04006410256410256,
+    "min_wer": 0.0,
+    "max_wer": 0.375,
+    "substitutions": 40,
+    "deletions": 16,
+    "insertions": 0
+  },
+  "by_subset": {
+    "public": {
+      "clips": 12,
+      "reference_words": 222,
+      "aggregate_wer": 0.04954954954954955,
+      "mean_wer": 0.02481460532931121,
+      "median_wer": 0.0,
+      "min_wer": 0.0,
+      "max_wer": 0.11764705882352941,
+      "substitutions": 11,
+      "deletions": 0,
+      "insertions": 0
+    },
+    "synthetic_privacy": {
+      "clips": 32,
+      "reference_words": 647,
+      "aggregate_wer": 0.0695517774343122,
+      "mean_wer": 0.08022204846360109,
+      "median_wer": 0.06350806451612903,
+      "min_wer": 0.0,
+      "max_wer": 0.375,
+      "substitutions": 29,
+      "deletions": 16,
+      "insertions": 0
+    }
+  },
+  "number_normalised": {
+    "definition": "the same Levenshtein word error rate, after spoken number words have been folded to numerals on both the reference and the hypothesis. Identical treatment on both sides and for every engine, which is what makes Canary, Whisper and Parakeet comparable; the raw figure above cannot be, because Canary wrote numbers as words and Whisper and Parakeet write numerals.",
+    "clips": 44,
+    "reference_words": 808,
+    "aggregate_wer": 0.06188118811881188,
+    "mean_wer": 0.06696486188934922,
+    "median_wer": 0.03205128205128205
+  },
+  "digit_preservation": {
+    "definition": "long numbers (7+ digits) transcribed digit for digit, scored on the value rather than the spelling",
+    "clips_with_identifiers": 5,
+    "identifiers": 5,
+    "exact": 0,
+    "accuracy": 0.0
+  },
+  "wake_word": {
+    "measurable": false,
+    "reason": "no clip in the committed corpus addresses the device by name, so wake-word recognition is not measurable here for any engine"
+  }
+}

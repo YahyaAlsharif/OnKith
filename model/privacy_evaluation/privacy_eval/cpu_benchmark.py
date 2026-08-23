@@ -153,11 +153,12 @@ class CpuBenchmark:
         self.warnings = WarningLog()
         self.completed: dict[str, bool] = {}
         self.started_utc = common.utc_now()
-        # The engine is part of the run id, so a V4 run can never land in or be
-        # mistaken for one of the frozen Canary folders. The historical Canary
-        # runs carry no engine token and are identified by its absence.
+        # The engine is part of the run id, so a V5 run can never land in or be
+        # mistaken for a V4 Whisper folder or one of the frozen Canary folders.
+        # The historical Canary runs carry no engine token and are identified by
+        # its absence.
         self.run_id = common.make_run_id(
-            self.started_utc, options.mode, options.device_label, prefix="whisper"
+            self.started_utc, options.mode, options.device_label, prefix="parakeet"
         )
         self.run = RunDirectory(self.run_id, options.results_root)
 
@@ -679,25 +680,25 @@ class CpuBenchmark:
         # notebook - can tell which recognizer a result folder measured from the
         # key alone.
         if not self.options.run_full_pipeline:
-            self._record_stage("stt_whisper", [], available=False,
+            self._record_stage("stt_parakeet", [], available=False,
                                reason="full pipeline disabled")
             return
         try:
-            from integrated_pipeline.whisper_adapter import (
-                WhisperAdapter,
-                describe_whisper_backend,
+            from integrated_pipeline.parakeet_adapter import (
+                ParakeetAdapter,
+                describe_parakeet_backend,
             )
 
-            backend = describe_whisper_backend()
+            backend = describe_parakeet_backend()
             if not backend.get("available"):
                 raise RuntimeError(
-                    "faster-whisper backend unavailable: "
+                    "NeMo/torch Parakeet backend unavailable: "
                     + "; ".join(backend.get("errors", ["unknown"]))
                 )
 
             common.quieten_stt()
-            whisper = WhisperAdapter(self.config)
-            whisper.load()
+            parakeet = ParakeetAdapter(self.config)
+            parakeet.load()
 
             def make_segment(index: int):
                 return common.make_canary_segment(
@@ -709,28 +710,35 @@ class CpuBenchmark:
                 )
 
             for index in range(self.options.pipeline_warmup_runs):
-                whisper.transcribe_segment(make_segment(index))
+                parakeet.transcribe_segment(make_segment(index))
 
             stt_seconds = []
             transcript = ""
             for index in range(max(3, self.options.pipeline_latency_runs // 4)):
                 started = time.perf_counter()
-                transcript = whisper.transcribe_segment(
+                transcript = parakeet.transcribe_segment(
                     make_segment(100 + index)
                 ).text
                 stt_seconds.append(time.perf_counter() - started)
-            whisper.close()
+            decoder = parakeet.active_decoder
+            parakeet.close()
 
-            self._record_stage("stt_whisper", stt_seconds, extra={
+            self._record_stage("stt_parakeet", stt_seconds, extra={
                 "audio_seconds": self.audio_seconds,
                 "real_time_factor": statistics.fmean(stt_seconds) / self.audio_seconds,
-                "engine": "whisper",
-                "model": self.config.whisper["model"],
-                "runtime": self.config.whisper["runtime"],
-                "runtime_version": backend.get("faster_whisper_version"),
-                "device": self.config.whisper["device"],
-                "compute_type": self.config.whisper["compute_type"],
-                "beam_size": self.config.whisper["beam_size"],
+                "engine": "parakeet",
+                "model": self.config.parakeet["model"],
+                "model_id": self.config.parakeet["model_id"],
+                "revision": self.config.parakeet["revision"],
+                "checkpoint_sha256": self.config.parakeet["sha256"],
+                "runtime": self.config.parakeet["runtime"],
+                "runtime_version": backend.get("nemo_toolkit_version"),
+                "torch_version": backend.get("torch_version"),
+                "device": self.config.parakeet["device"],
+                "compute_type": self.config.parakeet["precision"],
+                "decoder_family": self.config.parakeet["decoder_family"],
+                "decoder_strategy": self.config.parakeet["decoder_strategy"],
+                "active_decoder": decoder,
                 # The input is `deterministic_speech`: a speech-shaped tone, not
                 # speech. It is identical bytes on every device, which is what
                 # made it a fair cross-device timing probe for Canary.
@@ -738,32 +746,34 @@ class CpuBenchmark:
                 "probe_transcript": transcript,
                 "representative_of_deployment": False,
                 "note": (
-                    "NOT the deployment cost of this recognizer. The probe is a "
-                    "synthetic tone; Whisper has no words to find in it, decodes "
-                    "against its own prompt and runs until the 30 s window is "
-                    "full, so this real-time factor measures a failure mode "
-                    "rather than transcription. Canary had no such loop, which "
-                    "is why the same probe was a fair timing comparison for it "
-                    "and is not one between the two engines. The live pipeline "
-                    "never submits unvoiced audio: Silero gates it first. For "
-                    "the recognizer cost on real speech, use "
+                    "NOT the deployment cost of this recognizer, and NOT "
+                    "comparable with the stt_whisper figure in a V4 folder. The "
+                    "probe is a synthetic tone. Whisper had no words to find in "
+                    "it, decoded against its own prompt and ran until its 30 s "
+                    "window filled, so a V4 number here measured a failure mode; "
+                    "Parakeet's TDT decoder emits blanks over the same tone and "
+                    "stops, so a V5 number here measures close to the encoder "
+                    "floor. Both are valid device-to-device comparisons for one "
+                    "engine and neither is an engine-to-engine comparison. The "
+                    "live pipeline never submits unvoiced audio: Silero gates it "
+                    "first. For the recognizer cost on real speech, and for the "
+                    "only defensible Whisper-versus-Parakeet timing, use "
                     "audio_latency_summary.json from "
                     "Full_Pipeline_Audio_Benchmark.py, which drives 44 committed "
-                    "WAV clips. This stage is kept because it is still a valid "
-                    "device-to-device comparison for one engine, and because the "
+                    "WAV clips. This stage is kept because the "
                     "assembled-utterance estimate below is built from it."
                 ),
             })
             print(f"STT  : mean {statistics.fmean(stt_seconds) * 1000:.0f} ms for "
                   f"{self.audio_seconds:.1f} s "
-                  f"(RTF {self.pipeline_stages['stt_whisper']['real_time_factor']:.3f})")
-            print("       synthetic tone, not speech - Whisper decodes against its "
-                  "own prompt here.")
+                  f"(RTF {self.pipeline_stages['stt_parakeet']['real_time_factor']:.3f})")
+            print("       synthetic tone, not speech - this is not the engine's "
+                  "cost on words.")
             print("       The recognizer's cost on real speech is in "
                   "Full_Pipeline_Audio_Benchmark.py.")
         except Exception as exc:
             reason = f"{type(exc).__name__}: {exc}"
-            self._record_stage("stt_whisper", [], available=False, reason=reason)
+            self._record_stage("stt_parakeet", [], available=False, reason=reason)
             self.warnings.note(f"STT stage unavailable - {reason}")
             print("STT  : unavailable, the remaining stages still run")
 
@@ -881,7 +891,7 @@ class CpuBenchmark:
 
     def _assemble_pipeline_summary(self) -> None:
         available_audio = [
-            name for name in ("vad_silero", "stt_whisper")
+            name for name in ("vad_silero", "stt_parakeet")
             if self.pipeline_stages.get(name, {}).get("available")
         ]
         self.pipeline_summary = {
@@ -988,14 +998,18 @@ class CpuBenchmark:
             "benchmark": "cpu_text",
             # Recorded so the figures notebook can separate this run from the
             # frozen Canary runs, which predate these keys and default to canary.
-            "pipeline_version": "V4",
+            "pipeline_version": "V5",
             "pipeline_root": common.relative(common.PRODUCTION_ROOT),
-            "stt_engine": "whisper",
-            "stt_model": self.config.whisper["model"],
-            "stt_runtime": self.config.whisper["runtime"],
-            "stt_device": self.config.whisper["device"],
-            "stt_compute_type": self.config.whisper["compute_type"],
-            "stt_beam_size": self.config.whisper["beam_size"],
+            "stt_engine": "parakeet",
+            "stt_model": self.config.parakeet["model"],
+            "stt_model_id": self.config.parakeet["model_id"],
+            "stt_model_revision": self.config.parakeet["revision"],
+            "stt_checkpoint_sha256": self.config.parakeet["sha256"],
+            "stt_runtime": self.config.parakeet["runtime"],
+            "stt_device": self.config.parakeet["device"],
+            "stt_compute_type": self.config.parakeet["precision"],
+            "stt_decoder_family": self.config.parakeet["decoder_family"],
+            "stt_decoder_strategy": self.config.parakeet["decoder_strategy"],
             "mode": self.options.mode,
             "smoke_test": self.options.smoke_test,
             "device_label": self.options.device_label or None,

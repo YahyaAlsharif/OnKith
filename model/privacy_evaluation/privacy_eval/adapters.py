@@ -1,4 +1,10 @@
-"""Thin adapters around the authoritative FullPipeline_V4 privacy components."""
+"""Thin adapters around the authoritative pipeline privacy components.
+
+The root comes from :mod:`privacy_eval.benchmark_common` rather than being
+named here, so everything under ``privacy_eval/`` imports one
+``integrated_pipeline`` and not two. See ``ensure_import_paths`` for why that
+matters now that V4 and V5 both ship one.
+"""
 
 from __future__ import annotations
 
@@ -6,9 +12,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+from .benchmark_common import PRODUCTION_ROOT, REPO_ROOT
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
 TINYBERT_ROOT = REPO_ROOT / "model" / "TinyBERT-4" / "artifacts" / "tinybert_pii"
 FP32_ONNX = TINYBERT_ROOT / "onnx_model" / "model_fp32.onnx"
 INT8_ONNX = TINYBERT_ROOT / "onnx_model" / "model_int8.onnx"

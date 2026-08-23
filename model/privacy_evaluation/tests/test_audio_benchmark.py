@@ -662,9 +662,7 @@ class PostprocessingAmplificationTests(unittest.TestCase):
         )
 
     def test_the_threshold_follows_the_deployments_own_identifier_scale(self) -> None:
-        import sys as _sys
-
-        _sys.path.insert(0, str(common.PRODUCTION_ROOT))
+        common.ensure_import_paths()
         from integrated_pipeline.structured_pii import StructuredPIIConfig
 
         self.assertEqual(audio.IDENTIFIER_DIGITS,
@@ -702,9 +700,7 @@ class PostprocessingAmplificationTests(unittest.TestCase):
         instead of silently going stale.
         """
 
-        import sys as _sys
-
-        _sys.path.insert(0, str(common.PRODUCTION_ROOT))
+        common.ensure_import_paths()
         from app.digit_normalizer import normalize_spoken_digits
 
         leaked = normalize_spoken_digits(
@@ -1069,30 +1065,38 @@ class UnavailableRecogniserTests(unittest.TestCase):
         """A teammate on the Pi must not have to guess what is missing."""
 
         help_text = audio.STT_UNAVAILABLE_HELP
-        self.assertIn("faster-whisper==1.2.1", help_text)
         self.assertIn("pip install", help_text)
+        self.assertIn("nemo_toolkit", help_text)
+        self.assertIn("requirements-", help_text)
 
-    def test_the_pinned_version_in_the_help_matches_the_deployment_config(self) -> None:
-        import sys as _sys
+    def test_the_help_names_the_pipeline_under_measurement(self) -> None:
+        """A requirements file from the wrong package installs the wrong stack."""
 
-        _sys.path.insert(0, str(common.PRODUCTION_ROOT))
-        from integrated_pipeline.config import PipelineConfig
-
-        config = PipelineConfig(root=common.PRODUCTION_ROOT)
         self.assertIn(
-            f"faster-whisper=={config.whisper['package_version']}",
-            audio.STT_UNAVAILABLE_HELP,
+            common.PRODUCTION_ROOT.name, audio.STT_UNAVAILABLE_HELP
         )
 
-    def test_the_help_never_points_at_the_archived_canary_installer(self) -> None:
-        """The Canary acquisition script lives in the archive and is not run.
+    def test_the_help_says_how_to_get_the_pinned_checkpoint(self) -> None:
+        """Unlike Whisper's, Parakeet's weights are pinned by hash.
 
-        Its numbers are frozen; pointing a stuck teammate at it would invite a
-        rerun of the historical baseline.
+        The recognizer refuses to start on a checkpoint that is not the exact
+        459,243,520 bytes it was measured on, so "pip install" alone leaves a
+        teammate stuck one step short.
         """
 
+        self.assertIn("cache_parakeet_checkpoint", audio.STT_UNAVAILABLE_HELP)
+
+    def test_the_help_never_points_at_a_superseded_recognizer(self) -> None:
+        """Canary lives in the archive and Whisper lives in FullPipeline_V4.
+
+        Both have frozen result folders. Pointing a stuck teammate at either
+        installer would invite a rerun of a historical baseline under a run id
+        that says V5.
+        """
+
+        help_text = audio.STT_UNAVAILABLE_HELP.lower()
         self.assertNotIn("acquire_canary", audio.STT_UNAVAILABLE_HELP)
-        self.assertNotIn("nemo", audio.STT_UNAVAILABLE_HELP.lower())
+        self.assertNotIn("faster-whisper", help_text)
 
 
 if __name__ == "__main__":

@@ -16,9 +16,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
-for extra in (str(EVALUATION_ROOT), str(REPO_ROOT / "FullPipeline_V4")):
-    if extra not in sys.path:
-        sys.path.insert(0, extra)
+if str(EVALUATION_ROOT) not in sys.path:
+    sys.path.insert(0, str(EVALUATION_ROOT))
+from privacy_eval.benchmark_common import ensure_import_paths  # noqa: E402
+
+ensure_import_paths()
 
 from privacy_eval import stt_comparison as compare
 

@@ -1,13 +1,20 @@
 # Research results
 
-Three entry points at the repository root. Between them they turn the saved
+Four entry points at the repository root. Between them they turn the saved
 evaluation evidence into report figures and measure what the deployment actually
 costs on real hardware.
+
+All three benchmark scripts measure the pipeline named by
+`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V5`.
+Run ids carry the recognizer - `parakeet`, `whisper`, or nothing at all for the
+frozen Canary runs - so a folder is never ambiguous about what produced it, and
+a new run can never be written into an old engine's folder.
 
 | Entry point | Run it on | What it does | Safe to run |
 |---|---|---|---|
 | [`Full_Pipeline_CPU_Benchmark.py`](../Full_Pipeline_CPU_Benchmark.py) | **any CPU** - workstation *and* the Raspberry Pi | Scores the committed 2,000-row held-out subset through the accepted INT8 privacy model. Records latency, memory, quality and an out-of-distribution parity check. | Yes |
 | [`Full_Pipeline_Audio_Benchmark.py`](../Full_Pipeline_Audio_Benchmark.py) | **any CPU** - workstation *and* the Raspberry Pi | Drives committed WAV clips through the whole deployment: VAD, STT, transcript normalisation, masking, spoken-digit rendering. Records word error rate, real-time factor, memory and end-to-end privacy leakage. | Yes |
+| [`Full_Pipeline_V5_EndToEnd_Benchmark.py`](../Full_Pipeline_V5_EndToEnd_Benchmark.py) | **any CPU with a network connection** | Drives 24 committed clips through the whole V5 demonstration path: Parakeet, masking, the outbound LLM request, local rehydration, local TTS. Audits the bytes handed to `urllib` for private values and writes every payload out verbatim. | Yes |
 | [`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) | any machine with the repository | Reads saved metrics and writes publication-quality figures and tables. Trains nothing, evaluates nothing. | Yes |
 
 The two benchmarks are plain Python scripts. The Raspberry Pi has no Jupyter,
@@ -53,7 +60,21 @@ python Full_Pipeline_Audio_Benchmark.py --smoke-test  # four representative clip
 python Full_Pipeline_Audio_Benchmark.py --clip privacy_001
 python Full_Pipeline_Audio_Benchmark.py --list-clips
 python Full_Pipeline_Audio_Benchmark.py --verify-only
+
+python Full_Pipeline_V5_EndToEnd_Benchmark.py               # 24 cases, live LLM
+python Full_Pipeline_V5_EndToEnd_Benchmark.py --smoke-test  # 4 cases
+python Full_Pipeline_V5_EndToEnd_Benchmark.py --llm-stub    # no key needed
+python Full_Pipeline_V5_EndToEnd_Benchmark.py --offline     # payload audit only
+python Full_Pipeline_V5_EndToEnd_Benchmark.py --no-tts
+python Full_Pipeline_V5_EndToEnd_Benchmark.py --list-cases
 ```
+
+The end-to-end benchmark reads `GROQ_API_KEY` from the environment or from
+`FullPipeline_V5/.env`. Without one it still runs everything local, still builds
+and audits the outbound payload, and reports the API sections as `not run` with
+exit code 2. `--llm-stub` answers each built request locally so the whole
+integration can be exercised without a key; a stubbed run is labelled as such in
+every artifact it writes and is never a measurement of Groq.
 
 `--help` on either lists every option. `ONKITH_BENCHMARK_SMOKE=1` and
 `ONKITH_BENCHMARK_DEVICE=pi5` still work for the CPU benchmark.

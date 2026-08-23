@@ -2,9 +2,13 @@
 
 The masker used to live here because production was pinned to TinyBERT and
 could not load a 63-label SentencePiece model at all. That is no longer true:
-``FullPipeline_V4`` *is* Model V2, and the corrected decoder this module used to
-define now ships inside the pipeline as
-``integrated_pipeline.model_v2_masker``.
+the pipeline *is* Model V2, and the corrected decoder this module used to
+define now ships inside it as ``integrated_pipeline.model_v2_masker``.
+
+Which pipeline root that resolves to comes from
+``benchmark_common.PRODUCTION_ROOT``, so the harness and the benchmarks always
+agree on one copy. V4's and V5's decoders are byte-identical; the test named
+below fails if they ever stop being.
 
 Keeping only a re-export is the point. The accepted INT8 numbers in
 ``artifacts/model_v2/metrics/evaluation_production_path_int8_onnx.json`` were
@@ -19,10 +23,8 @@ SentencePiece word ids) lives with the decoder; see that module's docstring.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
+from .benchmark_common import PRODUCTION_ROOT, REPO_ROOT
 
 if str(PRODUCTION_ROOT) not in sys.path:
     sys.path.insert(0, str(PRODUCTION_ROOT))

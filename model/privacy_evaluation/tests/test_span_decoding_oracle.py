@@ -22,9 +22,11 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-for extra in (REPO_ROOT / "FullPipeline_V4", REPO_ROOT / "model" / "privacy_evaluation"):
-    if str(extra) not in sys.path:
-        sys.path.insert(0, str(extra))
+if str(REPO_ROOT / "model" / "privacy_evaluation") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "model" / "privacy_evaluation"))
+from privacy_eval.benchmark_common import ensure_import_paths  # noqa: E402
+
+ensure_import_paths()
 
 from integrated_pipeline.span_merger import consolidate_predictions_to_words
 from privacy_eval.dataset_metrics import evaluate_spans

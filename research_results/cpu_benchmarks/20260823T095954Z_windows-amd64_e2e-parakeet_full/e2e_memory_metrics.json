@@ -1,0 +1,19 @@
+{
+  "run_id": "20260823T095954Z_windows-amd64_e2e-parakeet_full",
+  "psutil_available": true,
+  "baseline_rss_bytes": 51466240,
+  "stage_rss_bytes": {
+    "baseline": 51466240,
+    "stt_loaded": 1618722816,
+    "privacy_loaded": 1866031104,
+    "all_models_loaded": 1868251136
+  },
+  "process_rss_bytes": 1525436416,
+  "process_vms_bytes": 3452477440,
+  "process_peak_rss_bytes": 1924677632,
+  "peak_rss_source": "sampled during the benchmark loop",
+  "system_total_bytes": 16802603008,
+  "system_available_bytes": 4904017920,
+  "system_used_percent": 70.8,
+  "process_peak_rss_bytes_os": 1924677632
+}

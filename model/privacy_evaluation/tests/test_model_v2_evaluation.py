@@ -205,19 +205,32 @@ class AdapterTests(unittest.TestCase):
         self.assertIn("merge_pii_spans", source)
 
     def test_evaluation_and_production_share_one_masker(self):
-        """The name this harness imports must resolve into the pipeline.
+        """The name this harness imports must resolve into a pipeline.
 
         Replaces the old "Model V2 must not touch production" guard. Production
         *is* Model V2 now, and the whole point of the integration is that these
         metrics were measured through the code the deployment runs. A second
         copy of the decoder appearing under privacy_eval/ would silently break
-        that, so assert the import lands in FullPipeline_V4.
+        that.
+
+        Byte-identity rather than path-identity, because there are now two
+        deployable pipelines and both ship this decoder. Which root the bare
+        ``integrated_pipeline`` import resolves to depends on what else the
+        process has imported - ``benchmark_common.ensure_import_paths`` exists
+        to make that deterministic for the benchmarks - so pinning the path
+        would make this test a report on import order. Pinning the bytes is the
+        guarantee that was actually wanted: whichever copy was loaded, it is the
+        same decoder, and a divergence between the two pipelines fails here.
         """
 
+        loaded = Path(inspect.getsourcefile(ModelV2OnnxMasker)).resolve()
         self.assertEqual(
-            Path(inspect.getsourcefile(ModelV2OnnxMasker)).resolve(),
-            MASKER_SOURCE.resolve(),
+            loaded.read_bytes(),
+            MASKER_SOURCE.resolve().read_bytes(),
+            f"{loaded} and {MASKER_SOURCE} have diverged",
         )
+        self.assertEqual(loaded.name, MASKER_SOURCE.name)
+        self.assertEqual(loaded.parent.name, "integrated_pipeline")
 
     def test_production_runs_the_model_v2_ontology(self):
         """The deployed pipeline is pinned to the 63-label Model V2 contract."""

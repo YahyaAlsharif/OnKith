@@ -7,7 +7,7 @@ a different question, and it is the question a deployed device actually poses:
 
 So it starts from committed WAV files and runs the real production stack -
 
-    audio -> Silero VAD -> Whisper STT -> transcript merge / wake-word
+    audio -> Silero VAD -> Parakeet STT -> transcript merge / wake-word
           -> inactivity buffer -> DeBERTa-v3-xsmall INT8 -> masking
           -> spoken-digit rendering -> final sanitized text
 
@@ -113,11 +113,15 @@ STT_UNAVAILABLE_HELP = """\
 The audio benchmark needs the production speech recognizer. Install it, then run
 this script again - nothing else changes:
 
-    pip install "faster-whisper==1.2.1"
+    pip install -r FullPipeline_V5/requirements-windows.txt   (or -rpi.txt)
 
-faster-whisper runs on CTranslate2, not torch, and publishes wheels for Windows
-and for Raspberry Pi OS (aarch64). The base.en weights are fetched once on first
-use and cached; after that the device runs offline.
+V5 runs NVIDIA Parakeet 110M through NeMo's native TDT/RNNT branch on torch CPU,
+so the install is torch + nemo_toolkit[asr]. The pinned 438 MiB checkpoint is
+fetched and byte-verified once by the platform setup script, or directly with:
+
+    python -c "from integrated_pipeline.parakeet_adapter import \
+cache_parakeet_checkpoint; print(cache_parakeet_checkpoint())"
+
 Until then the control arms below still run, so the fixtures, the privacy model
 and the memory profile are all validated - only the recognizer is missing."""
 
@@ -547,12 +551,12 @@ class AudioBenchmark:
         self.warnings = WarningLog()
         self.completed: dict[str, bool] = {}
         self.started_utc = common.utc_now()
-        # The engine is part of the run id, so a Whisper run can never land in
-        # or be mistaken for a Canary folder. The historical Canary runs carry no
-        # engine token and are identified by its absence.
+        # The engine is part of the run id, so a Parakeet run can never land
+        # in - or be mistaken for - a Whisper or a Canary folder. The historical
+        # Canary runs carry no engine token and are identified by its absence.
         self.run_id = common.make_run_id(
             self.started_utc, options.mode, options.device_label,
-            prefix="audio_whisper",
+            prefix="audio_parakeet",
         )
         self.run = RunDirectory(self.run_id, options.results_root)
 
@@ -566,7 +570,7 @@ class AudioBenchmark:
         self.load_seconds: dict[str, float] = {}
 
         self.vad = None
-        self.whisper = None
+        self.parakeet = None
         self.adapter = None
         self.stt_available = False
         self.stt_reason = ""
@@ -618,10 +622,12 @@ class AudioBenchmark:
         print(f"Architecture      : {info['architecture']} ({info['logical_cpus']} logical CPUs)")
         print(f"RAM               : {common.gib(info['total_ram_bytes'])}")
         print(f"Python            : {info['python']}   ONNX Runtime {info['onnxruntime']}")
-        print(f"STT model         : {self.config.whisper['model']} "
-              f"({self.config.whisper['runtime']}, {self.config.whisper['device']}, "
-              f"{self.config.whisper['compute_type']}, beam "
-              f"{self.config.whisper['beam_size']})")
+        print(f"STT model         : {self.config.parakeet['model']} "
+              f"({self.config.parakeet['runtime']}, "
+              f"{self.config.parakeet['device']}, "
+              f"{self.config.parakeet['precision']}, "
+              f"{self.config.parakeet['decoder_family']} "
+              f"{self.config.parakeet['decoder_strategy']})")
         print("Privacy model     : DeBERTa-v3-xsmall INT8")
         print(f"Privacy model SHA : {self.artifact['measured_sha256']}")
         print(f"Audio clips       : {len(self.clips)} "
@@ -669,28 +675,31 @@ class AudioBenchmark:
             print("  STT      skipped (--skip-stt)")
             return
         try:
-            from integrated_pipeline.whisper_adapter import (
-                WhisperAdapter,
-                describe_whisper_backend,
+            from integrated_pipeline.parakeet_adapter import (
+                ParakeetAdapter,
+                describe_parakeet_backend,
             )
 
-            backend = describe_whisper_backend()
+            backend = describe_parakeet_backend()
             if not backend.get("available"):
                 raise RuntimeError(
-                    "faster-whisper backend unavailable: "
+                    "NeMo/torch Parakeet backend unavailable: "
                     + "; ".join(backend.get("errors", ["unknown"]))
                 )
             common.quieten_stt()
             started = time.perf_counter()
-            self.whisper = WhisperAdapter(self.config)
+            self.parakeet = ParakeetAdapter(self.config)
             # Loading includes the one-second warmup decode, exactly as the live
             # deployment does it, so "STT loaded" means "ready to transcribe".
-            self.whisper.load()
+            # It also proves the TDT branch is the active decoder and refuses
+            # the CTC one, so a run folder cannot silently record the wrong
+            # decoder for this checkpoint.
+            self.parakeet.load()
             self.load_seconds["stt"] = time.perf_counter() - started
             self.stage_rss["stt_loaded"] = common.rss_bytes()
             self.stt_available = True
-            self.stt_backend = backend
-            print(f"  STT      whisper {self.config.whisper['model']:16} "
+            self.stt_backend = {**backend, **self.parakeet.audit()}
+            print(f"  STT      parakeet {self.config.parakeet['model']:15} "
                   f"loaded in {self.load_seconds['stt']:.2f} s")
         except Exception as exc:
             self.stt_reason = f"{type(exc).__name__}: {exc}"
@@ -723,7 +732,7 @@ class AudioBenchmark:
             segment_id=f"audio-benchmark-{clip_id}-0",
         )
         started = time.perf_counter()
-        transcript = self.whisper.transcribe_segment(segment)
+        transcript = self.parakeet.transcribe_segment(segment)
         return transcript.text, time.perf_counter() - started
 
     def _run_vad(self, audio) -> tuple[float, dict[str, Any]]:
@@ -1055,32 +1064,40 @@ class AudioBenchmark:
         self.stt_metrics = {
             "run_id": self.run_id,
             "available": True,
-            "engine": "whisper",
-            "model": self.config.whisper["model"],
-            "model_id": self.config.whisper["model_id"],
+            "engine": "parakeet",
+            "model": self.config.parakeet["model"],
+            "model_id": self.config.parakeet["model_id"],
+            "revision": self.config.parakeet["revision"],
+            "checkpoint_sha256": self.config.parakeet["sha256"],
             "backend": (
-                f"{self.config.whisper['runtime']}_"
-                f"{self.config.whisper['device']}_"
-                f"{self.config.whisper['compute_type']}"
+                f"{self.config.parakeet['runtime']}_"
+                f"{self.config.parakeet['device']}_"
+                f"{self.config.parakeet['precision']}"
             ),
-            "runtime": self.config.whisper["runtime"],
-            "runtime_version": (self.stt_backend or {}).get("faster_whisper_version"),
-            "device": self.config.whisper["device"],
-            "compute_type": self.config.whisper["compute_type"],
-            "decoding": {"strategy": "beam",
-                         "beam_size": self.config.whisper["beam_size"],
-                         "language": self.config.whisper["language"],
-                         "punctuation_and_capitalisation": self.config.whisper["pnc"],
-                         "initial_prompt_characters": len(
-                             (self.whisper.initial_prompt if self.whisper else "")
-                         )},
+            "runtime": self.config.parakeet["runtime"],
+            "runtime_version": (self.stt_backend or {}).get("nemo_toolkit_version"),
+            "torch_version": (self.stt_backend or {}).get("torch_version"),
+            "device": self.config.parakeet["device"],
+            "compute_type": self.config.parakeet["precision"],
+            # Read back off the loaded model rather than off the config, so this
+            # records the decoder that actually ran.
+            "decoding": {
+                "strategy": self.config.parakeet["decoder_strategy"],
+                "decoder_family": self.config.parakeet["decoder_family"],
+                "greedy_max_symbols": self.config.parakeet["greedy_max_symbols"],
+                "temperature": self.config.parakeet["temperature"],
+                "active_decoder": (
+                    self.parakeet.active_decoder if self.parakeet else {}
+                ),
+            },
             "note": (
                 "A controlled deployment check on a few dozen clips, not a "
                 "speech-recognition benchmark. Both sides of every WER are "
                 "lowercased and stripped of punctuation before scoring, which is "
-                "the same definition the Canary runs used - Canary produced "
-                "unpunctuated lowercase text (pnc=no) and Whisper punctuates, so "
-                "normalising both sides is what keeps the two comparable."
+                "the same definition the Canary and Whisper runs used - Canary "
+                "produced unpunctuated lowercase text (pnc=no) while Whisper and "
+                "Parakeet punctuate, so normalising both sides is what keeps the "
+                "three comparable."
             ),
             "overall": aggregate(scored),
             "by_subset": {
@@ -1113,10 +1130,10 @@ class AudioBenchmark:
             "definition": (
                 "the same Levenshtein word error rate, after spoken number words "
                 "have been folded to numerals on both the reference and the "
-                "hypothesis. Identical treatment on both sides and for both "
-                "engines, which is what makes Canary and Whisper comparable; the "
-                "raw figure above cannot be, because Canary wrote numbers as "
-                "words and Whisper writes numerals."
+                "hypothesis. Identical treatment on both sides and for every "
+                "engine, which is what makes Canary, Whisper and Parakeet "
+                "comparable; the raw figure above cannot be, because Canary wrote "
+                "numbers as words and Whisper and Parakeet write numerals."
             ),
             "clips": len(normalised),
             "reference_words": normalised_words,
@@ -1477,18 +1494,22 @@ class AudioBenchmark:
             "benchmark": "audio_pipeline",
             # Recorded so the figures notebook can separate this run from the
             # frozen Canary runs, which predate these keys and default to canary.
-            "pipeline_version": "V4",
+            "pipeline_version": "V5",
             "pipeline_root": common.relative(common.PRODUCTION_ROOT),
-            "stt_engine": "whisper",
-            "stt_model": self.config.whisper["model"],
-            "stt_model_id": self.config.whisper["model_id"],
-            "stt_runtime": self.config.whisper["runtime"],
+            "stt_engine": "parakeet",
+            "stt_model": self.config.parakeet["model"],
+            "stt_model_id": self.config.parakeet["model_id"],
+            "stt_model_revision": self.config.parakeet["revision"],
+            "stt_checkpoint_sha256": self.config.parakeet["sha256"],
+            "stt_runtime": self.config.parakeet["runtime"],
             "stt_runtime_version": (self.stt_backend or {}).get(
-                "faster_whisper_version"
+                "nemo_toolkit_version"
             ),
-            "stt_device": self.config.whisper["device"],
-            "stt_compute_type": self.config.whisper["compute_type"],
-            "stt_beam_size": self.config.whisper["beam_size"],
+            "stt_torch_version": (self.stt_backend or {}).get("torch_version"),
+            "stt_device": self.config.parakeet["device"],
+            "stt_compute_type": self.config.parakeet["precision"],
+            "stt_decoder_family": self.config.parakeet["decoder_family"],
+            "stt_decoder_strategy": self.config.parakeet["decoder_strategy"],
             "mode": self.options.mode,
             "smoke_test": self.options.smoke_test,
             "device_label": self.options.device_label or None,
@@ -1632,11 +1653,12 @@ class AudioBenchmark:
             f"- **Clips scored:** {len(self.clip_results)} of {totals['clips']} available "
             f"({selected_seconds:.1f} s of audio, {self.options.mode} mode)",
             f"- **Speech recognizer:** "
-            + (f"faster-whisper {self.config.whisper['model']} "
-               f"({self.config.whisper['runtime']}, "
-               f"{self.config.whisper['device']}, "
-               f"{self.config.whisper['compute_type']}, "
-               f"beam {self.config.whisper['beam_size']})" if self.stt_available
+            + (f"NVIDIA {self.config.parakeet['model']} "
+               f"({self.config.parakeet['runtime']}, "
+               f"{self.config.parakeet['device']}, "
+               f"{self.config.parakeet['precision']}, "
+               f"{self.config.parakeet['decoder_family']} "
+               f"{self.config.parakeet['decoder_strategy']})" if self.stt_available
                else f"UNAVAILABLE - {self.stt_reason}"),
             f"- **Started / finished (UTC):** {config_payload['started_utc'][:19]} -> "
             f"{config_payload['finished_utc'][:19]} "
@@ -1688,9 +1710,9 @@ class AudioBenchmark:
                 "The three rows above use the benchmark's standing definition:",
                 "Levenshtein over lowercased, punctuation-stripped words. It is",
                 "comparable across devices for one recognizer and **not** across",
-                "recognizers, because Canary wrote spoken numbers as words and",
-                "Whisper writes numerals. The engine-comparable figure folds",
-                "numbers to numerals on both sides:",
+                "recognizers, because Canary wrote spoken numbers as words while",
+                "Whisper and Parakeet write numerals. The engine-comparable figure",
+                "folds numbers to numerals on both sides:",
                 "",
                 "| Metric | Value |",
                 "|---|---|",
@@ -1861,8 +1883,10 @@ class AudioBenchmark:
                 lines += [
                     "### Spoken numbers rebuilt after masking",
                     "",
-                    f"The recognizer runs with `pnc: no`, so numbers arrive as digit "
-                    f"words. Where the privacy model missed one - already counted as a "
+                    f"Parakeet punctuates, but it writes a number read aloud digit "
+                    f"by digit as digit *words* rather than as a numeral, so the "
+                    f"V3-era shape is back under V5 after being absent under Whisper. "
+                    f"Where the privacy model missed one - already counted as a "
                     f"privacy-model failure above - the display renderer "
                     f"(`app/digit_normalizer.py`, which runs after masking by design) "
                     f"rewrote the surviving words into a numeral of "
@@ -1946,7 +1970,7 @@ class AudioBenchmark:
         return 0
 
     def close(self) -> None:
-        for component in (self.vad, self.whisper):
+        for component in (self.vad, self.parakeet):
             try:
                 if component is not None:
                     component.close()
@@ -1974,7 +1998,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="Full_Pipeline_Audio_Benchmark.py",
         description=(
             "OnKith end-to-end audio pipeline benchmark. Runs committed WAV clips "
-            "through the real deployment - Silero VAD, Whisper STT, transcript "
+            "through the real deployment - Silero VAD, Parakeet STT, transcript "
             "normalisation, DeBERTa-v3-xsmall INT8 masking, spoken-digit rendering - "
             "and records latency, real-time factor, memory, word error rate and how "
             "much private information survives imperfect speech recognition."

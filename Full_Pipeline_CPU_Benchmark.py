@@ -22,16 +22,20 @@ Everything lands in ``research_results/cpu_benchmarks/<run_id>/``,
 machine-readable, plus a ``benchmark_summary.md`` you can read directly.
 ``Research_Paper_Figures.ipynb`` discovers those folders automatically.
 
-The run id carries ``whisper`` and the config records ``"stt_engine":
-"whisper"``, so a V4 run is never confused with - or written into - one of the
-frozen Canary result folders.
+The measured pipeline is ``FullPipeline_V5``, selected by
+``privacy_eval.benchmark_common.PRODUCTION_ROOT``. The run id carries
+``parakeet`` and the config records ``"stt_engine": "parakeet"``, so a V5 run is
+never confused with - or written into - a V4 Whisper folder or one of the frozen
+Canary folders.
 
-Expect the ``stt_whisper`` stage to be slow and to report a poor real-time
-factor. It probes the recognizer with a synthetic tone - identical bytes on
-every device, which is what makes it a cross-device timing comparison - and
-Whisper, with no words to find in a tone, decodes against its own prompt until
-its 30 second window fills. The stage records that in its own ``note``. The
-recognizer's cost on real speech is in ``Full_Pipeline_Audio_Benchmark.py``.
+The ``stt_parakeet`` stage probes the recognizer with a synthetic tone -
+identical bytes on every device, which is what makes it a cross-device timing
+comparison. It is **not** an engine-to-engine comparison: Whisper decoded
+against its own prompt until its 30 second window filled, while Parakeet's TDT
+decoder emits blanks and stops, so the two engines fail the same probe in
+completely different ways. The stage records that in its own ``note``. Each
+recognizer's cost on real speech is in ``Full_Pipeline_Audio_Benchmark.py``,
+which is where the two engines can actually be compared.
 
 This file is deliberately thin. The measurement lives in
 ``model/privacy_evaluation/privacy_eval/cpu_benchmark.py``, next to the row
@@ -47,7 +51,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
 
-if not (REPO_ROOT / "FullPipeline_V4").is_dir():
+if not (REPO_ROOT / "FullPipeline_V5").is_dir():
     raise SystemExit("Run this script from inside the OnKith repository.")
 if str(EVALUATION_ROOT) not in sys.path:
     sys.path.insert(0, str(EVALUATION_ROOT))

@@ -171,7 +171,10 @@ class ArtifactIdentityTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        sys.path.insert(0, str(common.PRODUCTION_ROOT))
+        # Not a bare sys.path.insert: another test module may already have
+        # imported FullPipeline_V4's integrated_pipeline, and an insert does
+        # not dislodge sys.modules. ensure_import_paths does.
+        common.ensure_import_paths()
         from integrated_pipeline.config import PipelineConfig
 
         cls.config = PipelineConfig(root=common.PRODUCTION_ROOT)
@@ -248,7 +251,10 @@ class EntryPointTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("from privacy_eval.cpu_benchmark import main", text)
-        self.assertLess(len(text.splitlines()), 60)
+        # Docstring plus a dozen lines of path setup. The bound is a guard
+        # against measurement logic creeping back into the entry point, not a
+        # style rule, so it has room for the explanation a reader needs.
+        self.assertLess(len(text.splitlines()), 80)
 
     def test_the_obsolete_notebook_is_gone(self) -> None:
         """One canonical runner. Two implementations would drift apart."""
@@ -260,8 +266,9 @@ class EntryPointTests(unittest.TestCase):
 
     def test_both_benchmarks_expose_a_help_only_command_line(self) -> None:
         from privacy_eval import audio_benchmark as audio
+        from privacy_eval import end_to_end_benchmark as e2e
 
-        for parser in (cpu.build_parser(), audio.build_parser()):
+        for parser in (cpu.build_parser(), audio.build_parser(), e2e.build_parser()):
             with self.assertRaises(SystemExit) as raised:
                 parser.parse_args(["--help"])
             self.assertEqual(raised.exception.code, 0)

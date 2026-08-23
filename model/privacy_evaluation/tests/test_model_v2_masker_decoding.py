@@ -32,9 +32,14 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[1]
-for extra in (ROOT, REPO_ROOT / "FullPipeline_V4"):
-    if str(extra) not in sys.path:
-        sys.path.insert(0, str(extra))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# The pipeline root comes from the harness, not from a second copy of the name
+# here; two roots offering `integrated_pipeline` is what made this suite
+# order-dependent.
+from privacy_eval.benchmark_common import ensure_import_paths  # noqa: E402
+
+ensure_import_paths()
 
 from privacy_eval.dataset_metrics import evaluate_spans  # noqa: E402
 from privacy_eval.model_v2_adapter import MASKER_SOURCE, ModelV2OnnxMasker  # noqa: E402

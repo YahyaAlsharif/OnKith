@@ -28,7 +28,13 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V4"
+#: The pipeline under measurement. Moving this one line is what retargets both
+#: benchmark entry points; everything else about the methodology is unchanged,
+#: which is what keeps a V5 run comparable with the committed V4 folders.
+PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V5"
+#: The superseded Whisper pipeline. Still present and still runnable; nothing
+#: here imports it, and its committed result folders are read, never rewritten.
+WHISPER_V4_ROOT = REPO_ROOT / "FullPipeline_V4"
 #: The superseded Canary pipeline, kept in the archive. Nothing in these
 #: benchmarks imports it: the Canary numbers in research_results/ are frozen
 #: and are read from disk, never
@@ -51,6 +57,19 @@ def ensure_import_paths() -> None:
     Neither is a pip package; both are imported by bare name, exactly as the
     notebooks did. Importing them is the whole point - a benchmark that
     reimplemented the deployment path would be measuring something else.
+
+    Two pipelines now ship a package called ``integrated_pipeline``, so a bare
+    import resolves to whichever root reached ``sys.path`` first and, once
+    imported, stays resolved no matter what a later insert says. That is why
+    ``PRODUCTION_ROOT`` here is the *only* pipeline root anything under
+    ``privacy_eval/`` puts on the path: ``adapters.py`` and
+    ``model_v2_adapter.py`` read it from this module rather than naming a root
+    of their own. Whichever of them is imported first, they all mean the same
+    package, and a benchmark cannot quietly measure a pipeline its run id does
+    not name. The privacy components are byte-identical across V4 and V5, so
+    following this root costs the model-evaluation harness nothing;
+    ``test_evaluation_and_production_share_one_masker`` fails if that stops
+    being true.
     """
 
     for extra in (PRODUCTION_ROOT, EVALUATION_ROOT):

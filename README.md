@@ -23,9 +23,26 @@
 
 ---
 
-> **Pipeline V4 is the current deployment.**
+> **V5 is the demonstration pipeline. V4 is still the deployment.**
 >
-> The active pipeline is [`FullPipeline_V4/`](FullPipeline_V4/): V3's
+> [`FullPipeline_V5/`](FullPipeline_V5/) swaps Whisper for NVIDIA
+> **Parakeet 110M TDT** and adds a complete assistant layer *after* the privacy
+> gate: wake/intent routing, a **masked-text-only** LLM request, local reply
+> rehydration, local TTS and a localhost UI. It is what a live demonstration
+> should run, because it is the only pipeline that shows the whole point of the
+> project — a private value existing locally, only its placeholder crossing the
+> boundary, and the value restored on the way back.
+>
+> It has **not** replaced V4. On the same 44 clips through the same benchmark
+> code, Parakeet more than halves word error rate (0.0644 against 0.1795) and
+> runs three times faster (STT RTF 0.114 against 0.360), but it leaks *more*
+> private characters (0.2701 against 0.1686) and needs ~577 MiB more RSS.
+> Parakeet writes spoken digits as words and spoken addresses with a space
+> before the TLD, and the privacy model was trained on written English. Until
+> that is fixed the deployment claim stays with V4. See
+> [`FullPipeline_V5/README.md`](FullPipeline_V5/README.md).
+>
+> The active *deployment* pipeline is [`FullPipeline_V4/`](FullPipeline_V4/): V3's
 > architecture with **faster-whisper `base.en`** (CTranslate2, CPU, INT8, beam 5)
 > in place of NVIDIA Canary 180M Flash. Everything downstream of the recognizer -
 > VAD, segmentation, transcript merging, DeBERTa-v3-xsmall INT8 masking, span
@@ -567,30 +584,40 @@ Three entry points at the repository root produce every number above. None of
 them trains a model, re-exports ONNX, or touches the frozen OOD holdout.
 
 ```bash
-python Full_Pipeline_CPU_Benchmark.py       # 2,000-row text benchmark, ~5 min x86 / ~6 min Pi
-python Full_Pipeline_Audio_Benchmark.py     # 44 clips end to end, ~4 min x86 / ~11 min Pi
+python Full_Pipeline_CPU_Benchmark.py           # 2,000-row text benchmark, ~3 min x86 / ~6 min Pi
+python Full_Pipeline_Audio_Benchmark.py         # 44 clips end to end, ~1 min x86 / ~11 min Pi
+python Full_Pipeline_V5_EndToEnd_Benchmark.py   # 24 clips through the LLM round trip
 ```
 
-Both accept `--smoke-test` for a fast check and `--help` for every option. They
-are plain scripts, not notebooks, because the Raspberry Pi has no Jupyter and one
-implementation that runs everywhere beats two that can drift. Results land in
-`research_results/cpu_benchmarks/<run_id>/`, machine-readable plus a
+All three accept `--smoke-test` for a fast check and `--help` for every option.
+They are plain scripts, not notebooks, because the Raspberry Pi has no Jupyter
+and one implementation that runs everywhere beats two that can drift. Results
+land in `research_results/cpu_benchmarks/<run_id>/`, machine-readable plus a
 `benchmark_summary.md` you can read directly.
 
-The audio benchmark needs the production recognizer, which is not in the default
-install:
+All three measure the pipeline named by
+`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V5`.
+Moving that one line is what retargets them; everything else about the
+methodology is unchanged, which is what keeps a V5 run comparable with the
+committed V4 folders.
+
+They need the production recognizer, which is not in the default install:
 
 ```bash
-pip install --requirement FullPipeline_V4/requirements-rpi.txt      # or -windows.txt
+pip install --requirement FullPipeline_V5/requirements-rpi.txt      # or -windows.txt
 ```
 
-That brings faster-whisper 1.2.1 on CTranslate2. The `base.en` weights are
-fetched once on first use and cached under `~/.cache/huggingface`; nothing is
-committed for them, which is why the deployment config pins the package version,
-the model name and the decoding settings rather than a file hash. Without the
-recognizer the benchmark still verifies the fixtures, runs the VAD and both
-reference-text control arms, records the memory profile, reports exactly what is
-missing, and exits with code 2. It never fabricates a transcript.
+That brings torch and `nemo_toolkit[asr]` for Parakeet. The pinned 438 MiB
+`.nemo` checkpoint is fetched once, verified against its byte size and SHA-256,
+and cached under `~/.cache/huggingface`. Without the recognizer the audio
+benchmark still verifies the fixtures, runs the VAD and both reference-text
+control arms, records the memory profile, reports exactly what is missing, and
+exits with code 2. It never fabricates a transcript.
+
+The end-to-end benchmark additionally needs `GROQ_API_KEY` for its live leg.
+Without one it still runs everything local, still builds and audits the outbound
+payload, and reports the API sections as `not run` with exit code 2 — see
+[`FullPipeline_V5/README.md`](FullPipeline_V5/README.md).
 
 Then regenerate the figures on any machine with the repository:
 
@@ -667,7 +694,13 @@ that package again would need the NeMo stack reinstalled.
 
 ```text
 OnKith/
-├── FullPipeline_V4/          Production pipeline — the current one
+├── FullPipeline_V5/          Demonstration pipeline — Parakeet + masked LLM round trip
+│   ├── app/                  Everything V4 has, plus assistant, llm, rehydrate,
+│   │                         speech, light, assistant_surface, post_mask_assistant
+│   ├── integrated_pipeline/  Parakeet adapter; the privacy path is V4's, unchanged
+│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD, Piper voice config
+│   └── .env.example          Local, secret-free configuration template
+├── FullPipeline_V4/          Production pipeline — still the deployment claim
 │   ├── app/                  Entry point, audio runtime, live preview, terminal UI
 │   ├── integrated_pipeline/  VAD, Whisper adapter, spoken-form rewrite, masking,
 │   │                         span merge, storage, config
@@ -686,10 +719,13 @@ OnKith/
 │   └── FullPipeline_V3/      Frozen Canary baseline and implementation
 ├── Full_Pipeline_CPU_Benchmark.py
 ├── Full_Pipeline_Audio_Benchmark.py
+├── Full_Pipeline_V5_EndToEnd_Benchmark.py
 └── Research_Paper_Figures.ipynb
 ```
 
-`FullPipeline_V4/` is the deployment package and is self-contained. The V3
+`FullPipeline_V5/` and `FullPipeline_V4/` are both self-contained deployment
+packages. V5 is what a demonstration should run; V4 is what the deployment
+claim still rests on. The V3
 Canary implementation is frozen at
 [`archive/FullPipeline_V3/`](archive/FullPipeline_V3/); its saved measurements
 remain live comparison evidence even though the implementation is historical.
