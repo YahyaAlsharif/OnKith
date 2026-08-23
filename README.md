@@ -23,31 +23,36 @@
 
 ---
 
-> **V5 is the demonstration pipeline. V4 is still the deployment.**
+> **V6 is the current pipeline. The academic report evaluates V4.**
 >
-> [`FullPipeline_V5/`](FullPipeline_V5/) swaps Whisper for NVIDIA
-> **Parakeet 110M TDT** and adds a complete assistant layer *after* the privacy
-> gate: wake/intent routing, a **masked-text-only** LLM request, local reply
-> rehydration, local TTS and a localhost UI. It is what a live demonstration
-> should run, because it is the only pipeline that shows the whole point of the
-> project — a private value existing locally, only its placeholder crossing the
-> boundary, and the value restored on the way back.
+> [`FullPipeline_V6/`](FullPipeline_V6/) is the one pipeline to run. Everything
+> from the microphone to the masked transcript is **V4's code, byte for byte** -
+> Silero VAD, the segmenter, **faster-whisper `base.en`** (CTranslate2, CPU,
+> INT8, beam 5), transcript merging, DeBERTa-v3-xsmall INT8 masking, span
+> merging, the spoken-form rewrite, spoken-digit rendering, storage and the
+> terminal UI. On top of it sits the assistant layer built in V5: wake/intent
+> routing, a **masked-text-only** LLM request, local reply rehydration, local
+> TTS and a localhost UI. It is what a live demonstration should run, because it
+> is the only pipeline that shows the whole point of the project — a private
+> value existing locally, only its placeholder crossing the boundary, and the
+> value restored on the way back.
 >
-> It has **not** replaced V4. On the same 44 clips through the same benchmark
-> code, Parakeet more than halves word error rate (0.0644 against 0.1795) and
-> runs three times faster (STT RTF 0.114 against 0.360), but it leaks *more*
-> private characters (0.2701 against 0.1686) and needs ~577 MiB more RSS.
-> Parakeet writes spoken digits as words and spoken addresses with a space
-> before the TLD, and the privacy model was trained on written English. Until
-> that is fixed the deployment claim stays with V4. See
-> [`FullPipeline_V5/README.md`](FullPipeline_V5/README.md).
+> **The final report is not rewritten to V6, and should not be.** It evaluates
+> V4, on both devices, and those results stand. Because V6's recognizer and
+> privacy core are V4's files unchanged - a test fails on any drift, and a
+> second runs fixed text through V3, V4 and V6 in isolated interpreters
+> demanding identical masking - V4's Raspberry Pi measurements still describe
+> the local path V6 runs. What V6 does **not** have is Pi measurements of its
+> own.
 >
-> The active *deployment* pipeline is [`FullPipeline_V4/`](FullPipeline_V4/): V3's
-> architecture with **faster-whisper `base.en`** (CTranslate2, CPU, INT8, beam 5)
-> in place of NVIDIA Canary 180M Flash. Everything downstream of the recognizer -
-> VAD, segmentation, transcript merging, DeBERTa-v3-xsmall INT8 masking, span
-> merging, spoken-digit rendering, storage, UI - is V3's code, and a regression
-> test runs identical text through both packages and requires identical output.
+> V5 was the Parakeet experiment. On the same 44 clips Parakeet more than halved
+> word error rate (0.0644 against 0.1795) and ran three times faster (STT RTF
+> 0.114 against 0.360), but it leaked *more* private characters (0.2701 against
+> 0.1686), needed ~577 MiB more RSS, and brought a ~2 GB torch/NeMo dependency
+> tree with packages that have no aarch64 wheels. The assistant layer it
+> produced was kept; the recognizer was not, and V5 was deliberately never taken
+> to the Pi. Both predecessors are preserved in
+> [`archive/`](archive/) — see [`archive/README.md`](archive/README.md).
 > V4 adds exactly one thing to that path, for a measured reason:
 > a small deterministic rewrite of spoken address forms in front of the
 > detectors, described under
@@ -144,7 +149,14 @@ masked text  ──▶  local SQLite  ──▶  terminal / downstream use
 ```
 
 Everything above the last line runs on the device. The production package is
-[`FullPipeline_V4/`](FullPipeline_V4/).
+[`FullPipeline_V6/`](FullPipeline_V6/).
+
+| Version | What it is | Recognizer | Status |
+|---|---|---|---|
+| V3 | Canary baseline | NVIDIA Canary 180M Flash | archived, frozen results |
+| V4 | **The system the final academic report evaluates** | faster-whisper `base.en` | archived, frozen results, core reused by V6 |
+| V5 | Parakeet + assistant experiment | NVIDIA Parakeet 110M TDT | archived; no Pi evaluation, by decision |
+| **V6** | **Current pipeline: V4 core + V5 assistant layer** | faster-whisper `base.en` | maintained; workstation benchmarks only |
 
 Three details make the masked output trustworthy rather than merely plausible:
 
@@ -476,7 +488,7 @@ carries an identifier-scale number, V4 released **none** of them in legible form
 and V3 released two. The mechanism is not better masking — it is that Canary's
 digit-word spellings evaded the structured recognizer and were then reassembled
 into numerals by the display renderer, which Whisper's numerals do not do.
-See [`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md); the
+See [`FullPipeline_V6/KNOWN_ISSUES.md`](FullPipeline_V6/KNOWN_ISSUES.md); the
 renderer is unchanged and the behaviour is suppressed by orthography, not fixed.
 
 Attribution of the 12 entities V4 still leaks: **5** where the recognizer
@@ -544,7 +556,7 @@ way, and the result was the domain masked and the mailbox name released in the
 clear. It affected three of the three annotated EMAIL entities, and the same
 shape with "slash" affected the one annotated URL.
 
-`FullPipeline_V4/integrated_pipeline/spoken_form_normalizer.py` rewrites two
+`FullPipeline_V6/integrated_pipeline/spoken_form_normalizer.py` rewrites two
 shapes — `<token> at <domain>` and `<domain> slash <path>` — into their written
 form **for the detectors only**. Every span found on the rewritten view is
 projected back onto the original text before anything is masked, so the released
@@ -574,7 +586,7 @@ and it does, on three clips where it masks the spelled-out form — that is a
 model false negative, not an interface problem, and the fix belongs in the next
 training generation rather than in a rewrite rule. Both distinctions are kept
 explicit in
-[`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md).
+[`FullPipeline_V6/KNOWN_ISSUES.md`](FullPipeline_V6/KNOWN_ISSUES.md).
 
 ---
 
@@ -586,7 +598,7 @@ them trains a model, re-exports ONNX, or touches the frozen OOD holdout.
 ```bash
 python Full_Pipeline_CPU_Benchmark.py           # 2,000-row text benchmark, ~3 min x86 / ~6 min Pi
 python Full_Pipeline_Audio_Benchmark.py         # 44 clips end to end, ~1 min x86 / ~11 min Pi
-python Full_Pipeline_V5_EndToEnd_Benchmark.py   # 24 clips through the LLM round trip
+python Full_Pipeline_V6_EndToEnd_Benchmark.py   # 6 live clips through the LLM round trip
 ```
 
 All three accept `--smoke-test` for a fast check and `--help` for every option.
@@ -596,7 +608,10 @@ land in `research_results/cpu_benchmarks/<run_id>/`, machine-readable plus a
 `benchmark_summary.md` you can read directly.
 
 All three measure the pipeline named by
-`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V5`.
+`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V6`.
+V6 results are written to `research_results/v6_benchmarks/`, deliberately apart
+from the frozen V3/V4/V5 folders in `research_results/cpu_benchmarks/` that the
+figures notebook discovers by globbing.
 Moving that one line is what retargets them; everything else about the
 methodology is unchanged, which is what keeps a V5 run comparable with the
 committed V4 folders.
@@ -604,7 +619,7 @@ committed V4 folders.
 They need the production recognizer, which is not in the default install:
 
 ```bash
-pip install --requirement FullPipeline_V5/requirements-rpi.txt      # or -windows.txt
+pip install --requirement FullPipeline_V6/requirements-rpi.txt      # or -windows.txt
 ```
 
 That brings torch and `nemo_toolkit[asr]` for Parakeet. The pinned 438 MiB
@@ -617,7 +632,7 @@ exits with code 2. It never fabricates a transcript.
 The end-to-end benchmark additionally needs `GROQ_API_KEY` for its live leg.
 Without one it still runs everything local, still builds and audits the outbound
 payload, and reports the API sections as `not run` with exit code 2 — see
-[`FullPipeline_V5/README.md`](FullPipeline_V5/README.md).
+[`FullPipeline_V6/README.md`](FullPipeline_V6/README.md).
 
 Then regenerate the figures on any machine with the repository:
 
@@ -636,10 +651,10 @@ comparison and prediction-parity figures on its own, and writes
 
 ```bash
 python -m pytest model/privacy_evaluation/tests -q     # evaluation harness, fixtures, metrics
-cd FullPipeline_V4 && python -m pytest -q              # production pipeline
+cd FullPipeline_V6 && python -m pytest -q              # production pipeline
 ```
 
-`model/privacy_evaluation/tests/test_masking_parity_v3_v4.py` runs fixed text
+`model/privacy_evaluation/tests/test_masking_parity.py` runs fixed text
 through both pipeline packages in separate interpreters and requires identical
 masked output, spans and rendered text. It is what keeps "V4 is V3 with a
 different recognizer" a checked statement rather than a claim.
@@ -649,12 +664,12 @@ different recognizer" a checked statement rather than a claim.
 ## Running the production pipeline
 
 Quick start below; the full instructions are
-[`FullPipeline_V4/README.md`](FullPipeline_V4/README.md).
+[`FullPipeline_V6/README.md`](FullPipeline_V6/README.md).
 
 ### Windows (development and testing — WSL not required)
 
 ```powershell
-cd FullPipeline_V4
+cd FullPipeline_V6
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip wheel setuptools
@@ -672,7 +687,7 @@ INT8 ONNX, masks the text, and prints the released transcript.
 ### Raspberry Pi OS (64-bit)
 
 ```bash
-cd FullPipeline_V4
+cd FullPipeline_V6
 chmod +x install_pi.sh run_live.sh check_pi.sh
 ./install_pi.sh          # installs the pinned runtime
 
@@ -694,19 +709,17 @@ that package again would need the NeMo stack reinstalled.
 
 ```text
 OnKith/
-├── FullPipeline_V5/          Demonstration pipeline — Parakeet + masked LLM round trip
-│   ├── app/                  Everything V4 has, plus assistant, llm, rehydrate,
-│   │                         speech, light, assistant_surface, post_mask_assistant
-│   ├── integrated_pipeline/  Parakeet adapter; the privacy path is V4's, unchanged
-│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD, Piper voice config
-│   └── .env.example          Local, secret-free configuration template
-├── FullPipeline_V4/          Production pipeline — still the deployment claim
-│   ├── app/                  Entry point, audio runtime, live preview, terminal UI
+├── FullPipeline_V6/          The current pipeline — V4 core + V5 assistant layer
+│   ├── app/                  Entry point, audio runtime, live preview, terminal UI,
+│   │                         plus assistant, llm, rehydrate, speech, light,
+│   │                         assistant_surface, post_mask_assistant
 │   ├── integrated_pipeline/  VAD, Whisper adapter, spoken-form rewrite, masking,
-│   │                         span merge, storage, config
-│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD
-│   ├── scripts/              Pi checks, release packaging
-│   └── tests/                Production regression suite
+│   │                         span merge, storage, config — all V4's, unchanged
+│   ├── models/               DeBERTa INT8 + tokenizer, Silero VAD, Piper voice config
+│   ├── scripts/              Pi checks, release packaging, model download
+│   ├── tests/                Production regression suite, assistant suite,
+│   │                         V4-parity and independence gates
+│   └── .env.example          Documents the root .env; secret-free
 ├── model/                    Research: training, data preparation, evaluation
 │   ├── baseline_model/       BiLSTM span baseline and the binary classifier before it
 │   ├── TinyBERT-4/           Model V1 — superseded, kept for provenance
@@ -716,18 +729,22 @@ OnKith/
 │   └── data/                 Source-corpus builders (outputs stay local)
 ├── research_results/         Benchmark runs, figures, tables, summaries
 ├── archive/                  Superseded pipelines and STT experiments
-│   └── FullPipeline_V3/      Frozen Canary baseline and implementation
+│   ├── FullPipeline_V3/      Frozen Canary baseline and implementation
+│   ├── FullPipeline_V4/      The system the academic report evaluates; V6's core
+│   └── FullPipeline_V5/      Parakeet + assistant experiment; no Pi evaluation
 ├── Full_Pipeline_CPU_Benchmark.py
 ├── Full_Pipeline_Audio_Benchmark.py
-├── Full_Pipeline_V5_EndToEnd_Benchmark.py
+├── Full_Pipeline_V6_EndToEnd_Benchmark.py
 └── Research_Paper_Figures.ipynb
 ```
 
-`FullPipeline_V5/` and `FullPipeline_V4/` are both self-contained deployment
-packages. V5 is what a demonstration should run; V4 is what the deployment
-claim still rests on. The V3
-Canary implementation is frozen at
-[`archive/FullPipeline_V3/`](archive/FullPipeline_V3/); its saved measurements
+`FullPipeline_V6/` is a self-contained deployment package and the only
+maintained one; it imports nothing from `archive/`, which a test enforces. The
+V4 and V5 implementations are frozen at
+[`archive/FullPipeline_V4/`](archive/FullPipeline_V4/) and
+[`archive/FullPipeline_V5/`](archive/FullPipeline_V5/), and the V3
+Canary implementation at
+[`archive/FullPipeline_V3/`](archive/FullPipeline_V3/); their saved measurements
 remain live comparison evidence even though the implementation is historical.
 Everything in [`archive/`](archive/) is unmaintained and kept to show how the
 design evolved; see [`archive/README.md`](archive/README.md).
@@ -815,7 +832,7 @@ names, addresses and document numbers.
 - **Repeated mentions get different placeholder numbers.** One person named twice
   becomes `[GIVENNAME_1]` and `[GIVENNAME_2]`. Nothing leaks, but the stored
   transcript reads as two people. Documented in
-  [`FullPipeline_V4/KNOWN_ISSUES.md`](FullPipeline_V4/KNOWN_ISSUES.md).
+  [`FullPipeline_V6/KNOWN_ISSUES.md`](FullPipeline_V6/KNOWN_ISSUES.md).
 - **English only, 64-bit ARM only, single speaker assumed.** No diarisation.
 
 ## Future work

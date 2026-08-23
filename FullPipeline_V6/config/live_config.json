@@ -1,0 +1,97 @@
+{
+  "whisper": {
+    "engine": "faster-whisper",
+    "runtime": "ctranslate2",
+    "package": "faster-whisper",
+    "package_version": "1.2.1",
+    "model": "base.en",
+    "model_id": "Systran/faster-whisper-base.en",
+    "device": "cpu",
+    "compute_type": "int8",
+    "beam_size": 5,
+    "language": "en",
+    "sample_rate": 16000,
+    "names": [
+      "onkith"
+    ],
+    "initial_prompt": null,
+    "initial_prompt_note": "Left null so the hint is built from `names` and the command shapes in integrated_pipeline/whisper_adapter.py; renaming the device there re-biases the recogniser. Set a string here only to override it wholesale.",
+    "pnc": "yes"
+  },
+  "silero": {
+    "package": "silero-vad",
+    "package_version": "6.0.0",
+    "artifact": "models/silero/silero_vad.onnx",
+    "sha256": "597d30b3ec076608d059477bb14cfeffdf951bf5cae370d38f65d33bbfe82004",
+    "size_bytes": 2327524,
+    "opset": 16,
+    "sample_rate": 16000,
+    "frame_samples": 512,
+    "threshold": 0.5
+  },
+  "audio": {
+    "sample_rate": 16000,
+    "input_chunk_seconds": 0.1,
+    "input_chunk_samples": 1600,
+    "calibration_seconds": 0.75,
+    "calibration_samples": 12000,
+    "calibration_percentile": 95.0,
+    "energy_multiplier": 2.25,
+    "minimum_energy_gate": 1e-05,
+    "pre_roll_requested_seconds": 0.4,
+    "pre_roll_samples": 6144,
+    "start_confirm_requested_seconds": 0.2,
+    "start_confirm_samples": 3072,
+    "minimum_speech_requested_seconds": 0.2,
+    "minimum_speech_samples": 3072,
+    "dropout_bridge_samples": 2048,
+    "endpoint_silence_requested_seconds": 2.5,
+    "endpoint_silence_samples": 39936,
+    "maximum_unique_segment_requested_seconds": 8.5,
+    "maximum_unique_segment_samples": 136192,
+    "forced_overlap_requested_seconds": 0.35,
+    "forced_overlap_samples": 5632,
+    "trailing_context_requested_seconds": 0.35,
+    "trailing_context_samples": 5632,
+    "adjacent_submitted_overlap_samples": 11264,
+    "queue_max_chunks": 100,
+    "completed_segment_queue_max": 4,
+    "save_debug_audio": false,
+    "require_direct_16000_hz": true,
+    "streaming_resampler_validated": false
+  },
+  "buffer": {
+    "inactivity_seconds": 3.0,
+    "maximum_tokens": 256,
+    "maximum_duration_seconds": 15.0
+  },
+  "stage5": {
+    "mode": "immediate"
+  },
+  "storage": {
+    "filename": "session_transcript.db",
+    "journal_mode": "WAL",
+    "synchronous": "NORMAL",
+    "foreign_keys": true,
+    "busy_timeout_ms": 5000
+  },
+  "pii": {
+    "model": "OnKith Model V2 - DeBERTa-v3-xsmall token classifier, INT8",
+    "model_id": "microsoft/deberta-v3-xsmall",
+    "ontology_version": "model_v2.ontology.1",
+    "artifact": "models/deberta_pii/model_int8.onnx",
+    "tokenizer": "models/deberta_pii/tokenizer",
+    "label_map": "models/deberta_pii/config/model_v2_label_map.json",
+    "manifest": "models/deberta_pii/model_manifest.json",
+    "sha256": "bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8",
+    "size_bytes": 82278782,
+    "provider": "CPUExecutionProvider",
+    "context_limit": 512,
+    "overflow_stride": 128,
+    "label_count": 63,
+    "word_policy": "whole_word_union",
+    "structured_enabled": true,
+    "mask_policy_note": "Per-label masking policy. Every detected entity type defaults to true (masked). Set an entry to false to keep that label detected and reported but left visible in masked_text, e.g. \"CITY\": false lets \"what time is it in Riyadh\" through unchanged. Absent or malformed entries always mask.",
+    "mask_policy": {}
+  }
+}

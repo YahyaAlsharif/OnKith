@@ -5,16 +5,33 @@ evaluation evidence into report figures and measure what the deployment actually
 costs on real hardware.
 
 All three benchmark scripts measure the pipeline named by
-`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V5`.
-Run ids carry the recognizer - `parakeet`, `whisper`, or nothing at all for the
-frozen Canary runs - so a folder is never ambiguous about what produced it, and
-a new run can never be written into an old engine's folder.
+`privacy_eval.benchmark_common.PRODUCTION_ROOT`, which is `FullPipeline_V6`.
+
+## Two results roots, and why
+
+| Folder | Holds | Written by |
+|---|---|---|
+| [`cpu_benchmarks/`](cpu_benchmarks/) | The frozen V3 Canary, V4 Whisper and V5 Parakeet runs, workstation and Raspberry Pi. **The final academic report's evidence.** | nothing any more; read-only |
+| [`v6_benchmarks/`](v6_benchmarks/) | Every V6 run | the three benchmark scripts today |
+
+They are separate for one specific reason. V6 runs the same recognizer V4 did,
+so a V6 run is honestly tagged `"stt_engine": "whisper"` — and
+[`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) discovers runs
+by globbing `cpu_benchmarks/` and labels each one from its `stt_engine` key
+alone. A V6 folder sitting beside the V4 ones would be drawn into the report as
+V4. The report is frozen at V4 deliberately, so V6 writes somewhere else rather
+than being mislabelled or the notebook being edited.
+
+Run ids carry both the version and the recognizer - `v6_whisper`,
+`audio_v6_whisper`, `e2e_v6_whisper` for V6; `parakeet`, `whisper`, or nothing
+at all for the frozen Canary runs - so a folder is never ambiguous about what
+produced it, and a new run can never be written into an old engine's folder.
 
 | Entry point | Run it on | What it does | Safe to run |
 |---|---|---|---|
 | [`Full_Pipeline_CPU_Benchmark.py`](../Full_Pipeline_CPU_Benchmark.py) | **any CPU** - workstation *and* the Raspberry Pi | Scores the committed 2,000-row held-out subset through the accepted INT8 privacy model. Records latency, memory, quality and an out-of-distribution parity check. | Yes |
 | [`Full_Pipeline_Audio_Benchmark.py`](../Full_Pipeline_Audio_Benchmark.py) | **any CPU** - workstation *and* the Raspberry Pi | Drives committed WAV clips through the whole deployment: VAD, STT, transcript normalisation, masking, spoken-digit rendering. Records word error rate, real-time factor, memory and end-to-end privacy leakage. | Yes |
-| [`Full_Pipeline_V5_EndToEnd_Benchmark.py`](../Full_Pipeline_V5_EndToEnd_Benchmark.py) | **any CPU with a network connection** | Drives 24 committed clips through the whole V5 demonstration path: Parakeet, masking, the outbound LLM request, local rehydration, local TTS. Audits the bytes handed to `urllib` for private values and writes every payload out verbatim. | Yes |
+| [`Full_Pipeline_V6_EndToEnd_Benchmark.py`](../Full_Pipeline_V6_EndToEnd_Benchmark.py) | **any CPU with a network connection** | Drives 6 committed clips through the whole V6 demonstration path: Whisper, masking, the outbound LLM request, local rehydration, local TTS. Audits the bytes handed to `urllib` for private values and writes every payload out verbatim. Six live calls by default because the Groq free tier is token-limited; `--extended` makes it ten. | Yes, and it spends API quota |
 | [`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) | any machine with the repository | Reads saved metrics and writes publication-quality figures and tables. Trains nothing, evaluates nothing. | Yes |
 
 The two benchmarks are plain Python scripts. The Raspberry Pi has no Jupyter,
@@ -61,20 +78,32 @@ python Full_Pipeline_Audio_Benchmark.py --clip privacy_001
 python Full_Pipeline_Audio_Benchmark.py --list-clips
 python Full_Pipeline_Audio_Benchmark.py --verify-only
 
-python Full_Pipeline_V5_EndToEnd_Benchmark.py               # 24 cases, live LLM
-python Full_Pipeline_V5_EndToEnd_Benchmark.py --smoke-test  # 4 cases
-python Full_Pipeline_V5_EndToEnd_Benchmark.py --llm-stub    # no key needed
-python Full_Pipeline_V5_EndToEnd_Benchmark.py --offline     # payload audit only
-python Full_Pipeline_V5_EndToEnd_Benchmark.py --no-tts
-python Full_Pipeline_V5_EndToEnd_Benchmark.py --list-cases
+python Full_Pipeline_V6_EndToEnd_Benchmark.py               # 6 cases, live LLM
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --extended    # 10 cases, live LLM
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --smoke-test  # 3 cases
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --llm-stub    # no key needed
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --offline     # payload audit only
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --no-tts
+python Full_Pipeline_V6_EndToEnd_Benchmark.py --list-cases
 ```
 
-The end-to-end benchmark reads `GROQ_API_KEY` from the environment or from
-`FullPipeline_V5/.env`. Without one it still runs everything local, still builds
-and audits the outbound payload, and reports the API sections as `not run` with
-exit code 2. `--llm-stub` answers each built request locally so the whole
-integration can be exercised without a key; a stubbed run is labelled as such in
-every artifact it writes and is never a measurement of Groq.
+The end-to-end benchmark reads `GROQ_API_KEY` from the environment first, then
+from the **repository-root `.env`**, which is git-ignored and must never be
+committed. Without a key it still runs everything local, still builds and audits
+the outbound payload, and reports the API sections as `not run` with exit code
+2. `--llm-stub` answers each built request locally so the whole integration can
+be exercised without a key; a stubbed run is labelled as such in every artifact
+it writes and is never a measurement of Groq.
+
+Use the stub for repeated development runs. The live default is six requests,
+which is small, but the free tier's binding limit is tokens per minute rather
+than requests per minute: the conversation is reset between cases and requests
+are spaced from the `x-ratelimit-*` response headers for that reason. On a 429
+the benchmark honours `Retry-After` once, caps the wait at 60 seconds, records
+the case as rate-limited and finishes.
+
+No artifact written here ever contains an API key. Saved request bodies are the
+masked payloads only; the key travels as a header and is recorded by name.
 
 `--help` on either lists every option. `ONKITH_BENCHMARK_SMOKE=1` and
 `ONKITH_BENCHMARK_DEVICE=pi5` still work for the CPU benchmark.
@@ -102,8 +131,17 @@ safe on every filesystem are used.
 
 The engine token is part of the run id so a Whisper run can never land in or be
 mistaken for a Canary folder. `audio` on its own is a V3 Canary audio run;
-`audio-whisper` and `whisper` are V4. Runs written before V4 carry no engine
-token, and its absence is what identifies them rather than a guess.
+`audio-whisper` and `whisper` are V4; `audio-parakeet`, `parakeet` and
+`e2e-parakeet` are V5; `audio-v6-whisper`, `v6-whisper` and `e2e-v6-whisper` are
+V6 and live in `v6_benchmarks/`. Runs written before V4 carry no engine token,
+and its absence is what identifies them rather than a guess.
+
+**There are no V5 Raspberry Pi results, and none are missing.** V5 was not taken
+through Pi evaluation once workstation testing showed its Parakeet core was not
+the preferred final path. **There are no V6 Raspberry Pi results either, as of
+this writing** — only workstation runs. V6's local core is V4's byte for byte,
+so V4's Pi numbers describe the same code, but they are V4's numbers and are
+labelled as such. Nothing here infers Pi performance from a workstation run.
 
 Both benchmarks write into the same root and are told apart by
 `benchmark_config.json`: audio runs carry `"benchmark": "audio_pipeline"`, and a
@@ -182,7 +220,7 @@ is one definition applied to four runs.
 `billing at example.org`, which is neither the spoken form the transcript
 records nor the written form the model and the structured EMAIL recognizer
 expect, and the result was the domain masked and the local part released.
-`FullPipeline_V4/integrated_pipeline/spoken_form_normalizer.py` rewrites two such
+`FullPipeline_V6/integrated_pipeline/spoken_form_normalizer.py` rewrites two such
 shapes for the detectors only and projects every span back before masking, so
 the released transcript is unchanged. This one **cannot** be replayed from a
 saved folder: it changes what the masker outputs, which needs the model. Runs
@@ -210,8 +248,8 @@ but the safer rule is that this directory only ever holds evidence.
 
 | Artifact | Location |
 |---|---|
-| Deployed INT8 ONNX, tokenizer, label map | `FullPipeline_V4/models/deberta_pii/` |
-| Deployment manifest with per-file SHA-256 | `FullPipeline_V4/models/deberta_pii/model_manifest.json` |
+| Deployed INT8 ONNX, tokenizer, label map | `FullPipeline_V6/models/deberta_pii/` |
+| Deployment manifest with per-file SHA-256 | `FullPipeline_V6/models/deberta_pii/model_manifest.json` |
 | Release gate / accepted candidate | `model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/accepted_int8_candidate.json` |
 | Frozen OOD final report (spent once) | `model/DeBERTa-v3-xsmall/artifacts/model_v2/metrics/evaluation_ood_final_int8.json` |
 | Benchmark subset the Pi and the laptop both score | `model/privacy_evaluation/fixtures/deployment_benchmark/` |
@@ -277,7 +315,7 @@ The audio benchmark needs the production recognizer, which is not in the default
 install:
 
 ```bash
-pip install --requirement FullPipeline_V4/requirements-rpi.txt   # or -windows.txt
+pip install --requirement FullPipeline_V6/requirements-rpi.txt   # or -windows.txt
 ```
 
 That brings faster-whisper 1.2.1 on CTranslate2. The `base.en` weights are

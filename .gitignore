@@ -11,6 +11,10 @@
 *.key
 id_rsa*
 kaggle.json
+# The canonical local secrets file is the root `.env` above. A file dropped
+# there as bare `env` is not covered by the `env/` virtualenv rule below, which
+# matches directories only, so guard the misnamed case explicitly.
+/env
 
 # ---------------------------------------------------------------------------
 # Virtual environments

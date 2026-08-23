@@ -1,10 +1,10 @@
-"""OnKith V5 integrated round-trip benchmark: audio in, spoken answer out.
+"""OnKith V6 integrated round-trip benchmark: audio in, spoken answer out.
 
 ``Full_Pipeline_Audio_Benchmark.py`` stops at the sanitized transcript and
 ``Full_Pipeline_CPU_Benchmark.py`` never leaves the device. Both measure the
-half of V5 that is local. This one measures the half that is the point:
+half of V6 that is local. This one measures the half that is the point:
 
-    audio -> Parakeet -> DeBERTa masking -> placeholder map (LOCAL)
+    audio -> Whisper -> DeBERTa masking -> placeholder map (LOCAL)
           -> masked request -> Groq -> masked reply
           -> local rehydration -> restored answer -> local TTS
 
@@ -36,10 +36,23 @@ probes still run against locally constructed replies. The live sections then
 report ``not run`` rather than a number. Nothing here ever invents an API
 response: a section with no measurement says so.
 
-    python Full_Pipeline_V5_EndToEnd_Benchmark.py
-    python Full_Pipeline_V5_EndToEnd_Benchmark.py --smoke-test
-    python Full_Pipeline_V5_EndToEnd_Benchmark.py --no-tts
-    python Full_Pipeline_V5_EndToEnd_Benchmark.py --help
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py               6 live cases
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py --extended    10 live cases
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py --smoke-test  3 live cases
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py --llm-stub    no key needed
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py --no-tts
+    python Full_Pipeline_V6_EndToEnd_Benchmark.py --help
+
+Staying inside the free tier
+----------------------------
+Requests per minute is not the binding limit here. The system prompt is long,
+and the client keeps a rolling conversation history, so a handful of rapid
+requests can reach the tokens-per-minute ceiling while sitting far below the
+request ceiling. Two things follow, and both are defaults rather than options:
+the conversation is reset between cases, because these are independent
+measurements and carrying five previous exchanges into the sixth request
+inflates its token count for no benefit; and requests are spaced, guided by the
+rate-limit headers Groq returns rather than by a fixed guess.
 """
 
 from __future__ import annotations
@@ -60,40 +73,48 @@ from .benchmark_common import RunDirectory, WarningLog, print_summary, summarise
 FIXTURE_DIR = common.EVALUATION_ROOT / "fixtures" / "audio_benchmark"
 MANIFEST_PATH = FIXTURE_DIR / "audio_benchmark.manifest.json"
 
-#: A compact, deliberately chosen slice of the committed audio corpus rather
-#: than a new dataset. Every privacy family the ontology cares about appears at
-#: least once, the hard negatives are all here so a false positive cannot hide,
-#: and the two long LibriSpeech clips are the difficult-recognition cases. 24
-#: clips is enough to establish that the integration works and to time it; the
-#: 44-clip audio benchmark is where accuracy is actually measured.
+#: Six representative cases, one per privacy family that matters, and they are
+#: what a default run sends to Groq. This is not a sample size chosen for
+#: statistics - the 44-clip audio benchmark is where accuracy is measured, on
+#: gold annotations, without spending a request. What these six establish is
+#: that the integration works end to end and what each leg costs, and six is
+#: enough for that while leaving the free tier's daily budget alone.
 DEFAULT_CASES: tuple[tuple[str, str], ...] = (
-    ("benign_001", "no PII, device command"),
-    ("benign_002", "no PII, short"),
-    ("benign_003", "no PII, quantities that must not be masked"),
-    ("benign_004", "no PII, time expression"),
-    ("benign_005", "no PII, mentions passwords without giving one"),
-    ("benign_006", "no PII, numbers that are not identifiers"),
-    ("benign_007", "no PII, long"),
-    ("privacy_001", "given name + surname"),
-    ("privacy_002", "given name + surname, second speaker"),
+    ("privacy_001", "person name"),
     ("privacy_003", "telephone number"),
     ("privacy_004", "email address, spoken form"),
-    ("privacy_005", "street address"),
-    ("privacy_006", "account/reference number"),
-    ("privacy_007", "date"),
-    ("privacy_008", "city + time"),
-    ("privacy_009", "age + given name"),
-    ("privacy_010", "organisation + surname"),
-    ("privacy_011", "URL, spoken form"),
+    ("privacy_007", "date / numeric private value"),
+    ("privacy_020", "multiple PII types in one utterance"),
+    ("benign_003", "no PII, quantities that must not be masked"),
+)
+
+#: ``--extended``. Four more, still small: a second speaker, a repeated name
+#: beside a telephone number, a long identifier, and the longest clip in the
+#: corpus. Ten live requests remains a small fraction of a day's budget.
+EXTENDED_CASES: tuple[tuple[str, str], ...] = DEFAULT_CASES + (
+    ("privacy_002", "given name + surname, second speaker"),
     ("privacy_012", "name repeated with a telephone number"),
-    ("privacy_013", "email + date"),
-    ("privacy_015", "credit card number"),
     ("privacy_016", "identity card number"),
-    ("privacy_020", "six entities, four types"),
     ("privacy_024", "seven entities, longest clip"),
 )
 
-SMOKE_CASES = ("benign_002", "privacy_001", "privacy_003", "privacy_012")
+#: One clip the device recognises as an instruction to itself. It goes through
+#: the whole local path and is then routed locally, so it costs no API quota -
+#: which is the property being checked, not a latency number.
+LOCAL_COMMAND_CASE = ("benign_001", "no PII, device command - must not call Groq")
+
+SMOKE_CASES = ("privacy_001", "privacy_003", "benign_003")
+
+#: Seconds between live requests when the response headers give no better
+#: guidance. Six requests at this spacing finish in about a minute and stay
+#: comfortably inside both the request and the token ceiling. The headers are
+#: preferred where Groq sends them; this is the fallback, not the policy.
+DEFAULT_REQUEST_PAUSE = 13.0
+
+#: The longest a 429's ``Retry-After`` will be honoured. Beyond this the case is
+#: recorded as rate limited and the run moves on: waiting out a daily quota is
+#: not a benchmark, it is an outage.
+MAX_RETRY_AFTER_SECONDS = 60.0
 
 #: How many restored answers get spoken when TTS is measured. Synthesis is
 #: real-time by construction, so timing every case would spend minutes proving
@@ -108,6 +129,16 @@ WARMUP_TEXT = (
 #: Used only when no real key is configured, so the request the client builds
 #: can still be inspected. It is never sent anywhere.
 OFFLINE_AUDIT_KEY = "OFFLINE-PAYLOAD-AUDIT-NOT-A-KEY"
+
+#: Below this many characters, a recognizer surface is not evidence of
+#: anything. The alignment that locates what the recognizer produced for a gold
+#: entity occasionally returns a fragment - it returned "at" for a spoken email
+#: address - and a two-letter English word is present in almost any sentence,
+#: so testing for it reports a leak where there is none. Such a surface is
+#: counted and named in its own field rather than quietly passed or quietly
+#: failed: the alignment was unreliable, which is a third thing and should read
+#: as one.
+MIN_TESTABLE_SURFACE = 4
 
 PLACEHOLDER = re.compile(r"\[([A-Z][A-Z0-9_]*)_(\d+)\]")
 #: Anything bracket-shaped, so a *corrupted* placeholder is visible too. The
@@ -140,7 +171,7 @@ def normalise_for_leak_check(text: str) -> str:
 
     The same normalisation the engine-comparable WER uses, and for the same
     reason. A gold entity spoken "five five five, zero one four seven" arrives
-    from Parakeet as "555-0147"; a substring search for the reference surface
+    from Whisper as "555-0147"; a substring search for the reference surface
     would find neither in the other and would report a clean payload for a
     number sitting in plain sight. Folding both sides is what makes the leak
     check mean what it says.
@@ -312,7 +343,7 @@ class Options:
     tts_cases: int = DEFAULT_TTS_CASES
     live: bool = True
     stub_llm: bool = False
-    request_pause: float = 0.6
+    request_pause: float = DEFAULT_REQUEST_PAUSE
 
 
 class EndToEndBenchmark:
@@ -323,7 +354,7 @@ class EndToEndBenchmark:
         self.started_utc = common.utc_now()
         self.run_id = common.make_run_id(
             self.started_utc, options.mode, options.device_label,
-            prefix="e2e_parakeet",
+            prefix="e2e_v6_whisper",
         )
         self.run = RunDirectory(self.run_id, options.results_root)
 
@@ -333,7 +364,7 @@ class EndToEndBenchmark:
         self.artifact: dict[str, Any] = {}
         self.config: Any = None
 
-        self.parakeet = None
+        self.whisper = None
         self.masker = None
         self.llm = None
         self.speech = None
@@ -346,6 +377,13 @@ class EndToEndBenchmark:
         self.stage_rss: dict[str, int | None] = {}
         self.peak_rss = 0
         self.load_seconds: dict[str, float] = {}
+
+        #: What the last response said about the remaining budget, so the
+        #: spacing between requests can follow the account real limits
+        #: instead of a number guessed in advance.
+        self.rate_limit_headers: dict[str, str] = {}
+        self.rate_limited_cases: list[str] = []
+        self.local_command_check: dict[str, Any] = {}
 
         self.rows: list[dict[str, Any]] = []
         self.payloads: list[dict[str, Any]] = []
@@ -372,7 +410,7 @@ class EndToEndBenchmark:
         total = sum(case["duration_seconds"] for case in self.cases)
         info = self.system_info
         print()
-        print("OnKith V5 Integrated Round-Trip Benchmark")
+        print("OnKith V6 Integrated Round-Trip Benchmark")
         print("=========================================")
         print()
         print(f"Device            : {info['board_model'] or info['platform']}")
@@ -381,11 +419,11 @@ class EndToEndBenchmark:
               f"({info['logical_cpus']} logical CPUs)")
         print(f"RAM               : {common.gib(info['total_ram_bytes'])}")
         print(f"Pipeline          : {common.relative(common.PRODUCTION_ROOT)}")
-        print(f"STT model         : {self.config.parakeet['model']} "
-              f"({self.config.parakeet['decoder_family']} "
-              f"{self.config.parakeet['decoder_strategy']}, "
-              f"{self.config.parakeet['device']}/"
-              f"{self.config.parakeet['precision']})")
+        print(f"STT model         : {self.config.whisper['model']} "
+              f"({self.config.whisper['runtime']}, "
+              f"{self.config.whisper['device']}/"
+              f"{self.config.whisper['compute_type']}, "
+              f"beam {self.config.whisper['beam_size']})")
         print(f"Privacy model SHA : {self.artifact['measured_sha256']}")
         print(f"Cases             : {len(self.cases)} "
               f"({total:.1f} s of audio, {self.options.mode} mode)")
@@ -417,24 +455,25 @@ class EndToEndBenchmark:
         print()
 
     def _load_stt(self) -> None:
-        from integrated_pipeline.parakeet_adapter import (
-            ParakeetAdapter,
-            describe_parakeet_backend,
+        from integrated_pipeline.whisper_adapter import (
+            WhisperAdapter,
+            describe_whisper_backend,
         )
 
-        backend = describe_parakeet_backend()
+        backend = describe_whisper_backend()
         if not backend.get("available"):
             raise RuntimeError(
-                "NeMo/torch Parakeet backend unavailable: "
+                "faster-whisper backend unavailable: "
                 + "; ".join(backend.get("errors", ["unknown"]))
             )
         common.quieten_stt()
         started = time.perf_counter()
-        self.parakeet = ParakeetAdapter(self.config)
-        self.parakeet.load()
+        self.whisper = WhisperAdapter(self.config)
+        self.whisper.load()
         self.load_seconds["stt"] = time.perf_counter() - started
         self.stage_rss["stt_loaded"] = common.rss_bytes()
-        print(f"  STT      parakeet {self.config.parakeet['model']:15} "
+        self.stt_backend = backend
+        print(f"  STT      whisper {self.config.whisper['model']:16} "
               f"loaded in {self.load_seconds['stt']:.2f} s")
 
     def _load_privacy(self) -> None:
@@ -457,6 +496,14 @@ class EndToEndBenchmark:
 
     def _load_llm(self) -> None:
         from app import llm as llm_module
+        from app.omit_ai_live import load_local_env
+
+        # The same loader the live pipeline uses, reading the same repository
+        # root .env, so the benchmark and the demonstration cannot end up
+        # configured differently. It is setdefault throughout: anything already
+        # exported wins, which is how a no-key run is produced without touching
+        # the file.
+        load_local_env()
 
         self.llm_module = llm_module
         settings = llm_module.GroqSettings.from_environment()
@@ -516,22 +563,31 @@ class EndToEndBenchmark:
             segment_id=f"e2e-{clip_id}-0",
         )
         started = time.perf_counter()
-        transcript = self.parakeet.transcribe_segment(segment)
+        transcript = self.whisper.transcribe_segment(segment)
         return transcript.text, time.perf_counter() - started
 
     def _ask(self, masked_text: str) -> dict[str, Any]:
-        """One request, with the payload captured on the way to the socket."""
+        """One request, with the payload captured on the way to the socket.
+
+        The conversation is reset first. Each case is an independent
+        measurement, so carrying the previous five exchanges into this request
+        would inflate its token count for no benefit - and the free tier runs
+        out of tokens per minute long before it runs out of requests.
+        """
 
         captured: list[CapturedRequest] = []
         module = self.llm_module
         real_urlopen = module.urllib.request.urlopen
         mode = self.llm_mode
+        self.llm.reset()
 
         def spy(request, *args, **kwargs):
             snapshot = snapshot_request(request)
             captured.append(snapshot)
             if mode == "live":
-                return real_urlopen(request, *args, **kwargs)
+                response = real_urlopen(request, *args, **kwargs)
+                self._note_rate_limit_headers(getattr(response, "headers", {}))
+                return response
             if mode == "stubbed transport":
                 # Answer from the payload that was actually built, so the reply
                 # can only echo placeholders the request really carried.
@@ -550,20 +606,98 @@ class EndToEndBenchmark:
         started = time.perf_counter()
         reply = ""
         error = ""
+        rate_limited = False
         try:
             reply = self.llm.reply_to(masked_text)
         except PayloadAudited:
             error = "not sent: no API key configured"
         except Exception as exc:
             error = f"{type(exc).__name__}: {exc}"
+            rate_limited = self._looks_rate_limited(exc)
         finally:
             module.urllib.request.urlopen = real_urlopen
+
+        seconds = time.perf_counter() - started
+        # One retry, once, and only for a refusal a wait can actually fix. The
+        # client already drops to the fallback model on a 429, so reaching here
+        # means both models refused; a second immediate attempt would only add
+        # two more requests to a limit that is already full.
+        if rate_limited and mode == "live":
+            wait = self._retry_after_seconds()
+            if wait is not None and wait <= MAX_RETRY_AFTER_SECONDS:
+                print(f"        rate limited; waiting {wait:.0f}s and retrying once")
+                time.sleep(wait)
+                module.urllib.request.urlopen = spy
+                retried_at = time.perf_counter()
+                try:
+                    reply = self.llm.reply_to(masked_text)
+                    error = ""
+                    rate_limited = False
+                except PayloadAudited:
+                    error = "not sent: no API key configured"
+                except Exception as exc:
+                    error = f"{type(exc).__name__}: {exc}"
+                    rate_limited = self._looks_rate_limited(exc)
+                finally:
+                    module.urllib.request.urlopen = real_urlopen
+                seconds = time.perf_counter() - retried_at
+            else:
+                print("        rate limited; recorded as such rather than waited out")
+
         return {
             "captured": captured,
             "reply": reply,
-            "seconds": time.perf_counter() - started,
+            "seconds": seconds,
             "error": error,
+            "rate_limited": rate_limited,
+            # Which model actually answered. A latency figure that silently
+            # mixed the primary and the fallback would describe neither.
+            "model": captured[-1].body.get("model") if captured else None,
+            "models_attempted": [item.body.get("model") for item in captured],
         }
+
+    @staticmethod
+    def _looks_rate_limited(error: Exception) -> bool:
+        return type(error).__name__ == "RateLimited" or "429" in str(error)
+
+    def _note_rate_limit_headers(self, headers: Any) -> None:
+        try:
+            items = list(headers.items())
+        except Exception:
+            return
+        for key, value in items:
+            lowered = str(key).lower()
+            if lowered.startswith("x-ratelimit") or lowered == "retry-after":
+                self.rate_limit_headers[lowered] = str(value)
+
+    def _retry_after_seconds(self) -> float | None:
+        raw = self.rate_limit_headers.get("retry-after")
+        if raw is None:
+            return None
+        try:
+            return max(0.0, float(raw))
+        except ValueError:
+            return None
+
+    def _pause_before_next_request(self) -> float:
+        """How long to wait, preferring what the account actually reports.
+
+        The remaining-request and remaining-token headers say how much budget
+        is left. Where they are present and the budget is comfortable there is
+        no reason to sit idle for the full fallback interval; where they are
+        absent, the fallback is what keeps six requests inside one minute of
+        tokens.
+        """
+
+        requests_left = self.rate_limit_headers.get("x-ratelimit-remaining-requests")
+        tokens_left = self.rate_limit_headers.get("x-ratelimit-remaining-tokens")
+        try:
+            if requests_left is not None and tokens_left is not None:
+                if int(float(requests_left)) > 10 and int(float(tokens_left)) > 20_000:
+                    return min(self.options.request_pause, 3.0)
+        except ValueError:
+            pass
+        return self.options.request_pause
 
     def _speak(self, text: str) -> float | None:
         if self.speech is None or not text:
@@ -602,7 +736,10 @@ class EndToEndBenchmark:
         outcome = self._ask(pii.masked_text) if pii.safe_to_release else {
             "captured": [], "reply": "", "seconds": 0.0,
             "error": "not sent: masking was blocked",
+            "rate_limited": False, "model": None, "models_attempted": [],
         }
+        if outcome.get("rate_limited"):
+            self.rate_limited_cases.append(clip_id)
         captured = outcome["captured"]
         reply = outcome["reply"]
 
@@ -617,23 +754,51 @@ class EndToEndBenchmark:
         ]
         # Two readings of every gold entity, because a recognizer changes the
         # surface. ``value`` is what the manifest says was spoken; ``recognized``
-        # is what Parakeet actually produced for it, located by the same
+        # is what Whisper actually produced for it, located by the same
         # alignment the audio benchmark uses, and it is the string the privacy
         # model was really given. Checking only the first would report a clean
         # payload for a number the recognizer mangled and the masker then
         # missed - which is exactly the case this corpus contains.
+        # Whether the masker found this entity at all is the question that
+        # separates the two failures a reader has to be able to tell apart: a
+        # value the masker replaced and that reached the payload anyway is a
+        # boundary failure, and there must be none of those. A value the masker
+        # never detected was never behind the boundary in the first place - it
+        # is a privacy-model recall miss, which the 44-clip audio benchmark
+        # measures properly, and reporting the two as one number would hide
+        # both.
+        masked_folded = [
+            normalise_for_leak_check(value) for value in mapping.values()
+        ]
+
+        def was_masked(text: str) -> bool:
+            folded = normalise_for_leak_check(text)
+            if not folded.strip():
+                return False
+            return any(
+                folded in candidate or candidate in folded
+                for candidate in masked_folded
+                if candidate.strip()
+            )
+
         gold_values = []
         for span in case.get("expected_private_spans", []):
             location = locate_entity(case["reference_transcript"], span, transcript)
             surface = location.get("hypothesis_surface", "")
+            testable = len(surface.strip()) >= MIN_TESTABLE_SURFACE
+            detected = was_masked(span["text"]) or (
+                bool(surface.strip()) and was_masked(surface)
+            )
             gold_values.append({
                 "label": span["label"],
                 "value": span["text"],
                 "recognized": surface,
                 "alignment": location.get("alignment", ""),
+                "detected_by_masker": detected,
+                "surface_testable": testable,
                 "in_payload": bool(captured)
                 and contains_value(payload_folded, span["text"]),
-                "recognized_in_payload": bool(captured) and bool(surface.strip())
+                "recognized_in_payload": bool(captured) and testable
                 and contains_value(payload_folded, surface),
             })
         transcript_in_payload = bool(captured) and bool(transcript.strip()) and (
@@ -690,6 +855,18 @@ class EndToEndBenchmark:
                 if self.llm_mode != "payload audit only" else None
             ),
             "llm_error": outcome["error"],
+            # Recorded per case so a latency figure can be attributed to one
+            # model. The client falls back to the larger model on a refusal,
+            # and averaging the two together would describe neither.
+            "llm_model": outcome.get("model"),
+            "llm_models_attempted": outcome.get("models_attempted") or [],
+            "llm_used_fallback": bool(
+                outcome.get("model")
+                and self.llm is not None
+                and outcome.get("model") == self.llm.settings.fallback_model
+                and self.llm.settings.fallback_model != self.llm.settings.model
+            ),
+            "llm_rate_limited": bool(outcome.get("rate_limited")),
             "llm_reply": reply,
             "restored_reply": restored,
             "reply_bracket_tokens": reply_brackets,
@@ -738,10 +915,15 @@ class EndToEndBenchmark:
             return False
         if not row["safe_to_release"]:
             return False
+        # The boundary condition, and the only leak that is this layer's
+        # fault: the masker replaced a value and it left the device anyway.
         if any(value["in_payload"] for value in row["masked_values"]):
             return False
-        if any(value["in_payload"] or value["recognized_in_payload"]
-               for value in row["gold_values"]):
+        if any(
+            value["detected_by_masker"]
+            and (value["in_payload"] or value["recognized_in_payload"])
+            for value in row["gold_values"]
+        ):
             return False
         if row["raw_transcript_in_payload"]:
             return False
@@ -764,7 +946,12 @@ class EndToEndBenchmark:
     def run_placeholder_probes(self) -> None:
         """Malformed, unknown and repeated placeholders must not crash anything."""
 
-        from app.rehydrate import RehydrationMap, rehydrate, unresolved_placeholders
+        from app.rehydrate import (
+            ConversationPlaceholders,
+            RehydrationMap,
+            rehydrate,
+            unresolved_placeholders,
+        )
 
         mapping = {"[GIVENNAME_1]": "Fahad", "[TELEPHONENUM_1]": "0551234567"}
         probes = [
@@ -795,7 +982,7 @@ class EndToEndBenchmark:
                 "got": got, "ok": ok, "error": error,
             })
 
-        # A rolling map across turns, the way the live worker holds it.
+        # A rolling map across turns, over two different placeholder names.
         rolling = RehydrationMap()
         try:
             rolling.add([{"placeholder": "[GIVENNAME_1]", "text": "Fahad"}])
@@ -814,9 +1001,118 @@ class EndToEndBenchmark:
                 "probe": "rolling map across turns", "reply": "", "expected": "",
                 "got": "", "ok": False, "error": f"{type(exc).__name__}: {exc}",
             })
+
+        # The cross-turn collision V5 shipped with, and the property V6 adds.
+        # The masker numbers placeholders per utterance, so two different
+        # people arrive as [GIVENNAME_1] one turn apart. Under a single rolling
+        # map the second overwrote the first and a reply about the first was
+        # restored with the second person's name. Nothing leaked - but the
+        # device said it would call the wrong person, and that has to be a
+        # measured property rather than a claim.
+        try:
+            conversation = ConversationPlaceholders()
+            turn_one, _ = conversation.adopt(
+                "Remind me to call [GIVENNAME_1] tomorrow",
+                [{"placeholder": "[GIVENNAME_1]", "text": "Fahad"}],
+            )
+            turn_two, _ = conversation.adopt(
+                "Remind me to call [GIVENNAME_1] tomorrow",
+                [{"placeholder": "[GIVENNAME_1]", "text": "Ali"}],
+            )
+            restored_one = conversation.apply("I will call [GIVENNAME_1] tomorrow.")
+            restored_two = conversation.apply("I will call [GIVENNAME_2] tomorrow.")
+            ok = (
+                turn_one == "Remind me to call [GIVENNAME_1] tomorrow"
+                and turn_two == "Remind me to call [GIVENNAME_2] tomorrow"
+                and restored_one == "I will call Fahad tomorrow."
+                and restored_two == "I will call Ali tomorrow."
+                and "Ali" not in restored_one
+                and "Fahad" not in restored_two
+            )
+            self.probe_results.append({
+                "probe": "two turns, same placeholder, different people",
+                "reply": f"{turn_one} | {turn_two}",
+                "expected": "I will call Fahad tomorrow. | I will call Ali tomorrow.",
+                "got": f"{restored_one} | {restored_two}",
+                "ok": ok,
+                "error": "",
+            })
+        except Exception as exc:
+            self.probe_results.append({
+                "probe": "two turns, same placeholder, different people",
+                "reply": "", "expected": "", "got": "", "ok": False,
+                "error": f"{type(exc).__name__}: {exc}",
+            })
         passed = sum(1 for probe in self.probe_results if probe["ok"])
         print(f"\nPlaceholder probes: {passed}/{len(self.probe_results)} passed")
         self.completed["placeholder_probes"] = passed == len(self.probe_results)
+
+    def run_local_command_check(self) -> None:
+        """An instruction to the device must not become a network request.
+
+        Recognising a command locally is the point of recognising it, and the
+        saving is not only latency: "turn the kitchen lights off" never leaves
+        the house. This drives a real clip through the real recognizer and the
+        real masker, routes it exactly as ``post_mask_assistant`` does, and
+        then asserts the transport was never reached - checked by counting the
+        requests the client actually built, not by trusting the router.
+
+        It costs no API quota, which is why it is a default rather than an
+        option.
+        """
+
+        from app.onkith_music import route_onkith_request
+        from app.wake_word_normalizer import normalize_wake_word
+        from .audio_benchmark import read_wav, verify_clip
+
+        clip_id, note = LOCAL_COMMAND_CASE
+        case = next(
+            (item for item in load_manifest()["clips"] if item["clip_id"] == clip_id),
+            None,
+        )
+        if case is None:
+            self.warnings.note(f"{clip_id} is not in the manifest; check skipped")
+            return
+
+        path = verify_clip(case, fixture_dir=FIXTURE_DIR)
+        transcript, _ = self._transcribe(read_wav(path), clip_id)
+        pii = self.masker.mask_text(transcript)
+
+        module = self.llm_module
+        real_urlopen = module.urllib.request.urlopen
+        built: list[Any] = []
+        module.urllib.request.urlopen = lambda request, *a, **k: built.append(request)
+        try:
+            # Unaddressed speech: no wake word, so it is held locally and the
+            # assistant is never asked anything at all.
+            unaddressed = route_onkith_request(normalize_wake_word(transcript)[0])
+            # Addressed speech naming a capability the device has: routed to
+            # the local action lane, which also never asks the model.
+            addressed = route_onkith_request(
+                normalize_wake_word(f"Onkith, {transcript}")[0]
+            )
+        finally:
+            module.urllib.request.urlopen = real_urlopen
+
+        held_locally = not unaddressed.command_detected
+        routed_locally = bool(addressed.command_detected) and addressed.intent != "ASK"
+        self.local_command_check = {
+            "clip_id": clip_id,
+            "note": note,
+            "transcript": transcript,
+            "masked_text": pii.masked_text,
+            "unaddressed_held_locally": held_locally,
+            "addressed_intent": addressed.intent,
+            "addressed_routed_locally": routed_locally,
+            "requests_built": len(built),
+            "ok": held_locally and routed_locally and not built,
+        }
+        verdict = "ok" if self.local_command_check["ok"] else "FAIL"
+        print(
+            f"Local command check: {clip_id} -> "
+            f"{addressed.intent or 'held'}, {len(built)} request(s) built  {verdict}"
+        )
+        self.completed["local_command_check"] = self.local_command_check["ok"]
 
     # -- aggregation -------------------------------------------------------
 
@@ -883,7 +1179,7 @@ class EndToEndBenchmark:
                     if rows and audio_seconds else None
                 ),
                 "note": (
-                    "Local only: Parakeet plus the fail-closed DeBERTa masker, "
+                    "Local only: Whisper plus the fail-closed DeBERTa masker, "
                     "measured on this device. Deliberately kept apart from the "
                     "network figure below, because a slow answer caused by wifi "
                     "is not caused by the privacy system."
@@ -955,6 +1251,56 @@ class EndToEndBenchmark:
                 "raw_transcripts_in_payload": sum(
                     1 for row in rows if row["raw_transcript_in_payload"]
                 ),
+
+                # ------------------------------------------------------------
+                # The distinction that matters, kept as two numbers.
+                # ------------------------------------------------------------
+                # A value the masker replaced, which then appeared in the
+                # payload anyway. This is a failure of the privacy boundary -
+                # the thing this pipeline exists to provide - and the only
+                # acceptable value is zero.
+                "masked_but_leaked": sum(
+                    1 for value in masked_values if value["in_payload"]
+                ) + sum(
+                    1 for value in gold_values
+                    if value["detected_by_masker"]
+                    and (value["in_payload"] or value["recognized_in_payload"])
+                ),
+                # A gold entity the privacy model never detected. It was never
+                # behind the boundary, so its surface is still in the text that
+                # went out. This is a recall miss, measured properly against
+                # gold annotations by the 44-clip audio benchmark, and it is
+                # reported here so that a clean boundary is not mistaken for
+                # perfect detection.
+                "missed_by_detector_and_in_payload": sum(
+                    1 for value in gold_values
+                    if not value["detected_by_masker"]
+                    and (value["in_payload"] or value["recognized_in_payload"])
+                ),
+                "missed_by_detector_total": sum(
+                    1 for value in gold_values if not value["detected_by_masker"]
+                ),
+                "detector_misses": [
+                    {
+                        "clip_id": row["clip_id"],
+                        "label": value["label"],
+                        "spoken": value["value"],
+                        "recognized": value["recognized"],
+                        "in_payload": bool(
+                            value["in_payload"] or value["recognized_in_payload"]
+                        ),
+                    }
+                    for row in rows
+                    for value in row["gold_values"]
+                    if not value["detected_by_masker"]
+                ],
+                # Gold entities whose recognizer surface was too short for a
+                # substring test to mean anything. Neither passed nor failed.
+                "surfaces_too_short_to_test": sum(
+                    1 for value in gold_values
+                    if not value["surface_testable"] and value["recognized"].strip()
+                ),
+
                 "leakage_rate": (
                     (sum(1 for value in masked_values if value["in_payload"])
                      + sum(1 for value in gold_values
@@ -962,17 +1308,19 @@ class EndToEndBenchmark:
                     / max(1, len(masked_values) + len(gold_values))
                 ),
                 "definition": (
-                    "Three independent checks against the bytes the LLM client "
-                    "handed to urllib. The first asserts that no value the "
-                    "masker replaced appears in the payload. The second asserts "
-                    "that no gold private surface from the manifest appears in "
-                    "it. The third asserts that the text the recognizer actually "
-                    "produced for each gold entity - located by the same "
-                    "alignment the audio benchmark uses - is absent too, which "
-                    "is what catches an entity the recognizer altered and the "
-                    "privacy model then missed. Every side is number-folded "
-                    "first, so a telephone number spoken as words and written "
-                    "as digits still matches."
+                    "Checks against the bytes the LLM client handed to urllib, "
+                    "not against the arguments a function was called with. "
+                    "Every side is number-folded first, so a telephone number "
+                    "spoken as words and written by the recognizer as digits "
+                    "still matches. The two headline counts answer different "
+                    "questions and must not be added together: "
+                    "`masked_but_leaked` is a value the masker replaced that "
+                    "left the device anyway, which is a boundary failure and "
+                    "must be zero; `missed_by_detector_and_in_payload` is a "
+                    "gold entity the privacy model never found, which is a "
+                    "recall miss and is why the audio benchmark exists. A "
+                    "pipeline can have a perfect boundary and an imperfect "
+                    "detector, and this run says which."
                 ),
             },
             "placeholder_preservation": {
@@ -1008,6 +1356,38 @@ class EndToEndBenchmark:
                     if tts else "not measured in this run"
                 ),
             },
+            "models": {
+                # Reported per model rather than pooled. The client falls back
+                # to the larger model when the smaller one refuses, and one
+                # mean over both would be a latency figure for neither.
+                "primary": getattr(self.llm.settings, "model", None),
+                "fallback": getattr(self.llm.settings, "fallback_model", None),
+                "answered_by": {
+                    name: sum(1 for row in rows if row.get("llm_model") == name)
+                    for name in sorted(
+                        {row.get("llm_model") for row in rows if row.get("llm_model")}
+                    )
+                },
+                "cases_using_fallback": sum(
+                    1 for row in rows if row.get("llm_used_fallback")
+                ),
+            },
+            "rate_limiting": {
+                "cases_rate_limited": len(self.rate_limited_cases),
+                "clips": list(self.rate_limited_cases),
+                "observed_headers": dict(self.rate_limit_headers),
+                "request_pause_seconds": self.options.request_pause,
+                "history_reset_between_cases": True,
+                "definition": (
+                    "A case is rate limited when both the primary and the "
+                    "fallback model refused it with HTTP 429. Retry-After is "
+                    "honoured once, capped at "
+                    f"{MAX_RETRY_AFTER_SECONDS:.0f}s; past that the case is "
+                    "recorded as rate limited and the run continues rather "
+                    "than waiting out a quota window."
+                ),
+            },
+            "local_command": dict(self.local_command_check),
         }
 
     # -- output ------------------------------------------------------------
@@ -1016,13 +1396,15 @@ class EndToEndBenchmark:
         finished_utc = common.utc_now()
         config_payload = {
             "run_id": self.run_id,
-            "benchmark": "v5_end_to_end",
-            "pipeline_version": "V5",
+            "benchmark": "v6_end_to_end",
+            "pipeline_version": "V6",
             "pipeline_root": common.relative(common.PRODUCTION_ROOT),
-            "stt_engine": "parakeet",
-            "stt_model_id": self.config.parakeet["model_id"],
-            "stt_model_revision": self.config.parakeet["revision"],
-            "stt_checkpoint_sha256": self.config.parakeet["sha256"],
+            "stt_engine": "whisper",
+            # V6's recognizer and privacy core are V4's files unchanged.
+            "core_identical_to": "V4",
+            "stt_model_id": self.config.whisper["model_id"],
+            "stt_compute_type": self.config.whisper["compute_type"],
+            "stt_beam_size": self.config.whisper["beam_size"],
             "privacy_model_sha256": self.artifact["measured_sha256"],
             "llm_provider": "groq",
             "llm_model": self.llm.settings.model if self.llm else None,
@@ -1032,7 +1414,7 @@ class EndToEndBenchmark:
             "mode": self.options.mode,
             "cases": [case["clip_id"] for case in self.cases],
             "device_label": self.options.device_label or None,
-            "entry_point": "Full_Pipeline_V5_EndToEnd_Benchmark.py",
+            "entry_point": "Full_Pipeline_V6_EndToEnd_Benchmark.py",
             "started_utc": self.started_utc.isoformat(),
             "finished_utc": finished_utc.isoformat(),
             "duration_seconds": (finished_utc - self.started_utc).total_seconds(),
@@ -1056,6 +1438,8 @@ class EndToEndBenchmark:
         self.run.jsonl("e2e_cases.jsonl", self.rows)
         self.run.jsonl("e2e_outbound_payloads.jsonl", self.payloads)
         self.run.jsonl("e2e_placeholder_probes.jsonl", self.probe_results)
+        if self.local_command_check:
+            self.run.json("e2e_local_command_check.json", self.local_command_check)
         self.run.markdown("e2e_benchmark_summary.md", self._summary_lines(config_payload))
         self.run.report()
 
@@ -1075,7 +1459,7 @@ class EndToEndBenchmark:
             return f"{value:.1f}" if isinstance(value, (int, float)) else "n/a"
 
         lines = [
-            f"# V5 integrated round-trip benchmark - {self.run_id}",
+            f"# V6 integrated round-trip benchmark - {self.run_id}",
             "",
             "Audio in, spoken answer out, through the pipeline the presentation",
             "runs. It is an **integration and latency** benchmark: recognition and",
@@ -1086,7 +1470,7 @@ class EndToEndBenchmark:
             f"- **Cases:** {summary['cases']} clips, "
             f"{summary['audio_seconds']:.1f} s of audio",
             f"- **Pipeline:** {config_payload['pipeline_root']} "
-            f"(Parakeet {config_payload['stt_model_id']}, DeBERTa-v3-xsmall INT8)",
+            f"(Whisper {config_payload['stt_model_id']}, DeBERTa-v3-xsmall INT8)",
             f"- **LLM:** groq {config_payload['llm_model']} - "
             + {
                 "live": "live",
@@ -1170,7 +1554,7 @@ class EndToEndBenchmark:
             "",
             "| Stage | Mean (ms) | P50 | P95 |",
             "|---|---:|---:|---:|",
-            f"| Parakeet STT | {stat(local['stt_seconds'], 'mean')} | "
+            f"| Whisper STT | {stat(local['stt_seconds'], 'mean')} | "
             f"{stat(local['stt_seconds'], 'p50')} | {stat(local['stt_seconds'], 'p95')} |",
             f"| Privacy masking | {stat(local['privacy_seconds'], 'mean')} | "
             f"{stat(local['privacy_seconds'], 'p50')} | "
@@ -1236,10 +1620,13 @@ class EndToEndBenchmark:
             self.rows.append(self.process_case(case, index, total))
             if self.llm_mode == "live" and index < total:
                 # A courtesy gap, not a measurement artifact: the free tier is
-                # rate limited per minute and a refused request would be scored
-                # as an integration failure it is not.
-                time.sleep(self.options.request_pause)
+                # limited per minute in tokens as well as requests, and a
+                # refusal would be scored as an integration failure it is not.
+                # The interval follows the response headers where the account
+                # sends them, and the fallback constant where it does not.
+                time.sleep(self._pause_before_next_request())
         print("-" * 96)
+        self.run_local_command_check()
         self.run_placeholder_probes()
         self.completed["cases"] = True
         self.summarise_run()
@@ -1253,13 +1640,21 @@ class EndToEndBenchmark:
             print_summary("local TTS", self.summary["tts"]["seconds"])
         privacy = self.summary["privacy_round_trip"]
         print()
-        leaked_total = (
-            privacy["masker_values_in_payload"]
-            + privacy["gold_entities_in_payload"]
-            + privacy["gold_entities_recognized_surface_in_payload"]
-        )
-        print(f"raw PII in outbound payloads : {leaked_total}"
-              f" / {privacy['masker_values_tested'] + privacy['gold_entities_tested']}")
+        print(f"masked PII leaked anyway     : {privacy['masked_but_leaked']}"
+              f" / {privacy['masker_values_tested']} replaced values"
+              "   (boundary failures; must be 0)")
+        print(f"PII missed by the detector   : "
+              f"{privacy['missed_by_detector_and_in_payload']}"
+              f" / {privacy['gold_entities_tested']} gold entities"
+              "   (recall misses, never masked)")
+        for miss in privacy["detector_misses"]:
+            if miss["in_payload"]:
+                print(f"    {miss['clip_id']:14s} {miss['label']:14s} "
+                      f"{miss['recognized'] or miss['spoken']!r}")
+        if privacy["surfaces_too_short_to_test"]:
+            print(f"untestable short surfaces    : "
+                  f"{privacy['surfaces_too_short_to_test']} (alignment fragment; "
+                  "neither passed nor failed)")
         print(f"payloads captured            : {privacy['payloads_captured']}")
         end = self.summary["end_to_end"]
         print(f"end-to-end successful cases  : "
@@ -1282,8 +1677,8 @@ class EndToEndBenchmark:
 
     def close(self) -> None:
         try:
-            if self.parakeet is not None:
-                self.parakeet.close()
+            if self.whisper is not None:
+                self.whisper.close()
         except Exception:
             pass
 
@@ -1304,13 +1699,15 @@ CASE_CSV_FIELDS = [
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="Full_Pipeline_V5_EndToEnd_Benchmark.py",
+        prog="Full_Pipeline_V6_EndToEnd_Benchmark.py",
         description=(
-            "OnKith V5 integrated round-trip benchmark. Drives committed WAV "
-            "clips through Parakeet, the DeBERTa privacy masker, the Groq "
+            "OnKith V6 integrated round-trip benchmark. Drives committed WAV "
+            "clips through Whisper, the DeBERTa privacy masker, the Groq "
             "request, local rehydration and local TTS, and reports what left "
             "this machine, whether the placeholders survived, whether the "
-            "values came back, and what each leg cost."
+            "values came back, and what each leg cost. Six live cases by "
+            "default, because the free tier is token-limited and the 44-clip "
+            "audio benchmark is where accuracy is actually measured."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -1321,7 +1718,9 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument("--smoke-test", action="store_true",
-                        help="four cases, for checking the wiring")
+                        help="three cases, for checking the wiring")
+    parser.add_argument("--extended", action="store_true",
+                        help="ten live cases instead of six")
     parser.add_argument("--case", action="append", dest="cases", metavar="CLIP_ID",
                         help="score only this clip; repeatable")
     parser.add_argument("--list-cases", action="store_true")
@@ -1336,8 +1735,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tts-cases", type=int, default=DEFAULT_TTS_CASES,
                         help=f"speak the first N restored answers "
                              f"(default: {DEFAULT_TTS_CASES})")
-    parser.add_argument("--request-pause", type=float, default=0.6,
-                        help="seconds between API requests (default: 0.6)")
+    parser.add_argument("--request-pause", type=float,
+                        default=DEFAULT_REQUEST_PAUSE,
+                        help="fallback seconds between live API requests when "
+                             "the response carries no rate-limit headers "
+                             f"(default: {DEFAULT_REQUEST_PAUSE:.0f})")
     parser.add_argument("--device-label", default="",
                         help="tag for the run id, e.g. pi5")
     parser.add_argument("--results-root", type=Path, default=None)
@@ -1349,14 +1751,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     if args.list_cases:
+        print("default (6 live cases):")
         for clip_id, note in DEFAULT_CASES:
-            print(f"{clip_id:14s} {note}")
+            print(f"  {clip_id:14s} {note}")
+        print("\n--extended adds:")
+        for clip_id, note in EXTENDED_CASES[len(DEFAULT_CASES):]:
+            print(f"  {clip_id:14s} {note}")
+        print("\nalways included, routed locally and never sent:")
+        print(f"  {LOCAL_COMMAND_CASE[0]:14s} {LOCAL_COMMAND_CASE[1]}")
         return 0
 
     if args.cases:
         wanted, mode = list(args.cases), "selected"
     elif args.smoke_test:
         wanted, mode = list(SMOKE_CASES), "smoke"
+    elif args.extended:
+        wanted, mode = [clip_id for clip_id, _ in EXTENDED_CASES], "extended"
     else:
         wanted, mode = [clip_id for clip_id, _ in DEFAULT_CASES], "full"
 

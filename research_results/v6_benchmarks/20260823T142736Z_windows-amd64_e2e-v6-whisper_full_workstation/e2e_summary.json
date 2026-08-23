@@ -1,0 +1,187 @@
+{
+  "run_id": "20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation",
+  "cases": 6,
+  "audio_seconds": 26.997,
+  "llm_configured": true,
+  "llm_mode": "live",
+  "local": {
+    "stt_seconds": {
+      "count": 6,
+      "mean_ms": 1333.8856333339209,
+      "std_ms": 276.50431003966713,
+      "min_ms": 1157.2253000013006,
+      "max_ms": 1940.634400001727,
+      "p50_ms": 1217.2700999999506,
+      "p90_ms": 1626.9230500001868,
+      "p95_ms": 1783.778725000957,
+      "p99_ms": 1909.263265001573,
+      "total_ms": 8003.313800003525
+    },
+    "privacy_seconds": {
+      "count": 6,
+      "mean_ms": 20.911483332990127,
+      "std_ms": 4.382109191996537,
+      "min_ms": 16.857099999469938,
+      "max_ms": 30.20699999979115,
+      "p50_ms": 19.641650000266964,
+      "p90_ms": 25.589199998648837,
+      "p95_ms": 27.898099999219994,
+      "p99_ms": 29.74521999967692,
+      "total_ms": 125.46889999794075
+    },
+    "pre_llm_seconds": {
+      "count": 6,
+      "mean_ms": 1354.797116666911,
+      "std_ms": 280.6774094063227,
+      "min_ms": 1174.0824000007706,
+      "max_ms": 1970.8414000015182,
+      "p50_ms": 1238.0123499988258,
+      "p90_ms": 1651.4116500002274,
+      "p95_ms": 1811.1265250008728,
+      "p99_ms": 1938.8984250013891,
+      "total_ms": 8128.782700001466
+    },
+    "real_time_factor_mean": 0.3010994814239162,
+    "note": "Local only: Whisper plus the fail-closed DeBERTa masker, measured on this device. Deliberately kept apart from the network figure below, because a slow answer caused by wifi is not caused by the privacy system."
+  },
+  "llm": {
+    "measured": true,
+    "requests_attempted": 6,
+    "requests_succeeded": 6,
+    "requests_failed": 0,
+    "round_trip_seconds": {
+      "count": 6,
+      "mean_ms": 601.5748666668514,
+      "std_ms": 69.69569924097735,
+      "min_ms": 542.7884000018821,
+      "max_ms": 726.931400000467,
+      "p50_ms": 567.557050000687,
+      "p90_ms": 693.9116499997908,
+      "p95_ms": 710.4215250001289,
+      "p99_ms": 723.6294250003994,
+      "total_ms": 3609.4492000011087
+    },
+    "provider": "groq",
+    "model": "openai/gpt-oss-20b",
+    "fallback_model": "openai/gpt-oss-120b",
+    "timeout_seconds": 20.0,
+    "mode": "live",
+    "note": "Network round trip only."
+  },
+  "end_to_end": {
+    "total_seconds": {
+      "count": 6,
+      "mean_ms": 1956.3719833337625,
+      "std_ms": 310.79219680153994,
+      "min_ms": 1721.7006999999285,
+      "max_ms": 2631.733300000633,
+      "p50_ms": 1837.549099998796,
+      "p90_ms": 2289.0424500001245,
+      "p95_ms": 2460.3878750003787,
+      "p99_ms": 2597.464215000582,
+      "total_ms": 11738.231900002575
+    },
+    "successful_cases": 6,
+    "case_count": 6,
+    "failures_by_cause": {},
+    "success_definition": "usable transcript, masking released, no raw private value in the outbound payload, deterministic rehydration probe restored every value, the request succeeded (live), no corrupted placeholder in the reply, every returned placeholder resolved, and a non-empty restored answer."
+  },
+  "privacy_round_trip": {
+    "payloads_captured": 6,
+    "masker_values_tested": 9,
+    "masker_values_in_payload": 0,
+    "gold_entities_tested": 11,
+    "gold_entities_in_payload": 2,
+    "gold_entities_recognized_surface_in_payload": 2,
+    "gold_entities_altered_by_stt": 1,
+    "raw_transcripts_in_payload": 0,
+    "masked_but_leaked": 0,
+    "missed_by_detector_and_in_payload": 2,
+    "missed_by_detector_total": 2,
+    "detector_misses": [
+      {
+        "clip_id": "privacy_007",
+        "label": "DATE",
+        "spoken": "twelfth of March",
+        "recognized": "12th of March",
+        "in_payload": true
+      },
+      {
+        "clip_id": "privacy_020",
+        "label": "TIME",
+        "spoken": "six in the evening",
+        "recognized": "6 in the evening",
+        "in_payload": true
+      }
+    ],
+    "surfaces_too_short_to_test": 2,
+    "leakage_rate": 0.1,
+    "definition": "Checks against the bytes the LLM client handed to urllib, not against the arguments a function was called with. Every side is number-folded first, so a telephone number spoken as words and written by the recognizer as digits still matches. The two headline counts answer different questions and must not be added together: `masked_but_leaked` is a value the masker replaced that left the device anyway, which is a boundary failure and must be zero; `missed_by_detector_and_in_payload` is a gold entity the privacy model never found, which is a recall miss and is why the audio benchmark exists. A pipeline can have a perfect boundary and an imperfect detector, and this run says which."
+  },
+  "placeholder_preservation": {
+    "replies_received": 6,
+    "replies_referring_to_a_placeholder": 2,
+    "replies_with_only_intact_placeholders": 2,
+    "measured_against": "live",
+    "definition": "Of the replies that used any bracketed token at all, how many used only tokens that were in the request. A reply containing [Name], [GIVENNAME] or an invented [TIME_1] counts as corrupted, because no local map can fill it. Meaningful only against a live model: a stubbed run scores the responder this file wrote."
+  },
+  "rehydration": {
+    "deterministic_probe_cases": 4,
+    "deterministic_probe_passed": 4,
+    "live_replies_fully_resolved": 2,
+    "live_replies_referring": 2,
+    "malformed_probe_passed": 10,
+    "malformed_probe_count": 10
+  },
+  "tts": {
+    "backend": "sapi",
+    "measured_cases": 5,
+    "seconds": {
+      "count": 5,
+      "mean_ms": 7216.225919999852,
+      "std_ms": 4079.063165921905,
+      "min_ms": 3400.452599998971,
+      "max_ms": 14948.571299999458,
+      "p50_ms": 5304.246700001386,
+      "p90_ms": 11959.066019999591,
+      "p95_ms": 13453.818659999524,
+      "p99_ms": 14649.62077199947,
+      "total_ms": 36081.12959999926
+    },
+    "speaks": "the locally restored answer, never the masked reply"
+  },
+  "models": {
+    "primary": "openai/gpt-oss-20b",
+    "fallback": "openai/gpt-oss-120b",
+    "answered_by": {
+      "openai/gpt-oss-20b": 6
+    },
+    "cases_using_fallback": 0
+  },
+  "rate_limiting": {
+    "cases_rate_limited": 0,
+    "clips": [],
+    "observed_headers": {
+      "x-ratelimit-limit-requests": "1000",
+      "x-ratelimit-limit-tokens": "8000",
+      "x-ratelimit-remaining-requests": "994",
+      "x-ratelimit-remaining-tokens": "7243",
+      "x-ratelimit-reset-requests": "8m38.4s",
+      "x-ratelimit-reset-tokens": "5.677s"
+    },
+    "request_pause_seconds": 13.0,
+    "history_reset_between_cases": true,
+    "definition": "A case is rate limited when both the primary and the fallback model refused it with HTTP 429. Retry-After is honoured once, capped at 60s; past that the case is recorded as rate limited and the run continues rather than waiting out a quota window."
+  },
+  "local_command": {
+    "clip_id": "benign_001",
+    "note": "no PII, device command - must not call Groq",
+    "transcript": "Turn the kitchen lights off, please.",
+    "masked_text": "Turn the kitchen lights off, please.",
+    "unaddressed_held_locally": true,
+    "addressed_intent": "LIGHT_OFF",
+    "addressed_routed_locally": true,
+    "requests_built": 0,
+    "ok": true
+  }
+}

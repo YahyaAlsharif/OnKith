@@ -235,12 +235,16 @@ class AdapterTests(unittest.TestCase):
     def test_production_runs_the_model_v2_ontology(self):
         """The deployed pipeline is pinned to the 63-label Model V2 contract."""
 
+        # Whichever pipeline is currently deployed, read from one place so
+        # this cannot go on asserting about a version that has been archived.
+        from privacy_eval.benchmark_common import PRODUCTION_ROOT
+
         source = (
-            REPO_ROOT / "FullPipeline_V4" / "integrated_pipeline" / "pii_adapter.py"
+            PRODUCTION_ROOT / "integrated_pipeline" / "pii_adapter.py"
         ).read_text(encoding="utf-8")
         self.assertIn("EXPECTED_LABEL_COUNT = 63", source)
         config = json.loads(
-            (REPO_ROOT / "FullPipeline_V4" / "config" / "live_config.json").read_text(
+            (PRODUCTION_ROOT / "config" / "live_config.json").read_text(
                 encoding="utf-8"
             )
         )

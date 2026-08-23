@@ -18,14 +18,28 @@ if str(REPO_ROOT / "model" / "privacy_evaluation") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "model" / "privacy_evaluation"))
 
 from privacy_eval import rescore  # noqa: E402
-from privacy_eval.benchmark_common import RESULTS_ROOT  # noqa: E402
+from privacy_eval.benchmark_common import (  # noqa: E402
+    LEGACY_RESULTS_ROOT,
+    RESULTS_ROOT,
+)
 
 
 def audio_run_folders() -> list[Path]:
-    if not RESULTS_ROOT.is_dir():
+    """Every committed audio run, in both results roots.
+
+    The frozen Canary, Whisper-V4 and Parakeet-V5 folders are in
+    ``cpu_benchmarks/``; V6 writes to ``v6_benchmarks/`` so that a V6 run
+    cannot be swept into the report figures, which discover the first root by
+    globbing. Rescoring is a cross-engine comparison and wants both.
+    """
+
+    roots = [root for root in (LEGACY_RESULTS_ROOT, RESULTS_ROOT) if root.is_dir()]
+    if not roots:
         return []
     folders = []
-    for directory in sorted(RESULTS_ROOT.glob("*")):
+    for directory in sorted(
+        path for root in roots for path in root.glob("*")
+    ):
         config = directory / "benchmark_config.json"
         if not config.is_file():
             continue

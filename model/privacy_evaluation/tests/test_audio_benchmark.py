@@ -1066,7 +1066,7 @@ class UnavailableRecogniserTests(unittest.TestCase):
 
         help_text = audio.STT_UNAVAILABLE_HELP
         self.assertIn("pip install", help_text)
-        self.assertIn("nemo_toolkit", help_text)
+        self.assertIn("faster-whisper==1.2.1", help_text)
         self.assertIn("requirements-", help_text)
 
     def test_the_help_names_the_pipeline_under_measurement(self) -> None:
@@ -1076,27 +1076,35 @@ class UnavailableRecogniserTests(unittest.TestCase):
             common.PRODUCTION_ROOT.name, audio.STT_UNAVAILABLE_HELP
         )
 
-    def test_the_help_says_how_to_get_the_pinned_checkpoint(self) -> None:
-        """Unlike Whisper's, Parakeet's weights are pinned by hash.
+    def test_the_help_says_no_checkpoint_step_is_needed(self) -> None:
+        """V6 is back on Whisper, whose weights are not pinned by hash.
 
-        The recognizer refuses to start on a checkpoint that is not the exact
-        459,243,520 bytes it was measured on, so "pip install" alone leaves a
-        teammate stuck one step short.
+        The Canary and Parakeet builds both refused to start on a checkpoint
+        that was not the exact byte count they were measured on, so their help
+        text had to name a fetch step. faster-whisper resolves base.en through
+        the CTranslate2 cache on first use instead. Saying so is the point:
+        silence here reads as an omission to a teammate who remembers the
+        older instructions.
         """
 
-        self.assertIn("cache_parakeet_checkpoint", audio.STT_UNAVAILABLE_HELP)
+        # Whitespace-folded: the sentence wraps, and a test that broke on
+        # where the line happens to end would be testing the formatting.
+        help_text = " ".join(audio.STT_UNAVAILABLE_HELP.lower().split())
+        self.assertIn("no separate checkpoint step", help_text)
+        self.assertNotIn("cache_parakeet_checkpoint", audio.STT_UNAVAILABLE_HELP)
 
     def test_the_help_never_points_at_a_superseded_recognizer(self) -> None:
-        """Canary lives in the archive and Whisper lives in FullPipeline_V4.
+        """Canary and Parakeet both live in the archive with frozen results.
 
-        Both have frozen result folders. Pointing a stuck teammate at either
-        installer would invite a rerun of a historical baseline under a run id
-        that says V5.
+        Pointing a stuck teammate at either installer would invite a rerun of a
+        historical baseline under a run id that says V6. Whisper is not on that
+        list any more: V6 runs it, and V6 is what this help text is for.
         """
 
         help_text = audio.STT_UNAVAILABLE_HELP.lower()
         self.assertNotIn("acquire_canary", audio.STT_UNAVAILABLE_HELP)
-        self.assertNotIn("faster-whisper", help_text)
+        self.assertNotIn("cache_parakeet_checkpoint", audio.STT_UNAVAILABLE_HELP)
+        self.assertNotIn("nemo_toolkit", help_text)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,10 @@
+{"probe": "single", "reply": "Okay, reminder to call [GIVENNAME_1] tomorrow.", "expected": "Okay, reminder to call Fahad tomorrow.", "got": "Okay, reminder to call Fahad tomorrow.", "ok": true, "error": ""}
+{"probe": "two types", "reply": "I will text [GIVENNAME_1] on [TELEPHONENUM_1].", "expected": "I will text Fahad on 0551234567.", "got": "I will text Fahad on 0551234567.", "ok": true, "error": ""}
+{"probe": "repeated", "reply": "[GIVENNAME_1] and [GIVENNAME_1] again.", "expected": "Fahad and Fahad again.", "got": "Fahad and Fahad again.", "ok": true, "error": ""}
+{"probe": "no placeholder", "reply": "It is sunny today.", "expected": "It is sunny today.", "got": "It is sunny today.", "ok": true, "error": ""}
+{"probe": "unknown placeholder", "reply": "I cannot reach [SURNAME_9].", "expected": "I cannot reach [SURNAME_9].", "got": "I cannot reach [SURNAME_9].", "ok": true, "error": ""}
+{"probe": "malformed bracket", "reply": "Try [GIVENNAME_ or [givenname_1] instead.", "expected": "Try [GIVENNAME_ or [givenname_1] instead.", "got": "Try [GIVENNAME_ or [givenname_1] instead.", "ok": true, "error": ""}
+{"probe": "ordinary brackets", "reply": "The note said [see attachment].", "expected": "The note said [see attachment].", "got": "The note said [see attachment].", "ok": true, "error": ""}
+{"probe": "empty reply", "reply": "", "expected": "", "got": "", "ok": true, "error": ""}
+{"probe": "rolling map across turns", "reply": "Mail [GIVENNAME_1] at [EMAIL_1].", "expected": "Mail Fahad at f@example.com.", "got": "Mail Fahad at f@example.com.", "ok": true, "error": ""}
+{"probe": "two turns, same placeholder, different people", "reply": "Remind me to call [GIVENNAME_1] tomorrow | Remind me to call [GIVENNAME_2] tomorrow", "expected": "I will call Fahad tomorrow. | I will call Ali tomorrow.", "got": "I will call Fahad tomorrow. | I will call Ali tomorrow.", "ok": true, "error": ""}

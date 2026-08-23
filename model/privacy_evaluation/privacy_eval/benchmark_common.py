@@ -31,17 +31,32 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 #: The pipeline under measurement. Moving this one line is what retargets both
 #: benchmark entry points; everything else about the methodology is unchanged,
 #: which is what keeps a V5 run comparable with the committed V4 folders.
-PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V5"
-#: The superseded Whisper pipeline. Still present and still runnable; nothing
-#: here imports it, and its committed result folders are read, never rewritten.
-WHISPER_V4_ROOT = REPO_ROOT / "FullPipeline_V4"
-#: The superseded Canary pipeline, kept in the archive. Nothing in these
-#: benchmarks imports it: the Canary numbers in research_results/ are frozen
-#: and are read from disk, never
-#: regenerated. It is named here so the path is discoverable rather than lore.
+PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V6"
+#: The superseded pipelines, kept in the archive as evidence. Nothing in these
+#: benchmarks imports any of them: their committed result folders are read from
+#: disk, never regenerated and never rewritten. They are named here so the
+#: paths are discoverable rather than lore.
+#:
+#: V4 matters more than the other two. V6's recognition and privacy core is
+#: V4's, byte for byte - ``FullPipeline_V6/tests/test_v6_independence.py``
+#: fails if that stops being true - so V4's Raspberry Pi measurements remain
+#: evidence about the path V6 runs, and a V4-against-V6 comparison on the same
+#: fixtures is a comparison of one core on two devices rather than of two
+#: pipelines.
+WHISPER_V4_ROOT = REPO_ROOT / "archive" / "FullPipeline_V4"
+PARAKEET_V5_ROOT = REPO_ROOT / "archive" / "FullPipeline_V5"
 CANARY_V3_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
-RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"
+#: V6 results are kept apart from ``cpu_benchmarks/``, which holds the frozen
+#: V3, V4 and V5 folders that ``Research_Paper_Figures.ipynb`` discovers by
+#: globbing. That notebook labels a run from its ``stt_engine`` key alone, so a
+#: V6 run - honestly tagged ``whisper``, because that is what it is - would be
+#: swept into the report's V4 series and drawn as V4. The report is frozen at
+#: V4 deliberately. A separate root is what keeps it that way without having to
+#: mislabel a V6 run or edit the notebook.
+RESULTS_ROOT = REPO_ROOT / "research_results" / "v6_benchmarks"
+#: Where the frozen V3/V4/V5 folders live. Read for historical comparison.
+LEGACY_RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"
 
 SAMPLE_RATE = 16_000
 
@@ -58,7 +73,7 @@ def ensure_import_paths() -> None:
     notebooks did. Importing them is the whole point - a benchmark that
     reimplemented the deployment path would be measuring something else.
 
-    Two pipelines now ship a package called ``integrated_pipeline``, so a bare
+    Several pipelines ship a package called ``integrated_pipeline``, so a bare
     import resolves to whichever root reached ``sys.path`` first and, once
     imported, stays resolved no matter what a later insert says. That is why
     ``PRODUCTION_ROOT`` here is the *only* pipeline root anything under
@@ -66,8 +81,8 @@ def ensure_import_paths() -> None:
     ``model_v2_adapter.py`` read it from this module rather than naming a root
     of their own. Whichever of them is imported first, they all mean the same
     package, and a benchmark cannot quietly measure a pipeline its run id does
-    not name. The privacy components are byte-identical across V4 and V5, so
-    following this root costs the model-evaluation harness nothing;
+    not name. The privacy components are byte-identical across V4, V5 and V6,
+    so following this root costs the model-evaluation harness nothing;
     ``test_evaluation_and_production_share_one_masker`` fails if that stops
     being true.
     """
