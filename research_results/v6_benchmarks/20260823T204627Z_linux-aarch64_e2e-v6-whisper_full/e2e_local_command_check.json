@@ -1,0 +1,11 @@
+{
+  "clip_id": "benign_001",
+  "note": "no PII, device command - must not call Groq",
+  "transcript": "Turn the kitchen lights off, please.",
+  "masked_text": "Turn the kitchen lights off, please.",
+  "unaddressed_held_locally": true,
+  "addressed_intent": "LIGHT_OFF",
+  "addressed_routed_locally": true,
+  "requests_built": 0,
+  "ok": true
+}

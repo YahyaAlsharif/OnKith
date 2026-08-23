@@ -1,0 +1,77 @@
+{
+  "run_id": "20260823T204339Z_linux-aarch64_audio-v6-whisper_full",
+  "available": true,
+  "engine": "whisper",
+  "model": "base.en",
+  "model_id": "Systran/faster-whisper-base.en",
+  "backend": "ctranslate2_cpu_int8",
+  "runtime": "ctranslate2",
+  "runtime_version": "1.2.1",
+  "device": "cpu",
+  "compute_type": "int8",
+  "decoding": {
+    "strategy": "beam",
+    "beam_size": 5,
+    "language": "en",
+    "punctuation_and_capitalisation": "yes",
+    "initial_prompt_characters": 298
+  },
+  "note": "A controlled deployment check on a few dozen clips, not a speech-recognition benchmark. Both sides of every WER are lowercased and stripped of punctuation before scoring, which is the same definition the Canary runs used - Canary produced unpunctuated lowercase text (pnc=no) and Whisper punctuates, so normalising both sides is what keeps the two comparable.",
+  "overall": {
+    "clips": 44,
+    "reference_words": 869,
+    "aggregate_wer": 0.18411967779056387,
+    "mean_wer": 0.19963870517938026,
+    "median_wer": 0.1642156862745098,
+    "min_wer": 0.0,
+    "max_wer": 0.6875,
+    "substitutions": 154,
+    "deletions": 6,
+    "insertions": 0
+  },
+  "by_subset": {
+    "public": {
+      "clips": 12,
+      "reference_words": 222,
+      "aggregate_wer": 0.08558558558558559,
+      "mean_wer": 0.12426879730010659,
+      "median_wer": 0.016129032258064516,
+      "min_wer": 0.0,
+      "max_wer": 0.5,
+      "substitutions": 18,
+      "deletions": 1,
+      "insertions": 0
+    },
+    "synthetic_privacy": {
+      "clips": 32,
+      "reference_words": 647,
+      "aggregate_wer": 0.21792890262751158,
+      "mean_wer": 0.2279024206341079,
+      "median_wer": 0.20483870967741935,
+      "min_wer": 0.0,
+      "max_wer": 0.6875,
+      "substitutions": 136,
+      "deletions": 5,
+      "insertions": 0
+    }
+  },
+  "number_normalised": {
+    "definition": "the same Levenshtein word error rate, after spoken number words have been folded to numerals on both the reference and the hypothesis. Identical treatment on both sides and for both engines, which is what makes Canary and Whisper comparable; the raw figure above cannot be, because Canary wrote numbers as words and Whisper writes numerals.",
+    "clips": 44,
+    "reference_words": 808,
+    "aggregate_wer": 0.09034653465346534,
+    "mean_wer": 0.08566569594159466,
+    "median_wer": 0.0
+  },
+  "digit_preservation": {
+    "definition": "long numbers (7+ digits) transcribed digit for digit, scored on the value rather than the spelling",
+    "clips_with_identifiers": 5,
+    "identifiers": 5,
+    "exact": 3,
+    "accuracy": 0.6
+  },
+  "wake_word": {
+    "measurable": false,
+    "reason": "no clip in the committed corpus addresses the device by name, so wake-word recognition is not measurable here for any engine"
+  }
+}

@@ -1,0 +1,7 @@
+clip_id,case_note,audio_duration_s,expected_entities,detected_entities,placeholder_map_size,stt_latency_ms,privacy_latency_ms,local_latency_ms,llm_latency_ms,total_latency_ms,tts_latency_ms,rehydration_probe_ok,raw_transcript_in_payload,end_to_end_ok,peak_rss_mb
+privacy_001,person name,2.079,2,2,2,1940.5851950000397,14.886632000070676,1955.4718270001104,,,,True,False,True,1446.265625
+privacy_003,telephone number,3.646,1,2,2,2262.2614140000223,24.23723600008998,2286.4986500001123,,,,True,False,True,1446.921875
+privacy_004,"email address, spoken form",4.064,1,1,1,2433.495960999835,17.70676299997831,2451.2027239998133,,,,True,False,True,1446.96875
+privacy_007,date / numeric private value,3.704,1,0,0,2414.2413849999684,26.047950000020137,2440.2893349999886,,,,,False,True,1454.21875
+privacy_020,multiple PII types in one utterance,9.974,6,4,4,4283.85426900013,34.48861099991518,4318.342880000046,,,,True,False,True,1461.046875
+benign_003,"no PII, quantities that must not be masked",3.53,0,0,0,2383.5477820000506,17.096116999937294,2400.643898999988,,,,,False,True,1461.046875

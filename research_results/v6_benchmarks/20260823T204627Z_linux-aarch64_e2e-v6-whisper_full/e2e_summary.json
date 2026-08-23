@@ -1,0 +1,153 @@
+{
+  "run_id": "20260823T204627Z_linux-aarch64_e2e-v6-whisper_full",
+  "cases": 6,
+  "audio_seconds": 26.997,
+  "llm_configured": false,
+  "llm_mode": "payload audit only",
+  "local": {
+    "stt_seconds": {
+      "count": 6,
+      "mean_ms": 2619.6643343333412,
+      "std_ms": 762.7823784469284,
+      "min_ms": 1940.5851950000397,
+      "max_ms": 4283.85426900013,
+      "p50_ms": 2398.8945835000095,
+      "p90_ms": 3358.6751149999827,
+      "p95_ms": 3821.2646920000566,
+      "p99_ms": 4191.336353600116,
+      "total_ms": 15717.986006000046
+    },
+    "privacy_seconds": {
+      "count": 6,
+      "mean_ms": 22.41055150000193,
+      "std_ms": 6.701059248906335,
+      "min_ms": 14.886632000070676,
+      "max_ms": 34.48861099991518,
+      "p50_ms": 20.971999500034144,
+      "p90_ms": 30.26828049996766,
+      "p95_ms": 32.37844574994142,
+      "p99_ms": 34.06657794992043,
+      "total_ms": 134.46330900001158
+    },
+    "pre_llm_seconds": {
+      "count": 6,
+      "mean_ms": 2642.074885833343,
+      "std_ms": 768.4585350175153,
+      "min_ms": 1955.4718270001104,
+      "max_ms": 4318.342880000046,
+      "p50_ms": 2420.466616999988,
+      "p90_ms": 3384.7728019999295,
+      "p95_ms": 3851.5578409999875,
+      "p99_ms": 4224.9858722000345,
+      "total_ms": 15852.449315000058
+    },
+    "real_time_factor_mean": 0.58719299607364,
+    "note": "Local only: Whisper plus the fail-closed DeBERTa masker, measured on this device. Deliberately kept apart from the network figure below, because a slow answer caused by wifi is not caused by the privacy system."
+  },
+  "llm": {
+    "measured": false,
+    "requests_attempted": 6,
+    "requests_succeeded": 0,
+    "requests_failed": 6,
+    "round_trip_seconds": {
+      "count": 0
+    },
+    "provider": "groq",
+    "model": "openai/gpt-oss-20b",
+    "fallback_model": "openai/gpt-oss-120b",
+    "timeout_seconds": 20.0,
+    "mode": "payload audit only",
+    "note": "Not run: no API key was configured, so no request left this machine. The payload each request would have carried was still built by the real client and is in e2e_outbound_payloads.jsonl."
+  },
+  "end_to_end": {
+    "total_seconds": {
+      "count": 0
+    },
+    "successful_cases": 6,
+    "case_count": 6,
+    "failures_by_cause": {},
+    "success_definition": "usable transcript, masking released, no raw private value in the outbound payload, deterministic rehydration probe restored every value. The four transport-dependent conditions are not counted in this run because no key was configured."
+  },
+  "privacy_round_trip": {
+    "payloads_captured": 6,
+    "masker_values_tested": 9,
+    "masker_values_in_payload": 0,
+    "gold_entities_tested": 11,
+    "gold_entities_in_payload": 2,
+    "gold_entities_recognized_surface_in_payload": 2,
+    "gold_entities_altered_by_stt": 1,
+    "raw_transcripts_in_payload": 0,
+    "masked_but_leaked": 0,
+    "missed_by_detector_and_in_payload": 2,
+    "missed_by_detector_total": 2,
+    "detector_misses": [
+      {
+        "clip_id": "privacy_007",
+        "label": "DATE",
+        "spoken": "twelfth of March",
+        "recognized": "12th of March",
+        "in_payload": true
+      },
+      {
+        "clip_id": "privacy_020",
+        "label": "TIME",
+        "spoken": "six in the evening",
+        "recognized": "6 in the evening",
+        "in_payload": true
+      }
+    ],
+    "surfaces_too_short_to_test": 2,
+    "leakage_rate": 0.1,
+    "definition": "Checks against the bytes the LLM client handed to urllib, not against the arguments a function was called with. Every side is number-folded first, so a telephone number spoken as words and written by the recognizer as digits still matches. The two headline counts answer different questions and must not be added together: `masked_but_leaked` is a value the masker replaced that left the device anyway, which is a boundary failure and must be zero; `missed_by_detector_and_in_payload` is a gold entity the privacy model never found, which is a recall miss and is why the audio benchmark exists. A pipeline can have a perfect boundary and an imperfect detector, and this run says which."
+  },
+  "placeholder_preservation": {
+    "replies_received": 0,
+    "replies_referring_to_a_placeholder": 0,
+    "replies_with_only_intact_placeholders": 0,
+    "measured_against": "payload audit only",
+    "definition": "Of the replies that used any bracketed token at all, how many used only tokens that were in the request. A reply containing [Name], [GIVENNAME] or an invented [TIME_1] counts as corrupted, because no local map can fill it. Meaningful only against a live model: a stubbed run scores the responder this file wrote."
+  },
+  "rehydration": {
+    "deterministic_probe_cases": 4,
+    "deterministic_probe_passed": 4,
+    "live_replies_fully_resolved": 0,
+    "live_replies_referring": 0,
+    "malformed_probe_passed": 10,
+    "malformed_probe_count": 10
+  },
+  "tts": {
+    "backend": "espeak-ng",
+    "measured_cases": 0,
+    "seconds": {
+      "count": 0
+    },
+    "speaks": "not measured in this run"
+  },
+  "models": {
+    "primary": "openai/gpt-oss-20b",
+    "fallback": "openai/gpt-oss-120b",
+    "answered_by": {
+      "openai/gpt-oss-20b": 6
+    },
+    "cases_using_fallback": 0
+  },
+  "rate_limiting": {
+    "cases_rate_limited": 0,
+    "clips": [],
+    "observed_headers": {},
+    "request_pause_seconds": 13.0,
+    "history_reset_between_cases": true,
+    "definition": "A case is rate limited when both the primary and the fallback model refused it with HTTP 429. Retry-After is honoured once, capped at 60s; past that the case is recorded as rate limited and the run continues rather than waiting out a quota window."
+  },
+  "local_command": {
+    "clip_id": "benign_001",
+    "note": "no PII, device command - must not call Groq",
+    "transcript": "Turn the kitchen lights off, please.",
+    "masked_text": "Turn the kitchen lights off, please.",
+    "unaddressed_held_locally": true,
+    "addressed_intent": "LIGHT_OFF",
+    "addressed_routed_locally": true,
+    "requests_built": 0,
+    "ok": true
+  }
+}
