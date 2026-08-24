@@ -2,7 +2,7 @@
 
 > **Superseded. This is Pipeline V3, the Canary build, kept as a baseline.**
 >
-> The current deployment is [`../../FullPipeline_V4/`](../../FullPipeline_V4/), which
+> The current deployment is [`../FullPipeline_V4/`](../FullPipeline_V4/), which
 > is this pipeline with faster-whisper `base.en` in place of NVIDIA Canary 180M
 > Flash. V3 is kept intact in the archive because the measurements in
 > [`../../research_results/`](../../research_results/) are its, and the

@@ -1,6 +1,132 @@
 {
   "generated_from": "Research_Paper_Figures.ipynb",
   "repository_root": "OnKith",
+  "current_pipeline": "V6",
+  "current_pipeline_root": "FullPipeline_V6",
+  "canonical_runs": {
+    "V3/audio_pipeline/pi": "cpu_benchmarks/20260818T081310Z_linux-aarch64_audio_full",
+    "V3/audio_pipeline/workstation": "cpu_benchmarks/20260818T062503Z_windows-amd64_audio_full_workstation",
+    "V3/cpu_text/pi": "cpu_benchmarks/20260818T082425Z_linux-aarch64_full",
+    "V3/cpu_text/workstation": "cpu_benchmarks/20260817T190227Z_windows-amd64_full_workstation",
+    "V4/audio_pipeline/pi": "cpu_benchmarks/20260821T201653Z_linux-aarch64_audio-whisper_full",
+    "V4/audio_pipeline/workstation": "cpu_benchmarks/20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+    "V4/cpu_text/pi": "cpu_benchmarks/20260822T122249Z_linux-aarch64_whisper_full",
+    "V4/cpu_text/workstation": "cpu_benchmarks/20260820T145843Z_windows-amd64_whisper_full_workstation",
+    "V5/audio_pipeline/workstation": "cpu_benchmarks/20260823T095553Z_windows-amd64_audio-parakeet_full",
+    "V5/cpu_text/workstation": "cpu_benchmarks/20260823T095708Z_windows-amd64_parakeet_full",
+    "V5/end_to_end/workstation": "cpu_benchmarks/20260823T095954Z_windows-amd64_e2e-parakeet_full",
+    "V6/audio_pipeline/pi": "v6_benchmarks/20260823T204339Z_linux-aarch64_audio-v6-whisper_full",
+    "V6/audio_pipeline/workstation": "v6_benchmarks/20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+    "V6/cpu_text/pi": "v6_benchmarks/20260823T203840Z_linux-aarch64_v6-whisper_full",
+    "V6/cpu_text/workstation": "v6_benchmarks/20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+    "V6/end_to_end/pi": "v6_benchmarks/20260823T204627Z_linux-aarch64_e2e-v6-whisper_full",
+    "V6/end_to_end/workstation": "v6_benchmarks/20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation"
+  },
+  "canonical_runs_resolved": {
+    "V3/audio_pipeline/pi": "cpu_benchmarks/20260818T081310Z_linux-aarch64_audio_full",
+    "V3/audio_pipeline/workstation": "cpu_benchmarks/20260818T062503Z_windows-amd64_audio_full_workstation",
+    "V3/cpu_text/pi": "cpu_benchmarks/20260818T082425Z_linux-aarch64_full",
+    "V3/cpu_text/workstation": "cpu_benchmarks/20260817T190227Z_windows-amd64_full_workstation",
+    "V4/audio_pipeline/pi": "cpu_benchmarks/20260821T201653Z_linux-aarch64_audio-whisper_full",
+    "V4/audio_pipeline/workstation": "cpu_benchmarks/20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+    "V4/cpu_text/pi": "cpu_benchmarks/20260822T122249Z_linux-aarch64_whisper_full",
+    "V4/cpu_text/workstation": "cpu_benchmarks/20260820T145843Z_windows-amd64_whisper_full_workstation",
+    "V5/audio_pipeline/workstation": "cpu_benchmarks/20260823T095553Z_windows-amd64_audio-parakeet_full",
+    "V5/cpu_text/workstation": "cpu_benchmarks/20260823T095708Z_windows-amd64_parakeet_full",
+    "V5/end_to_end/workstation": "cpu_benchmarks/20260823T095954Z_windows-amd64_e2e-parakeet_full",
+    "V6/audio_pipeline/pi": "v6_benchmarks/20260823T204339Z_linux-aarch64_audio-v6-whisper_full",
+    "V6/audio_pipeline/workstation": "v6_benchmarks/20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+    "V6/cpu_text/pi": "v6_benchmarks/20260823T203840Z_linux-aarch64_v6-whisper_full",
+    "V6/cpu_text/workstation": "v6_benchmarks/20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+    "V6/end_to_end/pi": "v6_benchmarks/20260823T204627Z_linux-aarch64_e2e-v6-whisper_full",
+    "V6/end_to_end/workstation": "v6_benchmarks/20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation"
+  },
+  "figure_provenance": {
+    "assistant_privacy_boundary": [
+      "20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation",
+      "20260823T204627Z_linux-aarch64_e2e-v6-whisper_full"
+    ],
+    "audio_duration_scaling": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_latency_and_memory": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_latency_by_duration_bucket": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_pipeline_stage_latency": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_postprocessing_amplification": [
+      "20260818T062503Z_windows-amd64_audio_full_workstation",
+      "20260818T081310Z_linux-aarch64_audio_full",
+      "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+      "20260821T201653Z_linux-aarch64_audio-whisper_full",
+      "20260823T095553Z_windows-amd64_audio-parakeet_full",
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_privacy_reference_vs_pipeline": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "audio_word_error_rate": [
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "cpu_latency_distribution": [
+      "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+      "20260823T203840Z_linux-aarch64_v6-whisper_full"
+    ],
+    "cpu_memory_and_throughput": [
+      "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+      "20260823T203840Z_linux-aarch64_v6-whisper_full"
+    ],
+    "current_system_device_cost": [
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "current_system_device_quality": [
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+      "20260823T203840Z_linux-aarch64_v6-whisper_full",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "deberta_fp32_vs_int8": [],
+    "deberta_split_performance": [],
+    "deployment_parity": [
+      "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+      "20260823T203840Z_linux-aarch64_v6-whisper_full"
+    ],
+    "latency_by_input_length": [],
+    "model_progression": [],
+    "model_size_comparison": [],
+    "ood_model_comparison": [],
+    "per_entity_f1": [],
+    "pipeline_latency_breakdown": [
+      "20260823T203840Z_linux-aarch64_v6-whisper_full"
+    ],
+    "stt_engine_accuracy": [
+      "20260818T062503Z_windows-amd64_audio_full_workstation",
+      "20260818T081310Z_linux-aarch64_audio_full",
+      "20260823T095553Z_windows-amd64_audio-parakeet_full",
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "stt_engine_cost": [
+      "20260818T062503Z_windows-amd64_audio_full_workstation",
+      "20260818T081310Z_linux-aarch64_audio_full",
+      "20260823T095553Z_windows-amd64_audio-parakeet_full",
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ],
+    "stt_engine_released_identifiers": [
+      "20260818T062503Z_windows-amd64_audio_full_workstation",
+      "20260818T081310Z_linux-aarch64_audio_full",
+      "20260823T095553Z_windows-amd64_audio-parakeet_full",
+      "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+      "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+    ]
+  },
   "figures": [
     {
       "kind": "figure",
@@ -9,7 +135,8 @@
         "model_progression.png",
         "model_progression.pdf"
       ],
-      "caption": "Typed entity F1 and character-level error rates for TinyBERT INT8 and DeBERTa INT8 on the same held-out validation split."
+      "caption": "Typed entity F1 and character-level error rates for TinyBERT INT8 and DeBERTa INT8 on the same held-out validation split.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -18,7 +145,8 @@
         "deberta_fp32_vs_int8.png",
         "deberta_fp32_vs_int8.pdf"
       ],
-      "caption": "FP32 and INT8 typed entity F1 on every evaluation view, with the F1 lost to quantization against the 0.02 release gate."
+      "caption": "FP32 and INT8 typed entity F1 on every evaluation view, with the F1 lost to quantization against the 0.02 release gate.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -27,7 +155,8 @@
         "deberta_split_performance.png",
         "deberta_split_performance.pdf"
       ],
-      "caption": "Typed entity precision/recall/F1 and private-character recall for the deployed INT8 model on each evaluation view."
+      "caption": "Typed entity precision/recall/F1 and private-character recall for the deployed INT8 model on each evaluation view.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -36,7 +165,8 @@
         "per_entity_f1.png",
         "per_entity_f1.pdf"
       ],
-      "caption": "Typed entity F1 per entity type on the combined validation view, annotated with gold support."
+      "caption": "Typed entity F1 per entity type on the combined validation view, annotated with gold support.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -45,7 +175,8 @@
         "ood_model_comparison.png",
         "ood_model_comparison.pdf"
       ],
-      "caption": "TinyBERT INT8 against DeBERTa INT8 on the OOD development and frozen final fixtures, model-only in both cases."
+      "caption": "TinyBERT INT8 against DeBERTa INT8 on the OOD development and frozen final fixtures, model-only in both cases.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -54,7 +185,8 @@
         "model_size_comparison.png",
         "model_size_comparison.pdf"
       ],
-      "caption": "On-disk size of every privacy-model artifact, deployed one highlighted."
+      "caption": "On-disk size of every privacy-model artifact, deployed one highlighted.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -63,7 +195,8 @@
         "latency_by_input_length.png",
         "latency_by_input_length.pdf"
       ],
-      "caption": "Median single-threaded inference latency against input length for all three deployment candidates, on the development workstation."
+      "caption": "Median single-threaded inference latency against input length for all three deployment candidates, on the development workstation.",
+      "runs": []
     },
     {
       "kind": "figure",
@@ -72,7 +205,11 @@
         "cpu_latency_distribution.png",
         "cpu_latency_distribution.pdf"
       ],
-      "caption": "Per-row masking latency distribution and cumulative distribution for every benchmarked device."
+      "caption": "Per-row masking latency distribution and cumulative distribution for the current system on the workstation and on a Raspberry Pi 5.",
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -81,7 +218,10 @@
         "pipeline_latency_breakdown.png",
         "pipeline_latency_breakdown.pdf"
       ],
-      "caption": "Mean latency of each stage inside a masking call and across the assembled pipeline, on the most recent benchmarked device. The two audio stages are driven by a synthesised probe tone rather than speech; the real-speech cost is in the audio benchmark section."
+      "caption": "Mean latency of each stage inside a masking call and across the assembled pipeline, for the current system on the Raspberry Pi 5. The two audio stages are driven by a synthesised probe tone rather than speech; the real-speech cost is in the audio benchmark section.",
+      "runs": [
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -90,7 +230,11 @@
         "cpu_memory_and_throughput.png",
         "cpu_memory_and_throughput.pdf"
       ],
-      "caption": "Peak process RSS, resident privacy-stack cost and masking throughput for every benchmarked device."
+      "caption": "Peak process RSS, resident privacy-stack cost and masking throughput for the current system on the workstation and on a Raspberry Pi 5.",
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -99,7 +243,11 @@
         "deployment_parity.png",
         "deployment_parity.pdf"
       ],
-      "caption": "Prediction agreement and typed-F1 difference between benchmarked devices running the identical INT8 artifact."
+      "caption": "Cross-device agreement and quality difference for the current system running the identical INT8 artifact on the workstation and a Raspberry Pi 5. Disagreement is INT8 kernel arithmetic differing between x86-64 and aarch64, not a different model.",
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -108,7 +256,10 @@
         "audio_pipeline_stage_latency.png",
         "audio_pipeline_stage_latency.pdf"
       ],
-      "caption": "Mean per-clip latency of every pipeline stage from audio to sanitized text, and each stage's share of total processing time."
+      "caption": "Mean per-clip latency of every pipeline stage from audio to post-mask text, and each stage's share of total processing time, for the current system on the Raspberry Pi 5.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -117,7 +268,10 @@
         "audio_duration_scaling.png",
         "audio_duration_scaling.pdf"
       ],
-      "caption": "Audio duration against end-to-end latency, STT latency and STT real-time factor. RTF below 1 means the device processes speech faster than it arrives."
+      "caption": "Audio duration against end-to-end latency, STT latency and STT real-time factor for the current system on the Raspberry Pi 5. RTF below 1 means the device processes speech faster than it arrives; points above the dashed line are clips it did not.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -126,7 +280,10 @@
         "audio_latency_by_duration_bucket.png",
         "audio_latency_by_duration_bucket.pdf"
       ],
-      "caption": "Mean end-to-end latency per clip-duration bucket, with the observed minimum and maximum as whiskers."
+      "caption": "Mean end-to-end latency per clip-duration bucket for the current system on the Raspberry Pi 5, with the observed minimum and maximum as whiskers.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -135,7 +292,10 @@
         "audio_latency_and_memory.png",
         "audio_latency_and_memory.pdf"
       ],
-      "caption": "Cumulative distribution of end-to-end latency with P50/P90/P95/P99, and resident memory as each model loads, against the 4 GiB Raspberry Pi budget."
+      "caption": "Cumulative distribution of end-to-end latency with P50/P90/P95/P99, and resident memory as each model loads, for the current system on the Raspberry Pi 5, against the 4 GB Raspberry Pi budget.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -144,7 +304,10 @@
         "audio_privacy_reference_vs_pipeline.png",
         "audio_privacy_reference_vs_pipeline.pdf"
       ],
-      "caption": "Private-character recall and leakage for the same clips scored from written reference text, from uncased unpunctuated reference text, and end to end from audio; plus the attribution of every end-to-end failure."
+      "caption": "Private-character recall and leakage for the same clips scored from written reference text, from uncased unpunctuated reference text, and end to end from audio; plus the attribution of every end-to-end failure. Current system on the Raspberry Pi 5.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -153,7 +316,10 @@
         "audio_word_error_rate.png",
         "audio_word_error_rate.pdf"
       ],
-      "caption": "Word error rate on the synthetic privacy clips and on the LibriSpeech dev-clean clips, reported separately because they are different distributions."
+      "caption": "Word error rate on the synthetic privacy clips and on the LibriSpeech dev-clean clips, reported separately because they are different distributions. Current system on the Raspberry Pi 5.",
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -162,7 +328,16 @@
         "audio_postprocessing_amplification.png",
         "audio_postprocessing_amplification.pdf"
       ],
-      "caption": "The spoken-digit finding: utterances where the privacy model did not mask a spoken number and the display renderer then rendered it as a numeral. Shown for both recognizers, because the V4 count is zero by change of orthography rather than by a change to the renderer."
+      "caption": "The spoken-digit finding: utterances where the privacy model did not mask a spoken number and the display renderer then rendered it as a numeral. Shown for every recognizer generation, because the Whisper-era count is zero by change of orthography rather than by a change to the renderer.",
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+        "20260821T201653Z_linux-aarch64_audio-whisper_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -171,7 +346,14 @@
         "stt_engine_accuracy.png",
         "stt_engine_accuracy.pdf"
       ],
-      "caption": "Word error rate and number handling for both recognizers on the committed audio benchmark. The raw word error rate is shown in grey to expose how much of it is spelling: Canary wrote numbers as words, Whisper writes numerals, and only the number-normalised bars compare the engines. The right panel separates transcribing a long number correctly from keeping it out of the released text - the two are not the same thing, and the engines differ in opposite directions."
+      "caption": "Word error rate and number handling for every measured recognizer on the committed audio benchmark. The raw word error rate is shown in grey to expose how much of it is spelling: Canary wrote numbers as words, Whisper writes numerals, and only the number-normalised bars compare the engines. The right panel separates transcribing a long number correctly from keeping it out of the released text - the two are not the same thing, and the engines differ in opposite directions.",
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -180,7 +362,14 @@
         "stt_engine_cost.png",
         "stt_engine_cost.pdf"
       ],
-      "caption": "Real-time factor and end-to-end latency for both recognizers. The dashed line is real time: a bar below it means the device processes speech faster than it arrives. Bars are drawn only for arms that have been measured."
+      "caption": "Real-time factor and end-to-end latency for every measured recognizer. The dashed line is real time: a bar below it means the device processes speech faster than it arrives. Bars are drawn only for arms that have been measured.",
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "figure",
@@ -189,7 +378,55 @@
         "stt_engine_released_identifiers.png",
         "stt_engine_released_identifiers.pdf"
       ],
-      "caption": "End-to-end privacy per recognizer. Left: the measure that survives a change of recognizer without any alignment - after masking and after the display renderer, is an identifier-scale number still legible in what the device released? Right: the share of annotated entities that reached no released text, recomputed for all four arms by privacy_eval.rescore so that one scoring definition is applied throughout."
+      "caption": "End-to-end privacy per recognizer. Left: the measure that survives a change of recognizer without any alignment - after masking and after the display renderer, is an identifier-scale number still legible in what the device released? Right: the share of annotated entities that reached no released text, recomputed for every arm by privacy_eval.rescore so that one scoring definition is applied throughout.",
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "figure",
+      "name": "current_system_device_cost",
+      "files": [
+        "current_system_device_cost.png",
+        "current_system_device_cost.pdf"
+      ],
+      "caption": "Real-time factor, end-to-end latency and peak memory for the current system on the workstation and on a Raspberry Pi 5. RTF below the dashed line means the device processes speech faster than it arrives; the black rule on each bar is the P90. On the Raspberry Pi the P90 sits above the line, and the clips responsible are the shortest ones - Whisper decodes a fixed window whatever the clip length, so the per-clip cost has a floor.",
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "figure",
+      "name": "current_system_device_quality",
+      "files": [
+        "current_system_device_quality.png",
+        "current_system_device_quality.pdf"
+      ],
+      "caption": "Recognition accuracy, end-to-end privacy after speech recognition, and privacy-model quality on text, for the current system on both devices. Every pair is measured on the same committed fixtures through the same INT8 artifact; the residual differences are INT8 kernel arithmetic on aarch64 against x86-64.",
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "figure",
+      "name": "assistant_privacy_boundary",
+      "files": [
+        "assistant_privacy_boundary.png",
+        "assistant_privacy_boundary.pdf"
+      ],
+      "caption": "What reached the outbound request, what the local pipeline cost, and the local guarantees, for the current system on both devices. The boundary counts are read off the bytes handed to urllib. The Raspberry Pi run had no API key, so its requests were built and audited but never sent; the network, placeholder-preservation and TTS measurements are workstation only and are reported as such.",
+      "runs": [
+        "20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation",
+        "20260823T204627Z_linux-aarch64_e2e-v6-whisper_full"
+      ]
     }
   ],
   "tables": [
@@ -200,7 +437,8 @@
         "model_progression.csv"
       ],
       "caption": "Model generations with the metric each one actually has on record.",
-      "rows": 3
+      "rows": 3,
+      "runs": []
     },
     {
       "kind": "table",
@@ -209,7 +447,8 @@
         "deberta_quantization.csv"
       ],
       "caption": "FP32 against INT8 on every view, with the deltas the release gate reads.",
-      "rows": 5
+      "rows": 5,
+      "runs": []
     },
     {
       "kind": "table",
@@ -218,7 +457,8 @@
         "deberta_split_performance.csv"
       ],
       "caption": "Every metric of the deployed INT8 model on every evaluation view.",
-      "rows": 6
+      "rows": 6,
+      "runs": []
     },
     {
       "kind": "table",
@@ -227,7 +467,8 @@
         "per_entity_f1.csv"
       ],
       "caption": "Per-entity precision, recall, F1 and support on the combined validation view.",
-      "rows": 30
+      "rows": 30,
+      "runs": []
     },
     {
       "kind": "table",
@@ -236,7 +477,8 @@
         "ood_model_comparison.csv"
       ],
       "caption": "Both deployment models on the OOD development and frozen final fixtures.",
-      "rows": 4
+      "rows": 4,
+      "runs": []
     },
     {
       "kind": "table",
@@ -245,7 +487,8 @@
         "model_size_comparison.csv"
       ],
       "caption": "On-disk size of each privacy-model artifact.",
-      "rows": 5
+      "rows": 5,
+      "runs": []
     },
     {
       "kind": "table",
@@ -254,7 +497,8 @@
         "latency_by_input_length.csv"
       ],
       "caption": "Single-threaded latency at four input lengths on the development workstation.",
-      "rows": 12
+      "rows": 12,
+      "runs": []
     },
     {
       "kind": "table",
@@ -262,8 +506,21 @@
       "files": [
         "cpu_benchmark_runs.csv"
       ],
-      "caption": "Every CPU benchmark run discovered, with its device and headline numbers.",
-      "rows": 5
+      "caption": "Every CPU/text benchmark run in the repository, current and historical, with its device, environment and headline numbers. `canonical` marks the run the figures are drawn from.",
+      "rows": 11,
+      "runs": [
+        "20260817T190227Z_windows-amd64_full_workstation",
+        "20260818T082425Z_linux-aarch64_full",
+        "20260819T080341Z_windows-amd64_whisper_full_workstation",
+        "20260820T072331Z_linux-aarch64_whisper_full",
+        "20260820T145843Z_windows-amd64_whisper_full_workstation",
+        "20260821T201941Z_linux-aarch64_whisper_full",
+        "20260821T205958Z_linux-aarch64_whisper_full",
+        "20260822T122249Z_linux-aarch64_whisper_full",
+        "20260823T095708Z_windows-amd64_parakeet_full",
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -271,8 +528,12 @@
       "files": [
         "cpu_latency_percentiles.csv"
       ],
-      "caption": "Latency percentiles of the full masking call, per device.",
-      "rows": 4
+      "caption": "Latency percentiles of the full masking call, current system, per device.",
+      "rows": 2,
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -280,8 +541,25 @@
       "files": [
         "pipeline_latency_breakdown.csv"
       ],
-      "caption": "Mean latency per stage for the most recent benchmarked device.",
-      "rows": 10
+      "caption": "Mean latency per stage for the current system on both devices. The figure draws the Raspberry Pi rows.",
+      "rows": 20,
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "table",
+      "name": "cpu_memory_and_throughput",
+      "files": [
+        "cpu_memory_and_throughput.csv"
+      ],
+      "caption": "Memory footprint and masking throughput of the current system, per device.",
+      "rows": 2,
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -289,8 +567,12 @@
       "files": [
         "deployment_parity.csv"
       ],
-      "caption": "Cross-device prediction agreement and metric deltas.",
-      "rows": 3
+      "caption": "Cross-device agreement and metric deltas for the current system, workstation as reference.",
+      "rows": 3,
+      "runs": [
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -298,8 +580,17 @@
       "files": [
         "audio_deployment_summary.csv"
       ],
-      "caption": "One row per device and recognizer: audio benchmarked end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy. The privacy columns are recomputed for every run on the current scoring definition by privacy_eval.rescore, so a folder written before the alignment fix is not compared against one written after it. The word error rate is each run's own raw figure and is not comparable between recognizers; stt_engine_comparison.csv carries the number-normalised one.",
-      "rows": 4
+      "caption": "One row per canonical audio run: 44 clips end to end, with word error rate, real-time factor, latency, memory and end-to-end privacy. The privacy columns are recomputed for every run on the current scoring definition by privacy_eval.rescore, so a folder written before the alignment fix is not compared against one written after it. `aggregate_wer` is each run's own raw figure and is not comparable between recognizers; `aggregate_wer_number_normalised` is.",
+      "rows": 7,
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+        "20260821T201653Z_linux-aarch64_audio-whisper_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -307,8 +598,12 @@
       "files": [
         "audio_pipeline_stage_latency.csv"
       ],
-      "caption": "Per-stage mean latency and share of processing time for the audio pipeline.",
-      "rows": 6
+      "caption": "Per-stage mean latency and share of processing time for the current system on both devices. The figure draws the Raspberry Pi rows.",
+      "rows": 12,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -316,8 +611,12 @@
       "files": [
         "audio_clip_scaling.csv"
       ],
-      "caption": "Per-clip duration, latency and real-time factor behind the scaling figure.",
-      "rows": 44
+      "caption": "Per-clip duration, latency and real-time factor for the current system on both devices. The figure draws the Raspberry Pi rows.",
+      "rows": 88,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -325,8 +624,12 @@
       "files": [
         "audio_latency_by_duration_bucket.csv"
       ],
-      "caption": "End-to-end latency statistics per clip-duration bucket.",
-      "rows": 4
+      "caption": "End-to-end latency statistics per clip-duration bucket, current system, both devices.",
+      "rows": 8,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -334,8 +637,12 @@
       "files": [
         "audio_memory_breakdown.csv"
       ],
-      "caption": "Resident memory after each model loads, and the peak during the run.",
-      "rows": 6
+      "caption": "Resident memory after each model loads, and the peak during the run, for the current system on both devices.",
+      "rows": 12,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -343,8 +650,12 @@
       "files": [
         "audio_failure_attribution.csv"
       ],
-      "caption": "Every expected private entity, attributed to protection, a privacy-model failure, or the speech recognizer.",
-      "rows": 4
+      "caption": "Every expected private entity, attributed to protection, a privacy-model failure, or the speech recognizer - current system, both devices.",
+      "rows": 8,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -353,7 +664,10 @@
         "audio_privacy_arms.csv"
       ],
       "caption": "Privacy metrics for each route to the model: written reference text, uncased unpunctuated reference text, and the real audio pipeline.",
-      "rows": 3
+      "rows": 3,
+      "runs": [
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -361,8 +675,12 @@
       "files": [
         "audio_word_error_rate.csv"
       ],
-      "caption": "Word error rate per fixture subset.",
-      "rows": 2
+      "caption": "Word error rate per fixture subset, current system, both devices.",
+      "rows": 4,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -370,8 +688,17 @@
       "files": [
         "audio_postprocessing_amplification.csv"
       ],
-      "caption": "Spoken numbers the privacy model left unmasked and the display renderer then rewrote into numerals of identifier length, per recognizer arm. Every value is fictional: telephone numbers come from the NANP 555-01xx range reserved for fiction.",
-      "rows": 4
+      "caption": "Spoken numbers the privacy model left unmasked and the display renderer then rewrote into numerals of identifier length, per recognizer generation. Every value is fictional: telephone numbers come from the NANP 555-01xx range reserved for fiction.",
+      "rows": 5,
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+        "20260821T201653Z_linux-aarch64_audio-whisper_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -379,8 +706,17 @@
       "files": [
         "stt_engine_comparison.csv"
       ],
-      "caption": "Every measured recognizer arm, scored from its saved transcripts by one implementation. Rows for arms that have not been measured are absent rather than zero.",
-      "rows": 4
+      "caption": "Every measured recognizer arm, scored from its saved transcripts by one implementation. Arms that were never measured on a device are absent rather than zero. `drawn_in_figures` marks the arms the charts show; the previous system's Whisper rows are provenance for the current ones.",
+      "rows": 7,
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+        "20260821T201653Z_linux-aarch64_audio-whisper_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
     },
     {
       "kind": "table",
@@ -388,33 +724,131 @@
       "files": [
         "stt_engine_privacy.csv"
       ],
-      "caption": "End-to-end privacy per recognizer arm. The entity- and character-level columns are recomputed for every arm by privacy_eval.rescore on one definition - spoken numbers folded on both sides, located regions trimmed to their alphanumeric core - so they are comparable across engines; the released-identifier columns need no alignment at all. pipeline_has_spoken_form_stage says whether the run included the spoken-address rewrite in front of the detectors.",
-      "rows": 4
+      "caption": "End-to-end privacy per recognizer arm. The entity- and character-level columns are recomputed for every arm by privacy_eval.rescore on one definition - spoken numbers folded on both sides, located regions trimmed to their alphanumeric core - so they are comparable across engines; the released-identifier columns need no alignment at all.",
+      "rows": 5,
+      "runs": [
+        "20260818T062503Z_windows-amd64_audio_full_workstation",
+        "20260818T081310Z_linux-aarch64_audio_full",
+        "20260823T095553Z_windows-amd64_audio-parakeet_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "table",
+      "name": "current_system_device_cost",
+      "files": [
+        "current_system_device_cost.csv"
+      ],
+      "caption": "Cost of the current system on each device, with the environment each run recorded for itself.",
+      "rows": 2,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "table",
+      "name": "current_system_device_quality",
+      "files": [
+        "current_system_device_quality.csv"
+      ],
+      "caption": "Every quality metric of the current system measured on both devices, with the difference and the run id behind each side.",
+      "rows": 10,
+      "runs": [
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "table",
+      "name": "current_system_inherits_previous_core",
+      "files": [
+        "current_system_inherits_previous_core.csv"
+      ],
+      "caption": "The previous system against the current one on the same device and the same fixtures. Quality metrics are expected to be identical because the local core is unchanged; cost metrics are expected to differ.",
+      "rows": 18,
+      "runs": [
+        "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+        "20260820T145843Z_windows-amd64_whisper_full_workstation",
+        "20260821T201653Z_linux-aarch64_audio-whisper_full",
+        "20260822T122249Z_linux-aarch64_whisper_full",
+        "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+        "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+        "20260823T203840Z_linux-aarch64_v6-whisper_full",
+        "20260823T204339Z_linux-aarch64_audio-v6-whisper_full"
+      ]
+    },
+    {
+      "kind": "table",
+      "name": "assistant_privacy_boundary",
+      "files": [
+        "assistant_privacy_boundary.csv"
+      ],
+      "caption": "The assistant round trip on each device: what reached the outbound request, what the local legs cost, and which live-only measurements exist. Blank or zero live columns on the Raspberry Pi row mean the leg was not attempted because no API key was configured, not that it failed.",
+      "rows": 2,
+      "runs": [
+        "20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation",
+        "20260823T204627Z_linux-aarch64_e2e-v6-whisper_full"
+      ]
     }
   ],
-  "cpu_benchmark_runs": [
+  "benchmark_runs_on_disk": [
     "20260817T190227Z_windows-amd64_full_workstation",
-    "20260818T082425Z_linux-aarch64_full",
-    "20260819T080341Z_windows-amd64_whisper_full_workstation",
-    "20260820T072331Z_linux-aarch64_whisper_full",
-    "20260820T145843Z_windows-amd64_whisper_full_workstation"
-  ],
-  "audio_benchmark_runs": [
     "20260818T062503Z_windows-amd64_audio_full_workstation",
     "20260818T081310Z_linux-aarch64_audio_full",
+    "20260818T082425Z_linux-aarch64_full",
+    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation",
+    "20260819T080341Z_windows-amd64_whisper_full_workstation",
     "20260820T071755Z_linux-aarch64_audio-whisper_full",
-    "20260820T145659Z_windows-amd64_audio-whisper_full_workstation"
+    "20260820T072331Z_linux-aarch64_whisper_full",
+    "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
+    "20260820T145843Z_windows-amd64_whisper_full_workstation",
+    "20260821T201401Z_linux-aarch64_audio-whisper_full",
+    "20260821T201653Z_linux-aarch64_audio-whisper_full",
+    "20260821T201941Z_linux-aarch64_whisper_full",
+    "20260821T205958Z_linux-aarch64_whisper_full",
+    "20260822T122249Z_linux-aarch64_whisper_full",
+    "20260823T095553Z_windows-amd64_audio-parakeet_full",
+    "20260823T095708Z_windows-amd64_parakeet_full",
+    "20260823T095954Z_windows-amd64_e2e-parakeet_full",
+    "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+    "20260823T142451Z_windows-amd64_v6-whisper_full_workstation",
+    "20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation",
+    "20260823T203840Z_linux-aarch64_v6-whisper_full",
+    "20260823T204339Z_linux-aarch64_audio-v6-whisper_full",
+    "20260823T204627Z_linux-aarch64_e2e-v6-whisper_full"
+  ],
+  "runs_not_canonical": [
+    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation",
+    "20260819T080341Z_windows-amd64_whisper_full_workstation",
+    "20260820T071755Z_linux-aarch64_audio-whisper_full",
+    "20260820T072331Z_linux-aarch64_whisper_full",
+    "20260821T201401Z_linux-aarch64_audio-whisper_full",
+    "20260821T201941Z_linux-aarch64_whisper_full",
+    "20260821T205958Z_linux-aarch64_whisper_full"
   ],
   "recognizer_arms": {
-    "Canary laptop": "20260818T062503Z_windows-amd64_audio_full_workstation",
-    "Canary Raspberry Pi 5": "20260818T081310Z_linux-aarch64_audio_full",
-    "Whisper laptop": "20260820T145659Z_windows-amd64_audio-whisper_full_workstation",
-    "Whisper Raspberry Pi 5": "20260820T071755Z_linux-aarch64_audio-whisper_full"
+    "Canary generation - Workstation": "20260818T062503Z_windows-amd64_audio_full_workstation",
+    "Canary generation - Raspberry Pi 5": "20260818T081310Z_linux-aarch64_audio_full",
+    "Current system - Workstation": "20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation",
+    "Current system - Raspberry Pi 5": "20260823T204339Z_linux-aarch64_audio-v6-whisper_full",
+    "Parakeet demo - Workstation": "20260823T095553Z_windows-amd64_audio-parakeet_full",
+    "Parakeet demo - Raspberry Pi 5": null
   },
-  "pending_measurements": [],
+  "arms_not_measured": [
+    "Parakeet demo Raspberry Pi 5"
+  ],
   "unavailable_inputs": [
-    "20260819T080341Z_windows-amd64_whisper_full_workstation: superseded by a later text run on the same device with the same recognizer; kept on disk, out of the figures",
-    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation: superseded by a later audio run on the same device with the same recognizer; kept on disk, out of the figures",
-    "Whisper Raspberry Pi 5: measured before the spoken-address rewrite; its end-to-end privacy figures predate that change and its runtime figures do not"
+    "20260819T073431Z_windows-amd64_audio-whisper_full_workstation: discovered but not canonical for V4/audio_pipeline/workstation; kept on disk as evidence, out of the figures",
+    "20260819T080341Z_windows-amd64_whisper_full_workstation: discovered but not canonical for V4/cpu_text/workstation; kept on disk as evidence, out of the figures",
+    "20260820T071755Z_linux-aarch64_audio-whisper_full: discovered but not canonical for V4/audio_pipeline/pi; kept on disk as evidence, out of the figures",
+    "20260820T072331Z_linux-aarch64_whisper_full: discovered but not canonical for V4/cpu_text/pi; kept on disk as evidence, out of the figures",
+    "20260821T201401Z_linux-aarch64_audio-whisper_full: discovered but not canonical for V4/audio_pipeline/pi; kept on disk as evidence, out of the figures",
+    "20260821T201941Z_linux-aarch64_whisper_full: discovered but not canonical for V4/cpu_text/pi; kept on disk as evidence, out of the figures",
+    "20260821T205958Z_linux-aarch64_whisper_full: discovered but not canonical for V4/cpu_text/pi; kept on disk as evidence, out of the figures",
+    "Parakeet demo Raspberry Pi 5: never measured on that device, held back from the figures"
   ]
 }

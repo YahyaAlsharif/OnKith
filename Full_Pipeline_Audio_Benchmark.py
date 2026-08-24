@@ -31,9 +31,10 @@ benchmark's, tagged ``"benchmark": "audio_pipeline"`` and
 
 V6 results are written to ``research_results/v6_benchmarks/``, not to
 ``cpu_benchmarks/`` where the frozen V3, V4 and V5 folders live. V6 runs the
-same recognizer V4 did, and the figures notebook labels a run from its
-``stt_engine`` key alone, so a V6 folder sitting beside the V4 ones would be
-drawn into the report as V4. The report is frozen at V4 on purpose.
+same recognizer V4 did, so a folder is not identifiable by its engine token
+alone; keeping the roots apart means a V6 run can never be written into, or read
+as, a frozen historical one. The figures notebook reads both roots and keys on
+``pipeline_version``.
 
 If the speech recognizer is not installed the script says exactly what is
 missing and how to get it, runs everything that does not depend on it, and exits

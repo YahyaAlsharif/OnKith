@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """Run one pipeline's downstream privacy path over fixed text and print JSON.
 
-Point it at ``FullPipeline_V4`` or at ``archive/FullPipeline_V3`` and it does the
-same thing on either: transcript merge, wake-word repair, inactivity buffer,
-DeBERTa-v3-xsmall INT8 masking, span consolidation, spoken-digit rendering. The
-output is a JSON document, so two roots can be diffed.
+Point it at ``FullPipeline_V6``, ``archive/FullPipeline_V4`` or
+``archive/FullPipeline_V3`` and it does the same thing on any of them: transcript
+merge, wake-word repair, inactivity buffer, DeBERTa-v3-xsmall INT8 masking, span
+consolidation, spoken-digit rendering. The output is a JSON document, so two
+roots can be diffed.
 
-    python model/privacy_evaluation/scripts/masking_parity_probe.py FullPipeline_V4
+    python model/privacy_evaluation/scripts/masking_parity_probe.py FullPipeline_V6
 
 Why a separate process
 ----------------------
-Both packages are called ``integrated_pipeline``. Importing V3's and V4's copies
+Every pipeline package is called ``integrated_pipeline``. Importing two of them
 into one interpreter would make the second import a no-op and quietly compare a
 pipeline against itself.
 
@@ -135,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "root",
         type=Path,
-        help="pipeline package root, e.g. FullPipeline_V4 or archive/FullPipeline_V3",
+        help="pipeline package root, e.g. FullPipeline_V6 or archive/FullPipeline_V3",
     )
     args = parser.parse_args(argv)
     root = args.root if args.root.is_absolute() else (REPO_ROOT / args.root)

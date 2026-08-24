@@ -1,3 +1,5 @@
-run_id,device,subset,clips,reference_words,aggregate_wer,mean_wer,median_wer,min_wer,max_wer,substitutions,deletions,insertions
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,public,12,222,0.08108108108108109,0.12304330710402817,0.016129032258064516,0.0,0.5,17,1,0
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,synthetic_privacy,32,647,0.2132921174652241,0.22385830298704906,0.20483870967741935,0.0,0.6875,133,5,0
+run_id,system,device,subset,clips,reference_words,aggregate_wer,mean_wer,median_wer,min_wer,max_wer,substitutions,deletions,insertions
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,public,12,222,0.08108108108108109,0.12304330710402817,0.016129032258064516,0.0,0.5,17,1,0
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,synthetic_privacy,32,647,0.2132921174652241,0.22385830298704906,0.20483870967741935,0.0,0.6875,133,5,0
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,public,12,222,0.08558558558558559,0.12426879730010659,0.016129032258064516,0.0,0.5,18,1,0
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,synthetic_privacy,32,647,0.21792890262751158,0.2279024206341079,0.20483870967741935,0.0,0.6875,136,5,0

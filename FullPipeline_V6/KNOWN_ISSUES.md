@@ -3,12 +3,17 @@
 Open problems that are understood but deliberately not fixed. Each one says why
 it was left alone, so it does not get rediscovered from scratch.
 
-Most of what follows is written about V4, and all of it still applies: V6's
-recognizer and privacy core are V4's files unchanged, so an issue in that path
-is an issue here. Two of the detector misses recorded below - the date in
-`privacy_007` and `six in the evening` in `privacy_020` - were observed again
-in V6's live end-to-end run, which is the expected result rather than a new
-finding. Nothing in that path was retrained or rewritten for V6.
+Most of what follows was first written about V4, and all of it still applies:
+V6's recognizer and privacy core are V4's files unchanged, so an issue in that
+path is an issue here. That is now measured rather than asserted - on the same
+device and the same fixtures, every V6 quality metric matches V4's to machine
+precision.
+
+Everything below has been reproduced on **both** devices. V6 has been
+benchmarked on the development workstation and on a Raspberry Pi 5, and the
+issues in this file behave identically on the two: the same detector misses, the
+same hard-negative false positive, the same zero rebuilt identifiers. Where a
+figure differs between devices it is noted; where it does not, it does not.
 
 Issues belonging to the assistant layer V6 adds - the LLM route, rehydration,
 TTS and the presentation surface - are at the end of this file.
@@ -84,7 +89,8 @@ The same effect reproduced on a spoken card-style number
 identically on the development workstation and on the Raspberry Pi 5. Measured
 frequency in the V3 audio benchmark: 2 identifiers across 2 of 32 clips.
 
-**Under V4 the count is zero, and that is not a fix.** Whisper writes numerals
+**Under the current system the count is zero on both devices, and that is not a
+fix.** Whisper writes numerals
 itself, so a number that survives masking is already a numeral in the released
 text and the renderer has nothing left to assemble - the leak arrives in the
 compact form directly instead of being built downstream. The renderer is
@@ -349,12 +355,22 @@ every end-to-end run folder so this can be checked rather than believed - but a
 value the masker never detected was never behind the boundary at all, and it
 goes out in the transcript like any other word.
 
-The live V6 end-to-end run shows both halves of that sentence: zero of nine
-replaced values appeared in any outbound payload, and two of eleven gold
+Both V6 round-trip runs show both halves of that sentence, and they agree: zero
+of nine replaced values appeared in any outbound payload, and two of eleven gold
 entities - the date in `privacy_007` and `six in the evening` in `privacy_020` -
-were never detected and therefore did travel. Both are the long-standing misses
-recorded above under "Numeral dates and times are missed where the spelled-out
-forms were masked".
+were never detected and therefore did travel. Identical counts on the
+workstation, where the requests were live, and on the Raspberry Pi 5, where the
+payloads were built and audited without being sent. Both misses are the
+long-standing ones recorded above under "Numeral dates and times are missed
+where the spelled-out forms were masked".
+
+**One scope limit belongs here.** The Raspberry Pi round trip
+(`20260823T204627Z_linux-aarch64_e2e-v6-whisper_full`) ran without a
+`GROQ_API_KEY`. Everything local was measured there, and the outbound bytes were
+audited, but nothing was sent - so network latency, whether a real model returns
+intact placeholders, API success rate and spoken output are **not measured on
+the Pi**. Those exist for the workstation run only. Running the round-trip
+benchmark on the Pi with a key would close it.
 
 The benchmark reports these as two separate numbers on purpose. Adding them
 together would describe a boundary failure that did not happen, and hiding the

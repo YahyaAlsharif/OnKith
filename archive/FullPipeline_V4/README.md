@@ -1,5 +1,14 @@
 # OnKith production pipeline (FullPipeline_V4)
 
+> **ARCHIVED — DO NOT RUN THIS.**
+>
+> V4 is superseded by [`FullPipeline_V6/`](../../FullPipeline_V6/), which runs
+> V4's recognizer and privacy core unchanged plus the assistant layer, and which
+> has its own workstation and Raspberry Pi 5 benchmarks. This snapshot is kept
+> because V4 is the system the written academic report evaluates and because the
+> parity tests compare against it. Sentences below such as "this is the current
+> OnKith deployment package" were true when they were written and are not now.
+
 > **This package is FullPipeline_V4.**
 >
 > It is V3's pipeline with one component replaced: the speech recognizer is
@@ -20,14 +29,14 @@
 > else.
 >
 > The Canary implementation and artifacts are preserved at
-> [`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/), together with the
+> [`../FullPipeline_V3/`](../FullPipeline_V3/), together with the
 > measurements it produced. Both are benchmarked on both devices; the comparison
-> is in [`../research_results/`](../research_results/).
+> is in [`../../research_results/`](../../research_results/).
 
 **Local speech-to-text and privacy processing for Raspberry Pi 5**
 
 This is the **current** OnKith deployment package and the only maintained one.
-Earlier integrated pipelines live under [`../archive/`](../archive/) and should
+Earlier integrated pipelines live under [`../`](../) and should
 not be used. The Python entry point is still `app.omit_ai_live` and some code
 still says "Omit AI" — that is the project's earlier name, kept so the module
 paths in existing instructions keep working.
@@ -222,7 +231,7 @@ setting this package chose so much as one Whisper does not offer, and it changes
 what the privacy model is handed: capitalised names, sentence punctuation, and
 numbers written as numerals rather than as digit words. The consequences are
 measured rather than assumed — see
-[`../research_results/README.md`](../research_results/README.md) for what it did
+[`../../research_results/README.md`](../../research_results/README.md) for what it did
 to the benchmark's own scoring, and `KNOWN_ISSUES.md` for what it does to
 masking.
 

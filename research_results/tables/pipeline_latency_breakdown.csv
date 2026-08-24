@@ -1,11 +1,21 @@
-run_id,device,scope,stage,mean_ms
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Neural decode (ONNX + span consolidation),45.7024335000051
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Structured regex layer,0.21126775000220732
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,masking_call,Span merge and mask policy,0.09067245000778712
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Silero VAD (3 s synthetic probe),39.92279999984021
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Whisper STT (3 s synthetic probe),1495.930959999714
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Transcript merge,0.22061000008761766
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Wake-word normalisation,0.03415500018491002
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Inactivity buffer,0.13022500011174998
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Privacy masking,19.9469699999554
-20260820T145843Z_windows-amd64_whisper_full_workstation,workstation,pipeline,Spoken-digit rendering,0.07270499995684077
+run_id,system,device,scope,stage,mean_ms
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,masking_call,Neural decode (ONNX + span consolidation),45.866160750018025
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,masking_call,Structured regex layer,0.21598095000626927
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,masking_call,Span merge and mask policy,0.09411784992335015
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Silero VAD (3 s synthetic probe),39.07206000003498
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Whisper STT (3 s synthetic probe),1520.289739999862
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Transcript merge,0.20803500010515563
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Wake-word normalisation,0.034204999610665254
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Inactivity buffer,0.12367500003165333
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Privacy masking,19.723559999511053
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,pipeline,Spoken-digit rendering,0.08037499992497033
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,masking_call,Neural decode (ONNX + span consolidation),90.79802518400066
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,masking_call,Structured regex layer,0.2084043115013401
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,masking_call,Span merge and mask policy,0.09270935700044447
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Silero VAD (3 s synthetic probe),30.145614200000637
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Whisper STT (3 s synthetic probe),2691.584389600075
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Transcript merge,0.11990249998916624
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Wake-word normalisation,0.02170115000126316
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Inactivity buffer,0.07340125001746856
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Privacy masking,19.05634600001349
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,pipeline,Spoken-digit rendering,0.04589490001762897

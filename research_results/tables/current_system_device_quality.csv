@@ -1,0 +1,11 @@
+metric,benchmark,better,workstation,raspberry_pi_5,difference,workstation_run,raspberry_pi_5_run
+Aggregate WER,audio_pipeline,lower,0.17951668584579977,0.18411967779056387,0.004602991944764101,20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,20260823T204339Z_linux-aarch64_audio-v6-whisper_full
+"Aggregate WER, number-normalised",audio_pipeline,lower,0.0853960396039604,0.09034653465346534,0.004950495049504941,20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,20260823T204339Z_linux-aarch64_audio-v6-whisper_full
+Private character recall after STT,audio_pipeline,higher,0.8313725490196079,0.8300395256916996,-0.0013330233279083004,20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,20260823T204339Z_linux-aarch64_audio-v6-whisper_full
+Private character leakage after STT,audio_pipeline,lower,0.1686274509803921,0.1699604743083004,0.0013330233279083004,20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,20260823T204339Z_linux-aarch64_audio-v6-whisper_full
+Fully sanitized clip rate,audio_pipeline,higher,0.64,0.64,0.0,20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,20260823T204339Z_linux-aarch64_audio-v6-whisper_full
+Typed entity F1,cpu_text,higher,0.9452325372598313,0.944843435794312,-0.0003891014655192926,20260823T142451Z_windows-amd64_v6-whisper_full_workstation,20260823T203840Z_linux-aarch64_v6-whisper_full
+Private character recall,cpu_text,higher,0.9949793226477822,0.9949252642106117,-5.405843717054548e-05,20260823T142451Z_windows-amd64_v6-whisper_full_workstation,20260823T203840Z_linux-aarch64_v6-whisper_full
+Private character leakage,cpu_text,lower,0.005020677352217784,0.005074735789388329,5.405843717054548e-05,20260823T142451Z_windows-amd64_v6-whisper_full_workstation,20260823T203840Z_linux-aarch64_v6-whisper_full
+Non-private overmasking,cpu_text,lower,0.015485320370952321,0.015440065264199644,-4.525510675267713e-05,20260823T142451Z_windows-amd64_v6-whisper_full_workstation,20260823T203840Z_linux-aarch64_v6-whisper_full
+ood_dev typed F1 (model-only cross-check),cpu_text,higher,,,,20260823T142451Z_windows-amd64_v6-whisper_full_workstation,20260823T203840Z_linux-aarch64_v6-whisper_full

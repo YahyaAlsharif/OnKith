@@ -11,9 +11,9 @@
 > in `README.md`.
 >
 > The Canary implementation and artifacts are preserved at
-> [`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/), together with the
+> [`../FullPipeline_V3/`](../FullPipeline_V3/), together with the
 > measurements it produced. Both have now been benchmarked on a Raspberry Pi 5;
-> the comparison is in [`../research_results/`](../research_results/).
+> the comparison is in [`../../research_results/`](../../research_results/).
 
 
 Two ways to run this. Pick one.
@@ -157,5 +157,5 @@ Still open:
   complete V4 run on the same board.
 
 `PI5_VALIDATION_REPORT.md` and `BACKEND_VERSION_DECISION.md` in
-[`../archive/FullPipeline_V3/`](../archive/FullPipeline_V3/) are the V3 records and describe the
+[`../FullPipeline_V3/`](../FullPipeline_V3/) are the V3 records and describe the
 NeMo stack, not this one.

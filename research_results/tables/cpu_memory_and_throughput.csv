@@ -1,0 +1,3 @@
+run_id,system,device,process_rss_mib,process_peak_rss_mib,privacy_stack_resident_mib,system_ram_gib,throughput_rows_per_second
+20260823T142451Z_windows-amd64_v6-whisper_full_workstation,Current system,Workstation,1380.546875,1670.98828125,918.93359375,15.648643493652344,21.401675721032525
+20260823T203840Z_linux-aarch64_v6-whisper_full,Current system,Raspberry Pi 5,1641.078125,1928.390625,1179.90625,3.9542236328125,10.908978746819333

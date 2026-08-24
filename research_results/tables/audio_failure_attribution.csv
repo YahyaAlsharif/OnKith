@@ -1,5 +1,9 @@
-run_id,device,outcome,entities,share
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Protected,33,0.55
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,"STT altered, masked anyway",15,0.25
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Privacy-model failure,7,0.11666666666666667
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,"STT-caused, nothing masked",5,0.08333333333333333
+run_id,system,device,outcome,entities,share
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Protected,33,0.55
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,"STT altered, masked anyway",15,0.25
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Privacy-model failure,7,0.11666666666666667
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,"STT-caused, nothing masked",5,0.08333333333333333
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Protected,33,0.55
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,"STT altered, masked anyway",15,0.25
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Privacy-model failure,7,0.11666666666666667
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,"STT-caused, nothing masked",5,0.08333333333333333

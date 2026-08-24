@@ -29,7 +29,7 @@ The runner reports five deliberately separate stages:
 2. `int8_model` — the same model-only path with the deployed INT8 graph.
 3. `structured` — the frozen regex recognizer without a neural model.
 4. `structured_supplemental` — frozen plus current spoken-number supplements.
-5. `production` — whatever `FullPipeline_V4/config/live_config.json` currently
+5. `production` — whatever `FullPipeline_V6/config/live_config.json` currently
    points at, plus the frozen structured recognizer, the supplemental
    recognizer, and the fail-closed wrapper. Since the Model V2 migration that is
    the DeBERTa-v3-xsmall INT8 stack.
@@ -100,7 +100,7 @@ Pi latency.
 - OOD fixtures do not provide a token-level gold standard. Historical token
   metrics remain frozen in `baselines/tinybert_iid_baseline.json`.
 
-`FullPipeline_V4` is the combined-production reference. The masking-parity test
+`FullPipeline_V6` is the combined-production reference. The masking-parity test
 also imports `archive/FullPipeline_V3` read-only so identical text can be checked
 against the historical Canary package without loading either recognizer.
 

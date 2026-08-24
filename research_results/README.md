@@ -11,21 +11,21 @@ All three benchmark scripts measure the pipeline named by
 
 | Folder | Holds | Written by |
 |---|---|---|
-| [`cpu_benchmarks/`](cpu_benchmarks/) | The frozen V3 Canary, V4 Whisper and V5 Parakeet runs, workstation and Raspberry Pi. **The final academic report's evidence.** | nothing any more; read-only |
-| [`v6_benchmarks/`](v6_benchmarks/) | Every V6 run | the three benchmark scripts today |
+| [`v6_benchmarks/`](v6_benchmarks/) | Every run of the **current system**: audio, CPU/text and the assistant round trip, on the development workstation and on a Raspberry Pi 5. | the three benchmark scripts today |
+| [`cpu_benchmarks/`](cpu_benchmarks/) | The frozen V3 Canary, V4 Whisper and V5 Parakeet runs, workstation and Raspberry Pi. Historical provenance. | nothing any more; read-only |
 
-They are separate for one specific reason. V6 runs the same recognizer V4 did,
-so a V6 run is honestly tagged `"stt_engine": "whisper"` — and
-[`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) discovers runs
-by globbing `cpu_benchmarks/` and labels each one from its `stt_engine` key
-alone. A V6 folder sitting beside the V4 ones would be drawn into the report as
-V4. The report is frozen at V4 deliberately, so V6 writes somewhere else rather
-than being mislabelled or the notebook being edited.
+They are separate because V6 runs the same recognizer V4 did, so a V6 run is
+honestly tagged `"stt_engine": "whisper"` and would be indistinguishable from a
+V4 folder by engine alone. Keeping the roots apart means a V6 run can never be
+written into, or read as, a frozen historical one — and the frozen folders are
+never regenerated, so their contents cannot drift.
 
-Run ids carry both the version and the recognizer - `v6_whisper`,
+Run ids carry both the version and the recognizer — `v6_whisper`,
 `audio_v6_whisper`, `e2e_v6_whisper` for V6; `parakeet`, `whisper`, or nothing
-at all for the frozen Canary runs - so a folder is never ambiguous about what
-produced it, and a new run can never be written into an old engine's folder.
+at all for the frozen Canary runs — so a folder is never ambiguous about what
+produced it. Every folder also records `pipeline_version` in its
+`benchmark_config.json`, and that key, not the directory name, is what
+[`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) reads.
 
 | Entry point | Run it on | What it does | Safe to run |
 |---|---|---|---|
@@ -48,15 +48,23 @@ workstation                             Raspberry Pi
 -----------                             ------------
 python Full_Pipeline_CPU_Benchmark.py   python Full_Pipeline_CPU_Benchmark.py
 python Full_Pipeline_Audio_Benchmark.py python Full_Pipeline_Audio_Benchmark.py
+python Full_Pipeline_V6_EndToEnd_...py  python Full_Pipeline_V6_EndToEnd_...py
         │                                        │
-        └────────► research_results/cpu_benchmarks/<run_id>/ ◄───────┘
+        └────────► research_results/v6_benchmarks/<run_id>/ ◄────────┘
+                              │
+                add the run id to CANONICAL_RUNS
+                in Research_Paper_Figures.ipynb, section 1
                               │
                               ▼
-                  Research_Paper_Figures.ipynb
+                  Research_Paper_Figures.ipynb   (Run All)
                               │
                               ▼
                 figures/  tables/  summaries/
 ```
+
+A new run folder that is **not** added to `CANONICAL_RUNS` is listed by the
+notebook as discovered-but-not-canonical and enters no figure. That is
+deliberate: no run is ever picked up because it happens to be the newest.
 
 1. Run both benchmarks on the workstation; commit the folders they write.
 2. On the Raspberry Pi, pull, run the same two commands, and commit what they
@@ -118,9 +126,11 @@ recognition; budget accordingly and use `--smoke-test` first.
 research_results/
 ├── figures/          PNG at 300 dpi and PDF, one pair per plot
 ├── tables/           the numbers behind each figure, as CSV
-├── summaries/        figure_index.json and results_overview.md
+├── summaries/        figure_index.json (run provenance) and results_overview.md
+├── v6_benchmarks/
+│   └── <run_id>/     the current system, one folder per run per device
 └── cpu_benchmarks/
-    └── <run_id>/     one folder per benchmark run, per device
+    └── <run_id>/     frozen V3/V4/V5 runs, read-only
 ```
 
 `<run_id>` is `<UTC timestamp>_<os>-<arch>[_<engine token>]_<mode>[_<label>]`,
@@ -138,60 +148,181 @@ and its absence is what identifies them rather than a guess.
 
 **There are no V5 Raspberry Pi results, and none are missing.** V5 was not taken
 through Pi evaluation once workstation testing showed its Parakeet core was not
-the preferred final path. **There are no V6 Raspberry Pi results either, as of
-this writing** — only workstation runs. V6's local core is V4's byte for byte,
-so V4's Pi numbers describe the same code, but they are V4's numbers and are
-labelled as such. Nothing here infers Pi performance from a workstation run.
+the preferred final path; its dependency tree has no aarch64 wheels. That is the
+only device gap in this directory.
 
-Both benchmarks write into the same root and are told apart by
-`benchmark_config.json`: audio runs carry `"benchmark": "audio_pipeline"`, and a
-run without that key is a text run. `pipeline_version` and `stt_engine` say
-which pipeline produced it.
+**V6 has Raspberry Pi results of its own** — all three benchmarks, listed below.
+Nothing here infers Pi performance from a workstation run, and nothing infers V6
+Pi performance from a V4 run any more.
 
-| Text run writes | Audio run writes |
-|---|---|
-| `system_info.json` | `system_info.json` |
-| `benchmark_config.json` | `benchmark_config.json` |
-| `artifact_manifest.json` | `artifact_manifest.json` |
-| `deberta_latency.csv` + `deberta_latency_summary.json` | `audio_clip_results.csv` + `audio_latency_summary.json` |
-| `pipeline_latency.csv` + `pipeline_latency_summary.json` | `audio_stt_metrics.json` |
-| `evaluation_metrics.json` | `audio_privacy_metrics.json` |
-| `per_entity_metrics.csv` | `audio_memory_metrics.json` |
-| `prediction_parity_data.jsonl` | `audio_predictions.jsonl` |
-| `ood_dev_parity_data.jsonl` | `audio_failure_analysis.jsonl` |
-| `memory_metrics.json` | |
-| `benchmark_summary.md` | `audio_benchmark_summary.md` |
+The three benchmarks are told apart by `benchmark_config.json`: audio runs carry
+`"benchmark": "audio_pipeline"`, round-trip runs carry `"v5_end_to_end"` or
+`"v6_end_to_end"`, and a run without that key is a text run. `pipeline_version`
+and `stt_engine` say which pipeline produced it.
+
+| Text run writes | Audio run writes | Round-trip run writes |
+|---|---|---|
+| `system_info.json` | `system_info.json` | `system_info.json` |
+| `benchmark_config.json` | `benchmark_config.json` | `benchmark_config.json` |
+| `artifact_manifest.json` | `artifact_manifest.json` | `artifact_manifest.json` |
+| `deberta_latency.csv` + `deberta_latency_summary.json` | `audio_clip_results.csv` + `audio_latency_summary.json` | `e2e_summary.json` |
+| `pipeline_latency.csv` + `pipeline_latency_summary.json` | `audio_stt_metrics.json` | `e2e_case_results.csv` + `e2e_cases.jsonl` |
+| `evaluation_metrics.json` | `audio_privacy_metrics.json` | `e2e_outbound_payloads.jsonl` |
+| `per_entity_metrics.csv` | `audio_memory_metrics.json` | `e2e_placeholder_probes.jsonl` |
+| `prediction_parity_data.jsonl` | `audio_predictions.jsonl` | `e2e_local_command_check.json` |
+| `ood_dev_parity_data.jsonl` | `audio_failure_analysis.jsonl` | `e2e_memory_metrics.json` |
+| `memory_metrics.json` | | |
+| `benchmark_summary.md` | `audio_benchmark_summary.md` | `e2e_benchmark_summary.md` |
+
+`e2e_outbound_payloads.jsonl` records the URL, the **header names** and the body
+of every request the LLM client built. Header *values* are deliberately not
+captured, so an API key cannot reach a committed artifact.
 
 ## The canonical benchmark runs
 
-Each one is a complete, successful run of a committed entry point against the
-hash-verified deployment artifact, and every figure and table in this directory
-is derived from them. Two pipeline versions are kept side by side, because the
-progression from one recognizer to the other is itself a result.
+One run backs each current public claim. The table below is the authority, and
+it is mirrored exactly by `CANONICAL_RUNS` in
+[`Research_Paper_Figures.ipynb`](../Research_Paper_Figures.ipynb) section 1 and
+by `canonical_runs` in
+[`summaries/figure_index.json`](summaries/figure_index.json). Nothing anywhere
+selects a run by recency.
 
-**Pipeline V3 - NVIDIA Canary 180M Flash.** A frozen historical baseline. These
-runs are never regenerated: the Canary build is superseded and its recognizer is
-not installed anywhere in the current environment.
+### The current system — `FullPipeline_V6`
 
-| Run id | Device | Benchmark |
+| Benchmark | Device | Run id |
 |---|---|---|
-| `20260817T190227Z_windows-amd64_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows |
-| `20260818T082425Z_linux-aarch64_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows |
-| `20260818T062503Z_windows-amd64_audio_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips |
-| `20260818T081310Z_linux-aarch64_audio_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips |
+| audio pipeline, 44 clips | workstation, x86-64 | `v6_benchmarks/20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation` |
+| audio pipeline, 44 clips | **Raspberry Pi 5, 4 GB** | `v6_benchmarks/20260823T204339Z_linux-aarch64_audio-v6-whisper_full` |
+| CPU/text privacy, 2,000 rows | workstation, x86-64 | `v6_benchmarks/20260823T142451Z_windows-amd64_v6-whisper_full_workstation` |
+| CPU/text privacy, 2,000 rows | **Raspberry Pi 5, 4 GB** | `v6_benchmarks/20260823T203840Z_linux-aarch64_v6-whisper_full` |
+| assistant round trip, 6 clips | workstation, x86-64 | `v6_benchmarks/20260823T142736Z_windows-amd64_e2e-v6-whisper_full_workstation` |
+| assistant round trip, 6 clips | **Raspberry Pi 5, 4 GB** | `v6_benchmarks/20260823T204627Z_linux-aarch64_e2e-v6-whisper_full` |
 
-**Pipeline V4 - faster-whisper `base.en`.** The current deployment.
+**Scope of the Raspberry Pi round trip.** That run had no `GROQ_API_KEY`, so it
+is an outbound-payload audit: the real client built each request and every byte
+was audited, but nothing was sent. Its local measurements — recognition,
+masking, the placeholder map, rehydration probes, the local-command route — are
+real. Its network latency, placeholder-preservation and text-to-speech columns
+are **absent, not zero**. The workstation run is the live one.
 
-| Run id | Device | Benchmark | Privacy path |
+**Tested Raspberry Pi environment**, taken from the run manifests rather than
+from memory: Raspberry Pi 5 Model B Rev 1.0, 4 GB class (3.95 GiB visible),
+64-bit Raspberry Pi OS, Linux `6.18.39+rpt-rpi-2712` aarch64, glibc 2.41,
+4 cores, Python 3.11.9, ONNX Runtime 1.29.0, NumPy 2.4.6, faster-whisper on
+CTranslate2 1.2.1 (CPU, INT8, beam 5), privacy model
+`bc8d1d7a7fb14304e195e47079c3dbb330c627ea4c9753f3af667676048106a8`.
+
+**Tested workstation environment**: Windows 11 (`Windows-10-10.0.26200-SP0`),
+x86-64, 14 physical / 20 logical cores, 15.65 GiB RAM, Python 3.11.9, ONNX
+Runtime 1.27.0. The privacy artifact SHA-256 is identical on both.
+
+### History, kept as provenance
+
+These are never regenerated. Where more than one folder exists for the same
+device and benchmark, the canonical one is marked; the rest stay on disk as
+evidence that the run happened and are excluded from every figure.
+
+**V3 — NVIDIA Canary 180M Flash.** A frozen historical baseline; the recognizer
+is not installed anywhere in the current environment.
+
+| Benchmark | Device | Run id | Canonical |
 |---|---|---|---|
-| `20260819T080341Z_windows-amd64_whisper_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows | superseded by the run below |
-| `20260820T072331Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | complete memory baseline |
-| `20260819T073431Z_windows-amd64_audio-whisper_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips | superseded by the run below |
-| `20260820T071755Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | complete runtime/memory baseline; before spoken-address rewrite |
-| `20260820T145843Z_windows-amd64_whisper_full_workstation` | development workstation, x86-64 | CPU/text, 2,000 rows | current complete workstation run |
-| `20260820T145659Z_windows-amd64_audio-whisper_full_workstation` | development workstation, x86-64 | audio pipeline, 44 clips | current complete workstation run |
-| `20260821T201653Z_linux-aarch64_audio-whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | audio pipeline, 44 clips | current privacy path; VAD and memory unavailable |
-| `20260822T122249Z_linux-aarch64_whisper_full` | Raspberry Pi 5 Model B Rev 1.0, 4 GB | CPU/text, 2,000 rows | latest repeat; memory unavailable |
+| CPU/text, 2,000 rows | workstation | `cpu_benchmarks/20260817T190227Z_windows-amd64_full_workstation` | yes |
+| CPU/text, 2,000 rows | Raspberry Pi 5 | `cpu_benchmarks/20260818T082425Z_linux-aarch64_full` | yes |
+| audio, 44 clips | workstation | `cpu_benchmarks/20260818T062503Z_windows-amd64_audio_full_workstation` | yes |
+| audio, 44 clips | Raspberry Pi 5 | `cpu_benchmarks/20260818T081310Z_linux-aarch64_audio_full` | yes |
+
+**V4 — faster-whisper `base.en`.** The system the written academic report
+evaluates, and the system V6 inherits its local core from.
+
+| Benchmark | Device | Run id | Canonical | Note |
+|---|---|---|---|---|
+| CPU/text, 2,000 rows | workstation | `cpu_benchmarks/20260819T080341Z_windows-amd64_whisper_full_workstation` | no | superseded |
+| CPU/text, 2,000 rows | workstation | `cpu_benchmarks/20260820T145843Z_windows-amd64_whisper_full_workstation` | **yes** | complete |
+| CPU/text, 2,000 rows | Raspberry Pi 5 | `cpu_benchmarks/20260820T072331Z_linux-aarch64_whisper_full` | no | superseded |
+| CPU/text, 2,000 rows | Raspberry Pi 5 | `cpu_benchmarks/20260821T201941Z_linux-aarch64_whisper_full` | no | superseded |
+| CPU/text, 2,000 rows | Raspberry Pi 5 | `cpu_benchmarks/20260821T205958Z_linux-aarch64_whisper_full` | no | superseded |
+| CPU/text, 2,000 rows | Raspberry Pi 5 | `cpu_benchmarks/20260822T122249Z_linux-aarch64_whisper_full` | **yes** | latest; peak RSS not recorded |
+| audio, 44 clips | workstation | `cpu_benchmarks/20260819T073431Z_windows-amd64_audio-whisper_full_workstation` | no | superseded |
+| audio, 44 clips | workstation | `cpu_benchmarks/20260820T145659Z_windows-amd64_audio-whisper_full_workstation` | **yes** | complete |
+| audio, 44 clips | Raspberry Pi 5 | `cpu_benchmarks/20260820T071755Z_linux-aarch64_audio-whisper_full` | no | complete runtime/memory, but **before** the spoken-address rewrite |
+| audio, 44 clips | Raspberry Pi 5 | `cpu_benchmarks/20260821T201401Z_linux-aarch64_audio-whisper_full` | no | recognizer unavailable; not comparison evidence |
+| audio, 44 clips | Raspberry Pi 5 | `cpu_benchmarks/20260821T201653Z_linux-aarch64_audio-whisper_full` | **yes** | current privacy path; VAD and memory unavailable |
+
+The V4 Pi audio choice needs stating, because two folders are defensible and
+they disagree. `20260820T071755Z` has the complete runtime and memory profile
+but ran **before** the spoken-address rewrite, so its end-to-end privacy figures
+(0.7423 character recall, 4 of 25 clips clean) measure a privacy path that no
+longer exists and are not comparable with V6's. `20260821T201653Z` ran the same
+privacy path V6 runs and reproduces V6's privacy figures exactly, but its
+environment lacked `psutil`, so it records no peak RSS. The later folder is
+canonical because the comparison V6 needs is a privacy comparison; its memory
+column is left blank rather than filled from the earlier run.
+
+**V5 — NVIDIA Parakeet 110M TDT.** The recognizer experiment whose assistant
+layer was kept and whose recognizer was not. Workstation only, by decision: its
+dependency tree has no aarch64 wheels.
+
+| Benchmark | Device | Run id | Canonical |
+|---|---|---|---|
+| audio, 44 clips | workstation | `cpu_benchmarks/20260823T095553Z_windows-amd64_audio-parakeet_full` | yes |
+| CPU/text, 2,000 rows | workstation | `cpu_benchmarks/20260823T095708Z_windows-amd64_parakeet_full` | yes |
+| assistant round trip, 6 clips | workstation | `cpu_benchmarks/20260823T095954Z_windows-amd64_e2e-parakeet_full` | yes |
+
+### Tracing a headline number back to raw data
+
+Every published number is reachable in four steps, with no guessing at any of
+them:
+
+```text
+README headline
+   -> research_results/tables/<name>.csv          the numbers behind the figure
+   -> summaries/figure_index.json                 figure_provenance -> run ids
+   -> <root>/<run_id>/                            the committed run folder
+   -> *.json / *.csv / *.jsonl                    raw benchmark output
+```
+
+Worked example — "mean full-pipeline RTF 0.634 on the Raspberry Pi 5":
+
+1. [`tables/current_system_device_cost.csv`](tables/current_system_device_cost.csv),
+   column `mean_pipeline_rtf`, row `Raspberry Pi 5`;
+2. that row names run
+   `20260823T204339Z_linux-aarch64_audio-v6-whisper_full`;
+3. in that folder, `audio_latency_summary.json` →
+   `real_time_factor.pipeline.mean_ms`.
+
+The field is named `mean_ms` because the statistics helper names every field
+that way; the value is a **ratio**, not milliseconds. The same applies to every
+key under `real_time_factor`.
+
+### Provenance expectations
+
+- A number in a README, a figure and a table must come from the same run. If a
+  figure and a README disagree, the figure is regenerated or the README is
+  wrong — never both left standing.
+- "Generated from the latest V6 benchmark" is not provenance. A run id is.
+- Committed run folders are **read-only evidence**. They are never edited to
+  agree with prose. Where an artifact disagrees with prose, the artifact wins
+  and the prose changes.
+- A superseded run stays on disk. Deleting it would remove the record that the
+  measurement happened.
+
+### Known artifact quirks
+
+Two things in the committed folders are worth knowing before reading them
+closely. Neither is corrected in place, because a run folder is a record of what
+that run produced:
+
+- The `real_time_factor` block reuses the shared statistics helper, so its
+  fields are named `mean_ms`, `p90_ms` and so on. The values are dimensionless
+  ratios.
+- In the round-trip runs, `e2e_benchmark_summary.md` prints a latency table of
+  `n/a` and a "peak during run" figure sampled by a different counter from the
+  one `e2e_memory_metrics.json` records. The JSON files are the primary
+  artifacts; `e2e_summary.json` carries the full local, network and TTS latency
+  distributions, and `e2e_memory_metrics.json` carries
+  `process_peak_rss_bytes`. The notebook and this repository's documentation
+  read the JSON.
 
 ### Two things changed on 2026-08-20, and the table above says which runs predate them
 
@@ -228,21 +359,44 @@ marked "before the spoken-address rewrite" therefore hold the V4 privacy path as
 it was. Their runtime, memory and word-error figures are unaffected - the
 rewrite is a regex pass over already-recognized text.
 
-Runs that are *not* kept, and why:
+Runs that are *not* committed, and why:
 
 - **Smoke runs.** `--smoke-test` scores about 50 rows or four clips. It proves
   the harness works on a machine; it is not a measurement, and leaving one beside
   the full runs invites it to be read as one. Rerun it locally whenever you want
-  it - the output just should not be committed.
-- **Runs where a stage was unavailable.** An audio run without the speech
-  recognizer installed produces `stt_available: false`, no word error rate and no
-  end-to-end STT result. The `20260821T201401Z` Pi attempt records exactly that
-  failure and is not comparison evidence. The valid `20260821T201653Z` rerun on
-  the same board reached Whisper and the current privacy path, but lacked `onnx`
-  and `psutil`, so it does not replace the earlier complete V4 VAD/memory profile.
+  it — the output just should not be committed.
+- **Runs where a stage was unavailable** are committed when they happened, but
+  are never canonical. An audio run without the speech recognizer installed
+  produces `stt_available: false`, no word error rate and no end-to-end STT
+  result; `20260821T201401Z` records exactly that failure. The figures notebook
+  excludes such runs from every deployment comparison.
 
-The figures notebook excludes STT-unavailable runs from deployment comparisons,
-but the safer rule is that this directory only ever holds evidence.
+## Regenerating the figures and tables
+
+```bash
+python -m jupyter nbconvert --to notebook --execute --inplace \
+  Research_Paper_Figures.ipynb
+```
+
+Run it from the repository root, with an interpreter that has `matplotlib`,
+`numpy` and `nbclient`. It trains nothing, evaluates nothing and downloads
+nothing: it reads saved metrics and draws them. It writes `figures/`, `tables/`,
+`summaries/figure_index.json` and `summaries/results_overview.md`, overwriting
+whatever was there.
+
+What it produces:
+
+| Output | Contents |
+|---|---|
+| `figures/<name>.png` and `.pdf` | 300 dpi raster and vector, same plot |
+| `tables/<name>.csv` | the numbers behind the figure of the same name, plus wider per-run tables |
+| `summaries/figure_index.json` | `canonical_runs`, `figure_provenance` (figure name → run ids), the full run inventory, and every input that was missing |
+| `summaries/results_overview.md` | the written digest, with the canonical run table at the end |
+
+Adding a new run means: run the benchmark, commit the folder, add its run id to
+`CANONICAL_RUNS` in section 1 of the notebook, and press Run All. Skipping the
+middle step is not a failure mode — the notebook reports the folder as
+discovered-but-not-canonical and draws nothing from it.
 
 ## What is canonical
 

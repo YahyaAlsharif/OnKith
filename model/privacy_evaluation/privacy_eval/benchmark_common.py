@@ -39,21 +39,21 @@ PRODUCTION_ROOT = REPO_ROOT / "FullPipeline_V6"
 #:
 #: V4 matters more than the other two. V6's recognition and privacy core is
 #: V4's, byte for byte - ``FullPipeline_V6/tests/test_v6_independence.py``
-#: fails if that stops being true - so V4's Raspberry Pi measurements remain
-#: evidence about the path V6 runs, and a V4-against-V6 comparison on the same
-#: fixtures is a comparison of one core on two devices rather than of two
-#: pipelines.
+#: fails if that stops being true - so a V4-against-V6 comparison on the same
+#: device and the same fixtures is a check on that claim rather than a
+#: comparison of two systems. V6 has its own measurements on both devices; it
+#: no longer relies on V4's.
 WHISPER_V4_ROOT = REPO_ROOT / "archive" / "FullPipeline_V4"
 PARAKEET_V5_ROOT = REPO_ROOT / "archive" / "FullPipeline_V5"
 CANARY_V3_ROOT = REPO_ROOT / "archive" / "FullPipeline_V3"
 EVALUATION_ROOT = REPO_ROOT / "model" / "privacy_evaluation"
 #: V6 results are kept apart from ``cpu_benchmarks/``, which holds the frozen
-#: V3, V4 and V5 folders that ``Research_Paper_Figures.ipynb`` discovers by
-#: globbing. That notebook labels a run from its ``stt_engine`` key alone, so a
-#: V6 run - honestly tagged ``whisper``, because that is what it is - would be
-#: swept into the report's V4 series and drawn as V4. The report is frozen at
-#: V4 deliberately. A separate root is what keeps it that way without having to
-#: mislabel a V6 run or edit the notebook.
+#: V3, V4 and V5 folders. A V6 run is honestly tagged ``whisper``, because that
+#: is what it is, so it is not distinguishable from a V4 folder by engine token
+#: alone. A separate root means a V6 run can never be written into, or read as,
+#: a frozen historical one, and the frozen folders stay read-only.
+#: ``Research_Paper_Figures.ipynb`` reads both roots and identifies every run by
+#: the ``pipeline_version`` key its config records.
 RESULTS_ROOT = REPO_ROOT / "research_results" / "v6_benchmarks"
 #: Where the frozen V3/V4/V5 folders live. Read for historical comparison.
 LEGACY_RESULTS_ROOT = REPO_ROOT / "research_results" / "cpu_benchmarks"

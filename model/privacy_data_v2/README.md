@@ -211,7 +211,7 @@ split logic changed and the committed holdout is no longer valid.
 ## Postponed at the time — current status
 
 - **The production migration** from the TinyBERT 67-label contract to this
-  63-label model: **done.** `FullPipeline_V4` runs the DeBERTa-v3-xsmall INT8
+  63-label model: **done.** `FullPipeline_V6` runs the DeBERTa-v3-xsmall INT8
   model on the 63-label ontology.
 - **Raspberry Pi latency and memory benchmarking:** **done.** Both the 2,000-row
   text benchmark and the 44-clip audio benchmark have been run on a Raspberry Pi

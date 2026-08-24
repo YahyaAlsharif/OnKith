@@ -1,7 +1,13 @@
-run_id,device,stage,mean_ms,share_of_processing
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Audio load,1.0230500000612996,0.0005961320751574566
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Silero VAD,105.21512727266533,0.06130894106373264
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Speech recognition,1587.4755545455214,0.9250233092578587
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Transcript merge / normalisation,0.20456136365448235,0.00011919807458587448
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa INT8 masking,22.109927272739778,0.012883472778348134
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Spoken-digit rendering,0.11832272722048484,6.894675031719944e-05
+run_id,system,device,stage,mean_ms,share_of_processing
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Audio load,1.094731818491048,0.0006211518852496203
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Silero VAD,108.94221590900666,0.061813917940582844
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Speech recognition,1630.022447727325,0.9248763023994521
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Transcript merge / normalisation,0.20345000005115502,0.00011543772543306567
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,DeBERTa INT8 masking,22.0402727271159,0.012505671913998343
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Spoken-digit rendering,0.11899545469614994,6.751813528406524e-05
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Audio load,0.3507823408829774,0.0001165783333226603
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Silero VAD,70.30666163635405,0.023365581672142033
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Speech recognition,2913.240756318177,0.9681808698931013
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Transcript merge / normalisation,0.14468334089459942,4.808378522872561e-05
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,DeBERTa INT8 masking,24.858380295453035,0.008261386638364284
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Spoken-digit rendering,0.08274609090428632,2.7499677840980955e-05

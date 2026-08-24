@@ -1,4 +1,4 @@
-run_id,device,arm,typed_entity_f1,entity_recall,character_recall,character_leakage
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,reference_text,0.5254237288135593,0.7333333333333333,0.7226190476190476,0.2773809523809524
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,reference_uncased,0.4915254237288135,0.8166666666666667,0.8071428571428572,0.19285714285714284
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,audio_stt_pipeline,,0.55,0.8313725490196079,0.1686274509803921
+run_id,system,device,arm,typed_entity_f1,entity_recall,character_recall,character_leakage
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,reference_text,0.5344827586206896,0.7333333333333333,0.7202380952380952,0.27976190476190477
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,reference_uncased,0.4915254237288135,0.8166666666666667,0.8071428571428572,0.19285714285714284
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,audio_stt_pipeline,,0.55,0.8300395256916996,0.1699604743083004

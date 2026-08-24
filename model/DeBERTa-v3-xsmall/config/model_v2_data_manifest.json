@@ -358,7 +358,7 @@
     "dropped": 74,
     "mapped": 202,
     "medium_confidence": 22,
-    "path": "c:\\Users\\yahya\\VSCodeProjects\\OnKith\\model\\DeBERTa-v3-xsmall\\config\\model_v2_source_mapping.csv",
+    "path": "model/DeBERTa-v3-xsmall/config/model_v2_source_mapping.csv",
     "rows": 276
   },
   "ontology": {

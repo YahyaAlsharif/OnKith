@@ -1,14 +1,20 @@
 # Archive — superseded work, kept as evidence
 
-Nothing in this folder is maintained, and nothing here should be deployed. It is
-kept because it is how OnKith arrived at the pipeline in
-[`FullPipeline_V6/`](../FullPipeline_V6/), which is the only current one.
+> **Nothing in this folder is current. Do not run any of it.**
+> The system to run is [`FullPipeline_V6/`](../FullPipeline_V6/), at the
+> repository root. Everything here is a superseded snapshot, kept because it is
+> how the project got there.
 
-Two of these snapshots are not merely history. **V4** is the system the final
-academic report evaluates, and its Raspberry Pi results are that report's
-evidence; V6's recognizer and privacy core are V4's files unchanged, so those
-measurements still describe the path V6 runs. **V5** is the experiment that
-produced the assistant layer V6 ships.
+Nothing in this folder is maintained. Several of these snapshots describe
+themselves as "the current deployment package" in their own READMEs — they were,
+when they were written. They are not now.
+
+Two of these snapshots are not merely history. **V4** is the system the written
+academic report evaluates, and its workstation and Raspberry Pi results are that
+report's evidence; V6's recognizer and privacy core are V4's files unchanged, so
+a V4-against-V6 comparison on one device is a check on that claim. It is no
+longer a stand-in: V6 has its own measurements on both devices. **V5** is the
+experiment that produced the assistant layer V6 ships.
 
 Each directory is a frozen snapshot: its implementation and result artifacts
 are preserved as they were when archived, with only navigation notes adjusted
@@ -23,7 +29,7 @@ runnable on its own terms.
 | [`FullPipeline_V1/`](FullPipeline_V1/) | First pipeline that put speech recognition and privacy masking in one process: segmentation, a 3.0 s transcript inactivity buffer, structured recognizers, whole-word span merging, masked terminal output. | Moonshine v2 Medium Streaming | TinyBERT-4 INT8 (Model V1) | `FullPipeline_V2/` |
 | [`FullPipeline_V2/`](FullPipeline_V2/) | Same pipeline plus local SQLite transcript storage and the terminal UI. | Moonshine v2 Medium Streaming | TinyBERT-4 INT8 (Model V1) | `FullPipeline_V3/` |
 | [`FullPipeline_V3/`](FullPipeline_V3/) | Raspberry Pi pipeline with Silero VAD, overlap segmentation, Canary transcription, DeBERTa masking, local storage and UI. | NVIDIA Canary 180M Flash | DeBERTa-v3-xsmall INT8 (Model V2) | `FullPipeline_V4/` |
-| [`FullPipeline_V4/`](FullPipeline_V4/) | **The system the final academic report evaluates.** V3's pipeline with faster-whisper in place of Canary; everything downstream of the recognizer is unchanged. Its workstation and Raspberry Pi results are the report's evidence and are frozen. | faster-whisper `base.en` (CTranslate2, CPU, INT8, beam 5) | DeBERTa-v3-xsmall INT8 (Model V2) | `../FullPipeline_V6/` |
+| [`FullPipeline_V4/`](FullPipeline_V4/) | **The system the written academic report evaluates.** V3's pipeline with faster-whisper in place of Canary; everything downstream of the recognizer is unchanged. Its workstation and Raspberry Pi results are the report's evidence and are frozen. | faster-whisper `base.en` (CTranslate2, CPU, INT8, beam 5) | DeBERTa-v3-xsmall INT8 (Model V2) | `../FullPipeline_V6/` |
 | [`FullPipeline_V5/`](FullPipeline_V5/) | Parakeet recognizer experiment, and where the assistant layer was built: Groq over masked text only, local placeholder rehydration, TTS, the localhost presentation surface, wake-word routing and graceful no-key behaviour. The assistant layer was kept; the recognizer was not. **Never taken to the Raspberry Pi** - see below. | NVIDIA Parakeet 110M TDT (NeMo, CPU, FP32) | DeBERTa-v3-xsmall INT8 (Model V2) | `../FullPipeline_V6/` |
 
 ## What changed in V3 and V4
@@ -67,11 +73,15 @@ runs fixed text through V3, V4 and V6 in three isolated interpreters and
 requires identical masked output, spans, released text and wake-word repair
 from all three.
 
-**The academic report stays at V4.** V6 is subsequent integration and
-demonstration work; it has its own workstation benchmarks in
-[`research_results/v6_benchmarks/`](../research_results/v6_benchmarks/) and, as
-of this writing, **no Raspberry Pi measurements of its own**. The report has not
-been rewritten to claim otherwise.
+**The written academic report stays at V4**, which is a scoping decision about
+the report rather than a gap in the evidence. V6 has six benchmark runs of its
+own in
+[`research_results/v6_benchmarks/`](../research_results/v6_benchmarks/) —
+audio, CPU/text and the assistant round trip, on the workstation **and on a
+Raspberry Pi 5**. On the same device and the same fixtures, every V6 quality
+metric is identical to V4's to machine precision, so the two describe the same
+local core; the run ids are in
+[`research_results/README.md`](../research_results/README.md).
 
 ### Why V3 remains reproducible
 
@@ -91,10 +101,9 @@ The measured consequences of those changes are in the root
 The archived V4 snapshot is runnable on its own terms and is the reference the
 parity tests compare against. Its result folders under
 [`research_results/cpu_benchmarks/`](../research_results/cpu_benchmarks/) -
-workstation and Raspberry Pi alike - are frozen, are the final report's
-evidence, and are never regenerated. V6 writes to a different results root so
-that a V6 run cannot be discovered by the report's figures notebook and drawn
-as a V4 one.
+workstation and Raspberry Pi alike - are frozen, are the written report's
+evidence, and are never regenerated. V6 writes to a different results root so a
+V6 run can never be written into, or read as, a frozen historical one.
 
 ## Reading these snapshots
 
@@ -113,4 +122,8 @@ as a V4 one.
   [`FullPipeline_V6/ASSISTANT_ADDON.md`](../FullPipeline_V6/ASSISTANT_ADDON.md).
 - `FullPipeline_V3` is a historical snapshot. Its install scripts still build
   NeMo and PyTorch and fetch the 700 MB `.nemo` artifact; they are correct for
-  V3 and record what the Canary deployment cost. V4 needs none of it.
+  V3 and record what the Canary deployment cost. V4 and V6 need none of it.
+
+Additional pre-V5 development snapshots are retained locally, outside the tracked
+public tree. Nothing depends on them: `FullPipeline_V5/` above is the
+maintained-as-history version of that work, and it is the one to read.

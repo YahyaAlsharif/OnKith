@@ -1,7 +1,13 @@
-run_id,device,stage,rss_mib
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Baseline process,52.49609375
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,VAD loaded,77.88671875
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,STT loaded,713.59375
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,DeBERTa loaded,1138.859375
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,All models loaded,1146.48046875
-20260820T145659Z_windows-amd64_audio-whisper_full_workstation,workstation,Peak during run,1269.48828125
+run_id,system,device,stage,rss_mib
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Baseline process,52.390625
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,VAD loaded,78.58984375
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,STT loaded,716.20703125
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,DeBERTa loaded,1134.9296875
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,All models loaded,1144.671875
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Baseline process,56.640625
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,VAD loaded,90.40625
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,STT loaded,836.625
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,DeBERTa loaded,1464.015625
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,All models loaded,1465.046875
+20260823T142306Z_windows-amd64_audio-v6-whisper_full_workstation,Current system,Workstation,Peak during run,1271.578125
+20260823T204339Z_linux-aarch64_audio-v6-whisper_full,Current system,Raspberry Pi 5,Peak during run,1571.15625

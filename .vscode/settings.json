@@ -8,12 +8,12 @@
   "python.analysis.extraPaths": [
     "./model/privacy_data_v2",
     "./model/privacy_evaluation",
-    "./FullPipeline_V4"
+    "./FullPipeline_V6"
   ],
   "python.autoComplete.extraPaths": [
     "./model/privacy_data_v2",
     "./model/privacy_evaluation",
-    "./FullPipeline_V4"
+    "./FullPipeline_V6"
   ],
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "jupyter.notebookFileRoot": "${fileDirname}"
