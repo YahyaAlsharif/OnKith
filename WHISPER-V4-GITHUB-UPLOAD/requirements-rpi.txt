@@ -1,0 +1,19 @@
+numpy==2.0.2
+scipy==1.15.3
+sounddevice==0.5.5
+onnx==1.17.0
+onnxruntime==1.22.1
+
+# Speech recognition, V4. faster-whisper runs on CTranslate2, not torch: the
+# only place torch appears in its metadata is an optional extra for converting
+# models, which is not installed here and must not be. This is what replaced
+# V3's `torch==2.7.1` + `nemo_toolkit[asr]==2.5.3` pair - about 2 GB of
+# dependency tree and four packages that had to be compiled on the Pi.
+# `av` arrives with faster-whisper and is what resamples non-16-kHz audio.
+faster-whisper==1.2.1
+
+# Deployment benchmarks only (Full_Pipeline_CPU_Benchmark.py and
+# Full_Pipeline_Audio_Benchmark.py): process RSS, core counts and
+# total/available RAM. The live pipeline does not import it, and the benchmarks
+# report "unavailable" rather than failing if it is absent.
+psutil==7.0.0
