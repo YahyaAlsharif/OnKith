@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
 
 from integrated_pipeline.config import PipelineConfig
 from integrated_pipeline.pii_adapter import PIIMaskerAdapter
+from integrated_pipeline.supplemental_pii import SupplementalPIIMasker
 
 #: Sentences that must come back untouched. Each one is a thing somebody
 #: actually says to this device, and each contains a category the model
@@ -79,13 +80,37 @@ MUST_BE_MASKED = (
     ("ip address", "the box is on 192.168.1.44"),
     ("password", "my password is hunter2trombone"),
     ("sex", "the patient is female"),
+    # Spoken digit sequences. Both of these were released verbatim before
+    # the supplemental recogniser: the stray "a" broke the sequence match,
+    # and "bank id" matched none of the frozen cues.
+    ("spoken phone", "my phone number is a zero five five a six seven three four four two one"),
+    ("spoken bank id", "my bank id is four five three three two one one one six five"),
+)
+
+#: Numbers that are not private. The supplemental digit recogniser must
+#: add nothing here - it is a fail-closed bound, not a guess at meaning.
+#:
+#: Asserted against the classifier's own output rather than against the
+#: raw text, because the two layers answer different questions. The
+#: classifier over-masks some of these on its own: "we are in room two
+#: zero five" comes back as "room [STREET_1]" with or without this layer.
+#: That is a classifier false positive, in the safe direction, and it is
+#: not what this section is testing.
+SUPPLEMENT_MUST_ADD_NOTHING = (
+    ("a count", "I have two questions"),
+    ("a room number", "we are in room two zero five"),
+    ("a duration", "meet me in five minutes"),
+    ("a quantity", "bring me three of them"),
 )
 
 
 def main() -> int:
     config = PipelineConfig()
-    adapter = PIIMaskerAdapter(config)
-    adapter.load()
+    inner = PIIMaskerAdapter(config)
+    inner.load()
+    # The same stack the device runs: the supplemental digit recogniser
+    # wraps the classifier, so this reports what the microphone would get.
+    adapter = SupplementalPIIMasker(inner)
 
     released = set(config.never_masked_entities)
     label_map = json.loads(
@@ -139,6 +164,17 @@ def main() -> int:
         failures += not passed
         print(f"  [{'ok  ' if passed else 'FAIL'}] {label}")
         print(f"  {'':<8} {result.masked_text}")
+
+    print()
+    print("NUMBERS THAT ARE NOT PRIVATE - the digit layer must add nothing")
+    print("-" * 72)
+    for label, text in SUPPLEMENT_MUST_ADD_NOTHING:
+        alone = inner.mask_text(text).masked_text
+        both = adapter.mask_text(text).masked_text
+        passed = alone == both
+        failures += not passed
+        note = "" if alone == text else "   (classifier masks this on its own)"
+        print(f"  [{'ok  ' if passed else 'FAIL'}] {label:<16} {both}{note}")
 
     print()
     print("MASKED - these must not come back unchanged")

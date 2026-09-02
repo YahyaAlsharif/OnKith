@@ -61,6 +61,7 @@ from integrated_pipeline.moonshine_adapter import MoonshineAdapter
 from integrated_pipeline.whisper_adapter import WhisperAdapter
 from integrated_pipeline.pii_adapter import PIIMaskerAdapter
 from integrated_pipeline.pipeline import FailClosedMasker
+from integrated_pipeline.supplemental_pii import SupplementalPIIMasker
 from integrated_pipeline.schemas import LiveOutput, PIIResult
 from integrated_pipeline.sqlite_storage import (
     SQLiteTranscriptStore,
@@ -570,7 +571,18 @@ def main(argv: list[str] | None = None) -> int:
         return run_surface_only(args)
 
     pii_adapter = PIIMaskerAdapter(config)
-    safe_masker = FailClosedMasker(pii_adapter)
+    # Two spoken-digit gaps in the frozen structured recogniser, both
+    # confirmed as plaintext releases: a stray ASR filler inside a number
+    # ("a zero five five a six seven...") made the sequence pattern fail
+    # at the first token and eleven digits reached storage in the clear,
+    # and "bank id" matched none of its cues. This wraps the masker and
+    # re-merges through the same span merger, so the correction lands on
+    # the canonical masked text and therefore on SQLite, the screen and
+    # the assistant at once. From Yahya's V6.
+    #
+    # Inside FailClosedMasker on purpose: exceptions raised here have to
+    # become a blocked result, not a released one.
+    safe_masker = FailClosedMasker(SupplementalPIIMasker(pii_adapter))
     if args.text_test is not None:
         pii = safe_masker.mask_text(args.text_test)
         if not pii.safe_to_release:

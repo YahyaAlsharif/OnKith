@@ -36,12 +36,35 @@ from .span_merger import (
     decision_to_dict,
     merge_pii_spans,
 )
+from .spoken_form_normalizer import (
+    NormalisedText,
+    describe as describe_spoken_forms,
+    normalise_spoken_forms,
+    project_offsets,
+)
 from .structured_pii import StructuredPIIRecognizer
 from .tinybert_masker import TinyBertOnnxMasker
 
 BATCH_SIZE = 4
 #: Which decoder each engine name builds.
 ENGINE_MASKERS = {"deberta": ModelV2OnnxMasker, "tinybert": TinyBertOnnxMasker}
+
+
+def _project_candidate(
+    view: NormalisedText, text: str, span: SpanCandidate
+) -> SpanCandidate:
+    """Move one span off the normalised view and back onto the transcript."""
+
+    start, end = project_offsets(view, span.start_char, span.end_char)
+    return SpanCandidate(
+        entity_type=span.entity_type,
+        start_char=start,
+        end_char=end,
+        text=text[start:end],
+        source=span.source,
+        confidence=span.confidence,
+        metadata={**span.metadata, "spoken_form_projected": True},
+    )
 
 
 def sha256_of(path: Path, chunk_bytes: int = 1024 * 1024) -> str:
@@ -198,8 +221,19 @@ class PIIMaskerAdapter:
         assert self._masker is not None
         started = time.perf_counter()
 
+        # Speech does not arrive written. The recogniser produces "billing
+        # at example.org", and neither the classifier nor the structured
+        # EMAIL pattern - which requires an @ - has ever seen an address
+        # written that way, so the domain was masked and the local part
+        # released in the clear. This is a view for the detectors only:
+        # every span it produces is projected back before anything is
+        # replaced, so the released transcript is still the transcript,
+        # character for character. From Yahya's V6.
+        view = normalise_spoken_forms(text)
+        detect_text = view.text
+
         model_started = time.perf_counter()
-        decoding = self._masker.decode(text)
+        decoding = self._masker.decode(detect_text)
         model_latency = time.perf_counter() - model_started
 
         # Dropped here rather than left to a mask policy downstream, so a
@@ -215,9 +249,18 @@ class PIIMaskerAdapter:
 
         structured_started = time.perf_counter()
         structured_spans = [
-            span.as_candidate() for span in self._structured.find_spans(text)
+            span.as_candidate()
+            for span in self._structured.find_spans(detect_text)
         ]
         structured_latency = time.perf_counter() - structured_started
+
+        if view.changed:
+            model_spans = [
+                _project_candidate(view, text, span) for span in model_spans
+            ]
+            structured_spans = [
+                _project_candidate(view, text, span) for span in structured_spans
+            ]
 
         merged = merge_pii_spans(text, model_spans, structured_spans)
         return PIIResult(
@@ -234,6 +277,7 @@ class PIIMaskerAdapter:
                 "label_count": len(self._id2label),
                 "word_policy": PII_WORD_POLICY,
                 "structured_enabled": True,
+                "spoken_form_edits": describe_spoken_forms(view),
                 "pii_model_latency_seconds": model_latency,
                 "structured_latency_seconds": structured_latency,
                 "span_merger_latency_seconds": merged.latency_seconds,
