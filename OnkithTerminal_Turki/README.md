@@ -162,8 +162,16 @@ Only a selected music query is sent to YouTube. The microphone, speech recogniti
 Audio does not play in a browser. The core process plays music in a headless `mpv` child driven over a JSON IPC socket, with `yt-dlp` resolving the stream and only the audio track requested, so the Pi never decodes video for a track nobody is watching. Both are installed by `install_pi.sh`. `yt-dlp` is deliberately unpinned because it has to track YouTube extraction changes; refresh it with:
 
 ```sh
-.venv/bin/python -m pip install --upgrade yt-dlp
+VIRTUAL_ENV="$PWD/.venv" uv pip install --upgrade yt-dlp
 ```
+
+**The symptom of a stale copy is not an error message.** yt-dlp still
+resolves the video, but hands mpv a stream URL bound to a client whose
+headers mpv does not send, YouTube answers `403 Forbidden`, and mpv moves
+to the next item in the queue. Because a voice search loads all five
+results at once, the player marches through every one of them in about
+two seconds each, showing `00:00 / 00:00` and playing nothing. If that is
+what you are looking at, refresh yt-dlp before looking anywhere else.
 
 Because the core owns audio rather than the page, the screen can be closed or killed without interrupting playback, music can play with no UI at all, and the core can duck music while Onkith speaks.
 

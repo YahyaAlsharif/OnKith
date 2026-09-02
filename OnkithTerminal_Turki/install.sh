@@ -50,7 +50,25 @@ fi
 
 # yt-dlp is deliberately unpinned: it has to track YouTube extraction
 # changes, and a pinned copy stops resolving streams within weeks.
-"${ROOT_DIR}/.venv/bin/python" -m pip install --upgrade yt-dlp
+#
+# Through uv when uv made the environment. `uv venv` does not install pip,
+# so the old `python -m pip install --upgrade yt-dlp` here failed with
+# "No module named pip" on every single uv install, silently, because
+# nothing checked. yt-dlp therefore never landed in .venv/bin, playback
+# fell through to whatever copy the system happened to have, and that one
+# went stale until YouTube started answering 403 to the stream URLs it
+# handed mpv. The symptom was a player that skipped through every search
+# result in about two seconds each, playing nothing.
+if [[ -n "${UV_BIN}" ]]; then
+  "${UV_BIN}" pip install --python "${ROOT_DIR}/.venv/bin/python" \
+    --upgrade yt-dlp
+else
+  "${ROOT_DIR}/.venv/bin/python" -m pip install --upgrade yt-dlp
+fi
+if [[ ! -x "${ROOT_DIR}/.venv/bin/yt-dlp" ]]; then
+  echo "[WARNING] yt-dlp did not install. Music will not play:"
+  echo "[WARNING] mpv resolves YouTube streams through it."
+fi
 
 ln -sfn "${ROOT_DIR}/onkith" "${ROOT_DIR}/.venv/bin/onkith"
 "${ROOT_DIR}/.venv/bin/onkith" --self-test
